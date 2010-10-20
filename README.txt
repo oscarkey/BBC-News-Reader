@@ -1,0 +1,1 @@
+This is a Android (2.2) application to view the BBC News rss feeds.

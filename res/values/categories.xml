@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string-array name="category_names">
+<item>Headlines</item>
+<item>World</item>
+<item>United Kingdom</item>
+<item>England</item>
+<item>Scotland</item>
+<item>Wales</item>
+<item>Business</item>
+<item>Politics</item>
+<item>Health</item>
+<item>Education</item>
+<item>Science &amp; Environment</item>
+<item>Technology</item>
+<item>Entertainment &amp; Arts</item>
+</string-array>
+<string-array name="catergory_rss_urls">
+<item>http://feeds.bbci.co.uk/news/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/world/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/uk/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/england/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/scotland/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/wales/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/business/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/politics/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/health/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/education/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/science_and_environment/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/technology/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml</item>
+</string-array>
+</resources>
