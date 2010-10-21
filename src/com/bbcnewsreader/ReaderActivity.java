@@ -2,9 +2,13 @@ package com.bbcnewsreader;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -77,8 +81,24 @@ public class ReaderActivity extends Activity {
         }
     }
     
+    public boolean onCreateOptionsMenu(Menu menu){
+    	super.onCreateOptionsMenu(menu);
+    	//inflate the menu XML file
+    	MenuInflater menuInflater = new MenuInflater(this);
+    	menuInflater.inflate(R.layout.options_menu, menu);
+    	return true; //we have made the menu so we can return true
+    }
+    
+    public boolean onOptionsItemSelected(MenuItem item){
+    	Log.v("VERBOSE", "Option item "+item.getTitle()+" was selected");
+    	return true; //we have received the press so we can report true
+    }
+    
     public void itemClicked(View item){
     	TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
+    	//create an intent to launch the next activity
+    	Intent intent = new Intent(this, ArticleActivity.class);
+    	startActivity(intent);
     	Log.v("VERBOSE", "button pressed from view:" + title.getText());
     }
 }

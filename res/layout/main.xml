@@ -19,7 +19,7 @@ android:background="#660000">
 			android:paddingLeft="10dp"
 			android:paddingRight="10dp">
 				<TextView
-				android:text="News from the BBC"
+				android:text="@string/title"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:paddingTop="5dp"
