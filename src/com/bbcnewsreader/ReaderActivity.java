@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -16,6 +15,24 @@ public class ReaderActivity extends Activity {
 	String[] categoryNames;
 	TableLayout[] categories;
 	String[] items = {"lorem", "ipsum", "dolor", "sit", "amet",
+			"consectetuer", "adipiscing", "elit", "morbi", "vel",
+			"ligula", "vitae", "arcu", "aliquet", "mollis",
+			"etiam", "vel", "erat", "placerat", "ante",
+			"porttitor", "sodales", "pellentesque", "augue",
+			"purus", "lorem", "ipsum", "dolor", "sit", "amet",
+			"consectetuer", "adipiscing", "elit", "morbi", "vel",
+			"ligula", "vitae", "arcu", "aliquet", "mollis",
+			"etiam", "vel", "erat", "placerat", "ante",
+			"porttitor", "sodales", "pellentesque", "augue",
+			"purus", "lorem", "ipsum", "dolor", "sit", "amet",
+			"consectetuer", "adipiscing", "elit", "morbi", "vel",
+			"ligula", "vitae", "arcu", "aliquet", "mollis",
+			"etiam", "vel", "erat", "placerat", "ante",
+			"porttitor", "sodales", "pellentesque", "augue",
+			"purus","ligula", "vitae", "arcu", "aliquet", "mollis",
+			"etiam", "vel", "erat", "placerat", "ante",
+			"porttitor", "sodales", "pellentesque", "augue",
+			"purus", "lorem", "ipsum", "dolor", "sit", "amet",
 			"consectetuer", "adipiscing", "elit", "morbi", "vel",
 			"ligula", "vitae", "arcu", "aliquet", "mollis",
 			"etiam", "vel", "erat", "placerat", "ante",
@@ -43,10 +60,10 @@ public class ReaderActivity extends Activity {
         	//retrieve the row for the news items
         	TableRow newsRow = (TableRow)category.findViewById(R.id.rowNewsItem);
         	//loop through and add 3 news items
-        	for(int t = 0; t < 3; t++){
+        	for(int t = 0; t < 4; t++){
         		LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_news_item, null);
         		TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
-        		title.setText(items[i+t]);
+        		title.setText(items[(i*4)+t]);
         		newsRow.addView(item);
         	}
         	categories[i] = category;

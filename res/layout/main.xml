@@ -2,14 +2,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 android:orientation="horizontal"
 android:layout_width="fill_parent"
-android:layout_height="fill_parent">
+android:layout_height="fill_parent"
+android:background="#660000">
 	<ScrollView android:id="@+id/newsScroller"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 		<LinearLayout android:id="@+id/newsScrollerContent"
 		android:orientation="vertical"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
+		android:layout_height="fill_parent"
+		android:gravity="center_horizontal">
+			<LinearLayout
+			android:orientation="vertical"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingLeft="10dp"
+			android:paddingRight="10dp">
+				<TextView
+				android:text="News from the BBC"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:paddingTop="5dp"
+				android:paddingBottom="2dp"
+				android:textSize="24sp"/>
+				<TextView
+				android:text="Last updated ???"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:padding="2dp"
+				android:textSize="15sp"/>
+			</LinearLayout>
 		</LinearLayout>
 	</ScrollView>
 </LinearLayout>

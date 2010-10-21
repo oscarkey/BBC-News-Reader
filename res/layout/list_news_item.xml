@@ -4,15 +4,18 @@ android:id="@+id/rootNewsItem"
 android:orientation="vertical"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
-android:gravity="center_horizontal">
+android:gravity="center_horizontal"
+android:paddingLeft="2dp"
+android:paddingRight="2dp">
 	<ImageView
 	android:src="@drawable/no_thumb"
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"/>
 	<TextView android:id="@+id/textNewsItemTitle"
 	android:text="No Title"
+	android:maxLines="4"
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"
-	android:padding="10dp"
-    android:textSize="16sp"/>
+	android:gravity="center_horizontal"
+    android:textSize="10sp"/>
 </LinearLayout>

@@ -2,16 +2,24 @@
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
 android:id="@+id/rootCategoryItem"
 android:layout_width="match_parent"
-android:layout_height="wrap_content">
-	<TableRow>
+android:layout_height="wrap_content"
+android:stretchColumns="1"
+android:padding="10dp">
+<!-- android:background="#4A4A4A" -->
+	<TableRow
+	android:background="#3D3D3D">
 		<TextView android:id="@+id/textCategoryName"
 		android:text="No Title"
+		android:layout_span="4"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:padding="10dp"
+		android:padding="5dp"
 		android:textSize="16sp"/>
 	</TableRow>
 	<TableRow android:id="@+id/rowNewsItem"
-	android:orientation="horizontal">
+	android:orientation="horizontal"
+	android:padding="2dp"
+	android:background="#3D3D3D"
+	android:gravity="center_horizontal">
 	</TableRow>
 </TableLayout>
