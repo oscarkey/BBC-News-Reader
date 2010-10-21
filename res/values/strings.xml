@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, ReaderActivity!</string>
     <string name="app_name">BBC News Reader</string>
-<string name="thumb_width">66px</string>
-<string name="thumb_height">49px</string>
-
+    <string name="reader_activity_label">BBC News Reader -- Latest Headlines</string>
+    <string name="article_activity_label">BBC News Reader -- Article View</string>
 </resources>

@@ -3,7 +3,9 @@ package com.bbcnewsreader;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -11,10 +13,12 @@ import android.widget.TextView;
 
 public class ReaderActivity extends Activity {
 	/** variables */
+	static final int rowLength = 4;
 	LayoutInflater inflater; //used to create objects from the XML
 	String[] categoryNames;
 	TableLayout[] categories;
-	String[] items = {"lorem", "ipsum", "dolor", "sit", "amet",
+	LinearLayout[] items;
+	String[] itemNames = {"lorem", "ipsum", "dolor", "sit", "amet",
 			"consectetuer", "adipiscing", "elit", "morbi", "vel",
 			"ligula", "vitae", "arcu", "aliquet", "mollis",
 			"etiam", "vel", "erat", "placerat", "ante",
@@ -50,6 +54,7 @@ public class ReaderActivity extends Activity {
         //create the categories
         categoryNames = getResources().getStringArray(R.array.category_names); //string array with category names in it
         categories = new TableLayout[categoryNames.length];
+        items = new LinearLayout[categoryNames.length * rowLength]; //the array to hold the news items
         //loop through adding category views
         for(int i = 0; i < categoryNames.length; i++){
         	//create the category
@@ -63,11 +68,17 @@ public class ReaderActivity extends Activity {
         	for(int t = 0; t < 4; t++){
         		LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_news_item, null);
         		TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
-        		title.setText(items[(i*4)+t]);
+        		title.setText(itemNames[(i*rowLength)+t]);
+        		items[(i*rowLength)+t] = item;
         		newsRow.addView(item);
         	}
         	categories[i] = category;
         	content.addView(category); //add the category to the screen
         }
+    }
+    
+    public void itemClicked(View item){
+    	TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
+    	Log.v("VERBOSE", "button pressed from view:" + title.getText());
     }
 }
