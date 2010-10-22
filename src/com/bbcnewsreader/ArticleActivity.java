@@ -9,6 +9,7 @@ public class ArticleActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.article);
 		WebView webView = (WebView)findViewById(R.id.articleWebView);
+		webView.getUrl();
 		//webView.loadUrl("http://www.google.com");
 	}
 }
