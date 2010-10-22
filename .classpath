@@ -3,5 +3,12 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="lib" path="D:/Utilities/Java/Libraries/rome-1.0.jar" sourcepath="D:/Utilities/Java/Libraries/rome-1.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="https://rome.dev.java.net/apidocs/1_0/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="D:/Utilities/Java/Libraries/rome-fetcher-1.0.jar" sourcepath="D:/Utilities/Java/Libraries/rome-fetcher-1.0-sources.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JDOM"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
