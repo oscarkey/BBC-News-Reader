@@ -91,6 +91,12 @@ public class ReaderActivity extends Activity {
     
     public boolean onOptionsItemSelected(MenuItem item){
     	Log.v("VERBOSE", "Option item "+item.getTitle()+" was selected");
+    	if(item.getTitle().equals("Choose Categories")){
+    		//launch the category chooser activity
+    		//create an intent to launch the next activity
+        	Intent intent = new Intent(this, CategoryChooserActivity.class);
+        	startActivity(intent);
+    	}
     	return true; //we have received the press so we can report true
     }
     
