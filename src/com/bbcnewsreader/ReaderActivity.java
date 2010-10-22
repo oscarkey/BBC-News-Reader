@@ -17,17 +17,9 @@ public class ReaderActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        //scroller = (ScrollView)findViewById("news_scroller");
         this.dh = new DatabaseHandler(this);
-        dh.insertItem("Title1", "description1", "link1", "pubdate1");
-        /*List<String> names = this.dh.selectAll();
-        StringBuilder sb = new StringBuilder();
-        sb.append("Names in database:\n");
-        for (String name : names) {
-        sb.append(name + "\n");
-        }
-        Log.d("EXAMPLE", "names size - " + names.size());*/
-
-        
+        dh.clear();
+        dh.insertItem("Title1", "description1", "link1", "pubdate1", "world");
+        dh.insertCategory("World","true");
     }
 }

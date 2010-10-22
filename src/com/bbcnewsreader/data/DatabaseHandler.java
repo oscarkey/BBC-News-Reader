@@ -22,50 +22,51 @@ public class DatabaseHandler {
    private SQLiteDatabase db;
 
    private SQLiteStatement insertStmt;
-   private static final String InsertItem = "insert into " + TABLE_NAME + "(title, description, link, pubdate) values(?,?,?,?)";
-
    public DatabaseHandler(Context context) {
       this.context = context;
       OpenHelper openHelper = new OpenHelper(this.context);
       this.db = openHelper.getWritableDatabase();
    }
-
-   public long insert(String name) {
-      this.insertStmt.bindString(1, name);
-      return this.insertStmt.executeInsert();
-   }
-   public void insertItem(String title, String description, String link, String pubdate)
+   /**
+    * Inserts an RSSItem into the items table, then creates an entry in the relationship
+    * table between it and its category
+    * @param title News item's Title as String
+    * @param description News item's Description as String
+    * @param link News item's link as String
+    * @param pubdate News item's published data as String
+    * @param category News item's category as String
+    */
+   public void insertItem(String title, String description, String link, String pubdate, String category)
    {
-	   /*this.insertStmt=this.db.compileStatement(InsertItem);
-	   this.insertStmt.bindString(1, title);
-	   this.insertStmt.bindString(2, description);
-	   this.insertStmt.bindString(3, link);
-	   this.insertStmt.bindString(4, pubdate);
-	   this.insertStmt.executeInsert();*/
-	   Log.v("VERBOSE","insert into " + TABLE_NAME + " (item_Id, title, description, link, pubdate) values (null, "+title+", "+description+", "+link+", "+pubdate+")");
-	   //this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " (item_Id, title, description, link, pubdate) values (null, '"+title+"', '"+description+"', '"+link+"', '"+pubdate+"')");
+	   //Compiles then executes the insertion of the item into the items database.
+	   //Takes the rowid of the new record and uses it to get the item_id.
+	   //Moves to first item in Cursor then inserts item_id and category into relationship table.
 	   this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " values (NULL, '"+title+"', '"+description+"', '"+link+"', '"+pubdate+"')");
+	   long rowid=this.insertStmt.executeInsert();
+	   Cursor cursor=db.query(false,"items",new String[]{"item_Id"},("rowid='"+rowid+"'"),null,null,null,null, null);
+	   cursor.moveToNext();
+	   int itemid=cursor.getInt(0);
+	   this.insertStmt=this.db.compileStatement("insert into " + TABLE3_NAME + " values ('"+category+"', '"+itemid+"')");
 	   this.insertStmt.executeInsert();
    }
-
-   public void deleteAll() {
-      this.db.delete(TABLE_NAME, null, null);
+   /**
+    * Inserts a category into the category table.
+    * @param name Name of the category as String
+    * @param enabled Whether the RSSFeed should be fetched as Boolean
+    */
+   public void insertCategory(String name,String enabled)
+   {
+	   this.insertStmt=this.db.compileStatement("insert into " +TABLE2_NAME + " values (NULL, '"+name+"', '"+enabled+"')");
+	   this.insertStmt.executeInsert();
    }
-
-   public List<String> selectAll() {
-      List<String> list = new ArrayList<String>();
-      Cursor cursor = this.db.query(TABLE_NAME, new String[] { "name" }, 
-        null, null, null, null, "name desc");
-      if (cursor.moveToFirst()) {
-         do {
-            list.add(cursor.getString(0)); 
-         } while (cursor.moveToNext());
+   /**
+    * Clears all the tables in the database, leaving structure intact.
+    */
+   public void clear() {
+      db.execSQL("DELETE from "+TABLE_NAME);
+      db.execSQL("DELETE from "+TABLE2_NAME);
+      db.execSQL("DELETE from "+TABLE3_NAME);
       }
-      if (cursor != null && !cursor.isClosed()) {
-         cursor.close();
-      }
-      return list;
-   }
 
    private static class OpenHelper extends SQLiteOpenHelper {
 
@@ -85,10 +86,11 @@ public class DatabaseHandler {
          //Category table
          db.execSQL("CREATE TABLE " + TABLE2_NAME +
           "(category_Id integer PRIMARY KEY," +
-          "name varchar(255))");
+          "name varchar(255)," +
+          "enabled boolean)");
          //Link table
          db.execSQL("CREATE TABLE " + TABLE3_NAME +
-          "(categoryId INT, " +
+          "(categoryName varchar(255), " +
           "itemId INT)");
       }
 
