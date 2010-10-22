@@ -42,9 +42,9 @@ public class DatabaseHandler {
 	   this.insertStmt.bindString(3, link);
 	   this.insertStmt.bindString(4, pubdate);
 	   this.insertStmt.executeInsert();*/
-	   Log.v("ERROR","insert into " + TABLE_NAME + " (item_Id, title, description, link, pubdate) values (null, "+title+", "+description+", "+link+", "+pubdate+")");
+	   Log.v("VERBOSE","insert into " + TABLE_NAME + " (item_Id, title, description, link, pubdate) values (null, "+title+", "+description+", "+link+", "+pubdate+")");
 	   //this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " (item_Id, title, description, link, pubdate) values (null, '"+title+"', '"+description+"', '"+link+"', '"+pubdate+"')");
-	   this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " values (null, '"+title+"', '"+description+"', '"+link+"', '"+pubdate+"')");
+	   this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " values (NULL, '"+title+"', '"+description+"', '"+link+"', '"+pubdate+"')");
 	   this.insertStmt.executeInsert();
    }
 
@@ -76,7 +76,6 @@ public class DatabaseHandler {
       @Override
       public void onCreate(SQLiteDatabase db) {
     	  //Item table
-    	  db.delete(TABLE_NAME, null,null);
          db.execSQL("CREATE TABLE " + TABLE_NAME + 
           "(item_Id integer PRIMARY KEY," +
           "title varchar(255), " +
