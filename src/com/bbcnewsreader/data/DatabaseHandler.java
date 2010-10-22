@@ -10,7 +10,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataHelper {
+public class DatabaseHandler {
 
    private static final String DATABASE_NAME = "bbcnewsreader.db";
    private static final int DATABASE_VERSION = 1;
@@ -22,14 +22,12 @@ public class DataHelper {
    private SQLiteDatabase db;
 
    private SQLiteStatement insertStmt;
-   private static final String INSERT = "insert into " 
-      + TABLE_NAME + "(name) values (?)";
+   private static final String InsertItem = "insert into " + TABLE_NAME + "(title, description, link, pubdate) values(?,?,?,?)";
 
-   public DataHelper(Context context) {
+   public DatabaseHandler(Context context) {
       this.context = context;
       OpenHelper openHelper = new OpenHelper(this.context);
       this.db = openHelper.getWritableDatabase();
-      this.insertStmt = this.db.compileStatement(INSERT);
    }
 
    public long insert(String name) {
@@ -38,8 +36,16 @@ public class DataHelper {
    }
    public void insertItem(String title, String description, String link, String pubdate)
    {
-	   
-	   
+	   /*this.insertStmt=this.db.compileStatement(InsertItem);
+	   this.insertStmt.bindString(1, title);
+	   this.insertStmt.bindString(2, description);
+	   this.insertStmt.bindString(3, link);
+	   this.insertStmt.bindString(4, pubdate);
+	   this.insertStmt.executeInsert();*/
+	   Log.v("ERROR","insert into " + TABLE_NAME + " (item_Id, title, description, link, pubdate) values (null, "+title+", "+description+", "+link+", "+pubdate+")");
+	   //this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " (item_Id, title, description, link, pubdate) values (null, '"+title+"', '"+description+"', '"+link+"', '"+pubdate+"')");
+	   this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " values (null, '"+title+"', '"+description+"', '"+link+"', '"+pubdate+"')");
+	   this.insertStmt.executeInsert();
    }
 
    public void deleteAll() {
@@ -70,20 +76,21 @@ public class DataHelper {
       @Override
       public void onCreate(SQLiteDatabase db) {
     	  //Item table
+    	  db.delete(TABLE_NAME, null,null);
          db.execSQL("CREATE TABLE " + TABLE_NAME + 
-          "(P_Id int NOT NULL AUTO_INCREMENT," +
+          "(item_Id integer PRIMARY KEY," +
           "title varchar(255), " +
-          "description varchar(255)" +
-          "link varchar(255)" +
+          "description varchar(255), " +
+          "link varchar(255), " +
           "pubdate varchar(255))");
          //Category table
-         db.execSQL("CREATE TABLE" + TABLE2_NAME +
-          "P_Id int NOT NULL AUTO_INCREMENT," +
-          "name varchar(255)");
+         db.execSQL("CREATE TABLE " + TABLE2_NAME +
+          "(category_Id integer PRIMARY KEY," +
+          "name varchar(255))");
          //Link table
-         db.execSQL("CREATE TABLE" + TABLE3_NAME +
-          "categoryId INT NOT NULL" +
-          "itemId INT NOT NULL");
+         db.execSQL("CREATE TABLE " + TABLE3_NAME +
+          "(categoryId INT, " +
+          "itemId INT)");
       }
 
       @Override
