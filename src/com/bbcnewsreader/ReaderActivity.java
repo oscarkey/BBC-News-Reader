@@ -18,8 +18,10 @@ public class ReaderActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         this.dh = new DatabaseHandler(this);
-        dh.clear();
+        dh.dropTables();
         dh.insertItem("Title1", "description1", "link1", "pubdate1", "world");
-        dh.insertCategory("World","true");
+        dh.insertCategory("World",true,"http://feeds.bbci.co.uk/news/rss.xml");
+        dh.insertCategory("Technology",false,"http://feeds.bbci.co.uk/news/rss.xml");
+        dh.insertCategory("Science",true,"http://feeds.bbci.co.uk/news/rss.xml");
     }
 }

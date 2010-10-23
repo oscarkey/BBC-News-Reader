@@ -17,6 +17,20 @@ public class DatabaseHandler {
    private static final String TABLE_NAME = "items";
    private static final String TABLE2_NAME = "categories";
    private static final String TABLE3_NAME = "categories_items";
+   private static final String TABLE_CREATE ="CREATE TABLE " + TABLE_NAME + 
+   											  "(item_Id integer PRIMARY KEY," +
+									          "title varchar(255), " +
+									          "description varchar(255), " +
+									          "link varchar(255), " +
+									          "pubdate varchar(255))";
+   private static final String TABLE2_CREATE="CREATE TABLE " + TABLE2_NAME +
+									          "(category_Id integer PRIMARY KEY," +
+									          "name varchar(255)," +
+									          "enabled int," +
+									          "url varchar(255))";
+   private static final String TABLE3_CREATE="CREATE TABLE " + TABLE3_NAME +
+									          "(categoryName varchar(255), " +
+									          "itemId INT)";
 
    private Context context;
    private SQLiteDatabase db;
@@ -54,9 +68,11 @@ public class DatabaseHandler {
     * @param name Name of the category as String
     * @param enabled Whether the RSSFeed should be fetched as Boolean
     */
-   public void insertCategory(String name,String enabled)
+   public void insertCategory(String name,boolean enabledB,String url)
    {
-	   this.insertStmt=this.db.compileStatement("insert into " +TABLE2_NAME + " values (NULL, '"+name+"', '"+enabled+"')");
+	   int enabledI;
+	   if(enabledB){enabledI=1;}else{enabledI=0;}
+	   this.insertStmt=this.db.compileStatement("insert into " +TABLE2_NAME + " values (NULL, '"+name+"', '"+enabledI+"', '"+url+"')");
 	   this.insertStmt.executeInsert();
    }
    /**
@@ -67,7 +83,44 @@ public class DatabaseHandler {
       db.execSQL("DELETE from "+TABLE2_NAME);
       db.execSQL("DELETE from "+TABLE3_NAME);
       }
-
+   /**
+    * Drops the entire database then rebuilds it.
+    */
+   public void dropTables()
+   {
+	  db.execSQL("DROP TABLE "+TABLE_NAME);
+	  db.execSQL("DROP TABLE "+TABLE2_NAME);
+	  db.execSQL("DROP TABLE "+TABLE3_NAME);
+	  db.execSQL(TABLE_CREATE);
+	  db.execSQL(TABLE2_CREATE);
+	  db.execSQL(TABLE3_CREATE);
+   }
+   /**
+    * Queries the categories table for the enabled column of all rows,
+    * returning an array of booleans representing whether categories are enabled or not,
+    * sorted by category_Id.
+    * !!OPTIMIZE!!
+    * @return boolean[] containing enabled column from categories table.
+    */
+   public boolean[] getEnabledCategories()
+   {
+	   Cursor cursor=db.query(TABLE2_NAME, new String[]{"enabled"}, null, null, null, null, "category_Id");
+	   boolean[] enabledCategories = new boolean[cursor.getCount()];
+	   Log.v("TEST",cursor.toString());
+	   for(int i=1;i<=cursor.getCount();i++)
+	   {
+		   cursor.moveToNext();
+		   if(cursor.getInt(0)==0)
+		   {
+			   enabledCategories[i-1]=false;
+		   }
+		   else
+		   {
+			   enabledCategories[i-1]=true;
+		   }
+	   }
+	return enabledCategories;
+   }
    private static class OpenHelper extends SQLiteOpenHelper {
 
       OpenHelper(Context context) {
@@ -76,22 +129,10 @@ public class DatabaseHandler {
 
       @Override
       public void onCreate(SQLiteDatabase db) {
-    	  //Item table
-         db.execSQL("CREATE TABLE " + TABLE_NAME + 
-          "(item_Id integer PRIMARY KEY," +
-          "title varchar(255), " +
-          "description varchar(255), " +
-          "link varchar(255), " +
-          "pubdate varchar(255))");
-         //Category table
-         db.execSQL("CREATE TABLE " + TABLE2_NAME +
-          "(category_Id integer PRIMARY KEY," +
-          "name varchar(255)," +
-          "enabled boolean)");
-         //Link table
-         db.execSQL("CREATE TABLE " + TABLE3_NAME +
-          "(categoryName varchar(255), " +
-          "itemId INT)");
+    	  //Creates the three tables
+    	  db.execSQL(TABLE_CREATE);
+    	  db.execSQL(TABLE2_CREATE);
+    	  db.execSQL(TABLE3_CREATE);
       }
 
       @Override
