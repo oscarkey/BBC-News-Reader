@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -90,21 +89,21 @@ public class ReaderActivity extends Activity {
     }
     
     public boolean onOptionsItemSelected(MenuItem item){
-    	Log.v("VERBOSE", "Option item "+item.getTitle()+" was selected");
     	if(item.getTitle().equals("Choose Categories")){
     		//launch the category chooser activity
     		//create an intent to launch the next activity
         	Intent intent = new Intent(this, CategoryChooserActivity.class);
         	startActivity(intent);
     	}
+    	//TODO add code to show the settings menu
     	return true; //we have received the press so we can report true
     }
     
     public void itemClicked(View item){
-    	TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
+    	//TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
     	//create an intent to launch the next activity
+    	//TODO work out how to use an intent to tell the article activity what to display
     	Intent intent = new Intent(this, ArticleActivity.class);
     	startActivity(intent);
-    	Log.v("VERBOSE", "button pressed from view:" + title.getText());
     }
 }
