@@ -99,11 +99,11 @@ public class DatabaseHandler {
     * Queries the categories table for the enabled column of all rows,
     * returning an array of booleans representing whether categories are enabled or not,
     * sorted by category_Id.
-    * !!OPTIMIZE!!
     * @return boolean[] containing enabled column from categories table.
     */
    public boolean[] getEnabledCategories()
    {
+	   //FIXME Optimise
 	   Cursor cursor=db.query(TABLE2_NAME, new String[]{"enabled"}, null, null, null, null, "category_Id");
 	   boolean[] enabledCategories = new boolean[cursor.getCount()];
 	   Log.v("TEST",cursor.toString());
@@ -120,6 +120,40 @@ public class DatabaseHandler {
 		   }
 	   }
 	return enabledCategories;
+   }
+   /**
+    * Takes a category and returns all the title, description and lnik of all
+    * the items related to it.
+    * @param category The Case-sensitive name of the category
+    * @return A String[{title,description,link}][{item1,item2}].
+    */
+   public String[][] getItems(String category)
+   {
+	   //FIXME Optimise
+	   //Query the relation table to get a list of Item_Ids.
+	   Cursor cursor=db.query(TABLE3_NAME, new String[]{"itemId"}, "categoryName='"+category+"'", null, null, null, null);
+	   /*Create a string consisting of the first item_Id, then a loop appending
+	    * ORs and further item_Id
+	   */
+	   cursor.moveToNext();
+	   String itemIdQuery=new String("item_Id='"+cursor.getString(0)+"'");
+	   for(int i=2;i<=cursor.getCount();i++)
+	   {
+		   cursor.moveToNext();
+		   itemIdQuery+=(" OR item_Id='"+cursor.getString(0)+"'");
+	   }
+	   //Query the items table to get a the rows with that category
+	   //then fill the String[][] and return it
+	   cursor=db.query(TABLE_NAME,new String[]{"title", "description", "link"},itemIdQuery,null,null,null,"pubdate");
+	   String[][] items=new String[3][cursor.getCount()];
+	   for(int i=1;i<=cursor.getCount();i++)
+	   {
+		   cursor.moveToNext();
+		   items[0][i-1]=cursor.getString(0);
+		   items[1][i-1]=cursor.getString(1);
+		   items[2][i-1]=cursor.getString(2);
+	   }
+	   return items;
    }
    private static class OpenHelper extends SQLiteOpenHelper {
 
