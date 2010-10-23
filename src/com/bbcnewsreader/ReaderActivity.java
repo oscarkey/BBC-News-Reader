@@ -1,9 +1,12 @@
 package com.bbcnewsreader;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +20,8 @@ import android.widget.TextView;
 public class ReaderActivity extends Activity {
 	/** variables */
 	static final int rowLength = 4;
+	private ResourceService resourceService;
+	boolean resourceServiceBound;
 	LayoutInflater inflater; //used to create objects from the XML
 	String[] categoryNames;
 	TableLayout[] categories;
@@ -46,6 +51,63 @@ public class ReaderActivity extends Activity {
 			"porttitor", "sodales", "pellentesque", "augue",
 			"purus"};
 	
+	/* service configuration */
+	private ServiceConnection resourceServiceConnection = new ServiceConnection() {
+	    public void onServiceConnected(ComponentName className, IBinder service) {
+	        //this runs when the service connects
+	    	//save a pointer to the service to a local variable
+	        resourceService = ((ResourceService.ResourceBinder)service).getService();
+	    }
+
+	    public void onServiceDisconnected(ComponentName className) {
+	        //this runs if the service randomly disconnects
+	    	//if this happens there are more problems than a missing service
+	        resourceService = null; //as the service no longer exists, destroy its pointer
+	    }
+	};
+    
+    public boolean onCreateOptionsMenu(Menu menu){
+    	super.onCreateOptionsMenu(menu);
+    	//inflate the menu XML file
+    	MenuInflater menuInflater = new MenuInflater(this);
+    	menuInflater.inflate(R.layout.options_menu, menu);
+    	return true; //we have made the menu so we can return true
+    }
+    
+    public boolean onOptionsItemSelected(MenuItem item){
+    	if(item.getTitle().equals("Choose Categories")){
+    		//launch the category chooser activity
+    		//create an intent to launch the next activity
+        	Intent intent = new Intent(this, CategoryChooserActivity.class);
+        	startActivity(intent);
+    	}
+    	//TODO add code to show the settings menu
+    	return true; //we have received the press so we can report true
+    }
+    
+    public void itemClicked(View item){
+    	//TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
+    	//create an intent to launch the next activity
+    	//TODO work out how to use an intent to tell the article activity what to display
+    	Intent intent = new Intent(this, ArticleActivity.class);
+    	startActivity(intent);
+    }
+    
+    void doBindService(){
+    	//load the resource service
+    	bindService(new Intent(this, ResourceService.class), resourceServiceConnection, Context.BIND_AUTO_CREATE);
+    	resourceServiceBound = true;
+    }
+    
+    void doUnbindService(){
+    	//disconnect the resource service
+    	//check if the service is bound, if so, disconnect it
+    	if(resourceServiceBound){
+    		unbindService(resourceServiceConnection);
+    		resourceServiceBound = false;
+    	}
+    }
+    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,32 +140,13 @@ public class ReaderActivity extends Activity {
         	categories[i] = category;
         	content.addView(category); //add the category to the screen
         }
+        //start the service and tell it to start to refresh XML data
+        doBindService();
     }
     
-    public boolean onCreateOptionsMenu(Menu menu){
-    	super.onCreateOptionsMenu(menu);
-    	//inflate the menu XML file
-    	MenuInflater menuInflater = new MenuInflater(this);
-    	menuInflater.inflate(R.layout.options_menu, menu);
-    	return true; //we have made the menu so we can return true
-    }
-    
-    public boolean onOptionsItemSelected(MenuItem item){
-    	if(item.getTitle().equals("Choose Categories")){
-    		//launch the category chooser activity
-    		//create an intent to launch the next activity
-        	Intent intent = new Intent(this, CategoryChooserActivity.class);
-        	startActivity(intent);
-    	}
-    	//TODO add code to show the settings menu
-    	return true; //we have received the press so we can report true
-    }
-    
-    public void itemClicked(View item){
-    	//TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
-    	//create an intent to launch the next activity
-    	//TODO work out how to use an intent to tell the article activity what to display
-    	Intent intent = new Intent(this, ArticleActivity.class);
-    	startActivity(intent);
+    protected void onDestory(){
+    	super.onDestroy(); //pass the destroy command to the super
+    	//disconnect the service
+    	doUnbindService();
     }
 }

@@ -37,8 +37,7 @@ public class ResourceService extends Service {
 	
 	@Override
 	public IBinder onBind(Intent intent) {
-		// TODO Auto-generated method stub
-		return null;
+		return binder;
 	}
 
 }
