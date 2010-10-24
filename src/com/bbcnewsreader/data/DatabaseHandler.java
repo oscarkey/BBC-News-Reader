@@ -8,9 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class DatabaseHandler {
 
    private static final String DATABASE_NAME = "bbcnewsreader.db";
@@ -123,14 +120,14 @@ public class DatabaseHandler {
 	return enabledCategories;
    }
    /**
-    * Returns the names and links of all the categories
-    * @return
+    * Returns the links of all the categories that are enabled.
+    * @return A string[] containing the String urls.
     */
    public String[] getEnabledCategories()
    {
+	   //Queries the category table to get a list of enabled categories
 	   Cursor cursor=db.query(TABLE2_NAME, new String[]{"url"}, "enabled='1'", null, null, null, "category_Id");
 	   String[] categories=new String[cursor.getCount()];
-	   Log.v("TEST",Integer.toString(cursor.getCount()));
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
 		   cursor.moveToNext();

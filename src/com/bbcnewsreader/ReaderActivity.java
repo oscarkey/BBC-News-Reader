@@ -1,12 +1,11 @@
 package com.bbcnewsreader;
 
-import java.util.List;
-
-import com.bbcnewsreader.data.DatabaseHandler;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ScrollView;
+
+import com.bbcnewsreader.data.DatabaseHandler;
 
 public class ReaderActivity extends Activity {
 	/** variables */
