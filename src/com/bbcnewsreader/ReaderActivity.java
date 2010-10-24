@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.widget.ScrollView;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 
 public class ReaderActivity extends Activity {
 	/** variables */
+	ScrollView scroller;
 	static final int rowLength = 4;
 	private Messenger resourceMessenger;
 	boolean resourceServiceBound;
@@ -57,7 +59,7 @@ public class ReaderActivity extends Activity {
 			"etiam", "vel", "erat", "placerat", "ante",
 			"porttitor", "sodales", "pellentesque", "augue",
 			"purus"};
-	
+
 	/* service configuration */
 	//the handler class to process new messages
 	class IncomingHandler extends Handler {
@@ -165,6 +167,15 @@ public class ReaderActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        //scroller = (ScrollView)findViewById("news_scroller");
+
+
+
+
+
+
+
+
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news
@@ -196,6 +207,7 @@ public class ReaderActivity extends Activity {
         //start the service and tell it to start to refresh XML data
         doBindService(); //loads the service
     }
+}
     
     protected void onDestory(){
     	super.onDestroy(); //pass the destroy command to the super
