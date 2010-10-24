@@ -21,8 +21,10 @@ public class ReaderActivity extends Activity {
         dh.dropTables();
         dh.insertItem("Title1", "description1", "link1", "pubdate1", "World");
         dh.insertItem("Title2", "description2", "link2", "pubdate2", "World");
-        dh.insertCategory("World",true,"http://feeds.bbci.co.uk/news/rss.xml");
+        dh.insertCategory("World",true,"http://feeds.bbci.co.uk/world/rss.xml");
         dh.insertCategory("Technology",false,"http://feeds.bbci.co.uk/news/rss.xml");
-        dh.insertCategory("Science",true,"http://feeds.bbci.co.uk/news/rss.xml");
+        dh.insertCategory("Science",true,"http://feeds.bbci.co.uk/science/rss.xml");
+        String[] categories = dh.getEnabledCategories();
+        Log.v("TEST",categories[0]+categories[1]);
     }
 }

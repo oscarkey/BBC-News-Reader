@@ -1,5 +1,6 @@
 package com.bbcnewsreader.data;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -101,7 +102,7 @@ public class DatabaseHandler {
     * sorted by category_Id.
     * @return boolean[] containing enabled column from categories table.
     */
-   public boolean[] getEnabledCategories()
+   public boolean[] getCategoryBooleans()
    {
 	   //FIXME Optimise
 	   Cursor cursor=db.query(TABLE2_NAME, new String[]{"enabled"}, null, null, null, null, "category_Id");
@@ -122,7 +123,24 @@ public class DatabaseHandler {
 	return enabledCategories;
    }
    /**
-    * Takes a category and returns all the title, description and lnik of all
+    * Returns the names and links of all the categories
+    * @return
+    */
+   public String[] getEnabledCategories()
+   {
+	   Cursor cursor=db.query(TABLE2_NAME, new String[]{"url"}, "enabled='1'", null, null, null, "category_Id");
+	   String[] categories=new String[cursor.getCount()];
+	   Log.v("TEST",Integer.toString(cursor.getCount()));
+	   for(int i=1;i<=cursor.getCount();i++)
+	   {
+		   cursor.moveToNext();
+		   categories[i-1]=cursor.getString(0);
+	   }
+	   return categories;
+	   
+   }
+   /**
+    * Takes a category and returns all the title, description and link of all
     * the items related to it.
     * @param category The Case-sensitive name of the category
     * @return A String[{title,description,link}][{item1,item2}].
@@ -154,6 +172,26 @@ public class DatabaseHandler {
 		   items[2][i-1]=cursor.getString(2);
 	   }
 	   return items;
+   }
+   /**
+    * Sets the given category to the given boolean
+    * @param category The String category you wish to change.
+    * @param enabled The boolean value you wish to set it to.
+    */
+   public void setEnabled(String category,boolean enabled)
+   {
+	   //FIXME Skip first step?
+	   //Query the categories table for the id of the category with that name
+	   //Then fetch the id from the first one returned
+	   Cursor cursor=db.query(TABLE2_NAME,new String[]{"category_Id"},"name='"+category+"'",null,null,null,null);
+	   cursor.moveToNext();
+	   int categoryId=cursor.getInt(0);
+	   //Create a box containing the new value/column
+	   ContentValues cv=new ContentValues(1);
+	   if(enabled){cv.put("enabled", 1);}
+	   else{cv.put("enabled", 0);}
+	   //push up to database.
+	   db.update(TABLE2_NAME, cv, "category_Id='"+categoryId+"'", null);
    }
    private static class OpenHelper extends SQLiteOpenHelper {
 
