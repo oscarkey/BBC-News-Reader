@@ -1,26 +1,14 @@
-package com.bbcnewsreader.rss;
+package com.bbcnewsreader.resource.rss;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.view.*;
-import android.widget.TextView;
-import android.widget.ListView;
-import android.widget.AdapterView;
-import android.widget.ListAdapter;
-import android.widget.ArrayAdapter;
-import android.widget.AdapterView.OnItemClickListener; 
-import android.util.Log;
-import java.util.ArrayList;
 import java.net.URL;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.InputSource;
-
 import org.xml.sax.XMLReader;
 
-import android.content.Intent;
+import android.util.Log;
 
 
 public class RSSReader
@@ -61,7 +49,7 @@ public class RSSReader
            RSSHandler theRssHandler = new RSSHandler();
            // assign our handler
            xmlreader.setContentHandler(theRssHandler);
-           // get our data via the url class
+           // get our data via the URL class
            InputSource is = new InputSource(url.openStream());
            // perform the synchronous parse           
            xmlreader.parse(is);

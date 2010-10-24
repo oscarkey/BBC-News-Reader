@@ -1,9 +1,10 @@
-package com.bbcnewsreader.rss;
+package com.bbcnewsreader.resource.rss;
 
 
 import java.util.List;
 import java.util.Vector;
-import com.bbcnewsreader.rss.RSSItem;
+
+import com.bbcnewsreader.resource.rss.RSSItem;
 
 public class RSSFeed 
 {
@@ -15,7 +16,7 @@ public class RSSFeed
     
     RSSFeed()
     {
-        _itemlist = new Vector(0); 
+        _itemlist = new Vector<RSSItem>(0); 
     }
     int addItem(RSSItem item)
     {
@@ -27,7 +28,7 @@ public class RSSFeed
     {
         return _itemlist.get(location);
     }
-    List getAllItems()
+    List<RSSItem> getAllItems()
     {
         return _itemlist;
     }

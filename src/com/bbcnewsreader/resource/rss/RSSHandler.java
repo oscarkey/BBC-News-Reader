@@ -1,4 +1,4 @@
-package com.bbcnewsreader.rss;
+package com.bbcnewsreader.resource.rss;
 
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.*;

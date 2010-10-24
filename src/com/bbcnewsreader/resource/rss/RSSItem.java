@@ -1,4 +1,4 @@
-package com.bbcnewsreader.rss;
+package com.bbcnewsreader.resource.rss;
 
 public class RSSItem 
 {
