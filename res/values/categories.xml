@@ -16,18 +16,18 @@
 <item>Entertainment &amp; Arts</item>
 </string-array>
 <string-array name="catergory_rss_urls">
-<item>http://feeds.bbci.co.uk/news/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/world/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/uk/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/england/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/scotland/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/wales/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/business/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/politics/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/health/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/education/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/science_and_environment/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/technology/rss.xml</item>
-<item>http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/world/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/uk/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/england/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/scotland/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/wales/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/business/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/politics/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/health/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/education/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/science_and_environment/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/technology/rss.xml</item>
+<item>http://feeds.bbci.co.uk/news/mobile/entertainment_and_arts/rss.xml</item>
 </string-array>
 </resources>
