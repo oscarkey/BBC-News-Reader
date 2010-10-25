@@ -1,9 +1,14 @@
 package com.bbcnewsreader;
 
+
+
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ScrollView;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +21,7 @@ import android.widget.TextView;
 
 public class ReaderActivity extends Activity {
 	/** variables */
+	ScrollView scroller;
 	static final int rowLength = 4;
 	LayoutInflater inflater; //used to create objects from the XML
 	String[] categoryNames;
@@ -45,12 +51,21 @@ public class ReaderActivity extends Activity {
 			"etiam", "vel", "erat", "placerat", "ante",
 			"porttitor", "sodales", "pellentesque", "augue",
 			"purus"};
-	
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        //scroller = (ScrollView)findViewById("news_scroller");
+
+
+
+
+
+
+
+
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news
@@ -79,6 +94,7 @@ public class ReaderActivity extends Activity {
         	content.addView(category); //add the category to the screen
         }
     }
+}
     
     public boolean onCreateOptionsMenu(Menu menu){
     	super.onCreateOptionsMenu(menu);
