@@ -8,6 +8,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class CategoryChooserActivity extends ListActivity {
+	/* constants */
+	
+	
+	/* variables */
 	String[] allCategoryNames;
 	
 	@Override
@@ -21,15 +25,19 @@ public class CategoryChooserActivity extends ListActivity {
 		allCategoryNames = getResources().getStringArray(R.array.category_names); //load the full list of categories from the XML file
 		getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE); //allow multiple choices in the menu
 		getListView().setAdapter(new ArrayAdapter<String>(this, R.layout.category_choice_item, allCategoryNames)); //load the categories into the list
-		//load the selected categories from the data provider
-		//TODO load selected categories from the content provider
+		//load the enabled categories from the intent
+		boolean[] categoryBooleans = getIntent().getBooleanArrayExtra("categorybooleans");
+		//loop through enabling the categories as needed
+		for(int i = 0; i < categoryBooleans.length; i++){
+			getListView().setItemChecked(i, categoryBooleans[i]);
+		}
 	}
 	
 	@Override
 	public void onPause(){
 		//the activity is shutting down
 		super.onPause(); //tell the superclass to pause
-		//save the category state to the content provider
-		//TODO save state to the content provider
+		//send the category state back to the main activity where it will be saved
+		//TODO provide a result
 	}
 }
