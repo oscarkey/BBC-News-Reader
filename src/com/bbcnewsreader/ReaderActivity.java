@@ -2,6 +2,8 @@ package com.bbcnewsreader;
 
 
 
+import com.bbcnewsreader.data.DatabaseHandler;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -26,12 +28,15 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 public class ReaderActivity extends Activity {
-	/** variables */
-	ScrollView scroller;
+	/* constants */
+	
+	/* variables */
 	static final int rowLength = 4;
 	private Messenger resourceMessenger;
 	boolean resourceServiceBound;
+	private DatabaseHandler database;
 	LayoutInflater inflater; //used to create objects from the XML
+	ScrollView scroller;
 	String[] categoryNames;
 	TableLayout[] categories;
 	LinearLayout[] items;
@@ -69,6 +74,8 @@ public class ReaderActivity extends Activity {
 			switch(msg.what){
 			case(ResourceService.MSG_CLIENT_REGISTERED):
 				loadData(); //start of the loading of data
+			case(ResourceService.MSG_ERROR):
+				errorOccured();
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
 			}
@@ -84,7 +91,7 @@ public class ReaderActivity extends Activity {
 	        resourceMessenger = new Messenger(service);
 	        //try and tell the service that we have connected
 	        //this means it will keep talking to us
-	        sendMessageToService(ResourceService.MSG_REGISTER_CLIENT);
+	        sendMessageToService(ResourceService.MSG_REGISTER_CLIENT_WITH_DATABASE, database);
 	    }
 
 	    public void onServiceDisconnected(ComponentName className) {
@@ -121,6 +128,12 @@ public class ReaderActivity extends Activity {
     	startActivity(intent);
     }
     
+    void errorOccured(){
+    	//TODO display sensible error message
+    	Log.e("BBC News Reader", "Oops something broke. We'll crash now.");
+    	System.exit(1); //closes the app with an error code
+    }
+    
     void loadData(){
     	//TODO display old news as old
     	//tell the service to load the data
@@ -145,12 +158,12 @@ public class ReaderActivity extends Activity {
     	}
     }
     
-    void sendMessageToService(int what){
+    void sendMessageToService(int what, Object object){
     	//check the service is bound before trying to send a message
     	if(resourceServiceBound){
 	    	try{
 				//create a message according to parameters
-				Message msg = Message.obtain(null, what);
+				Message msg = Message.obtain(null, what, object);
 				msg.replyTo = messenger; //tell the service to reply to us, if needed
 				resourceMessenger.send(msg); //send the message
 			}
@@ -161,11 +174,17 @@ public class ReaderActivity extends Activity {
     	}
     }
     
+    void sendMessageToService(int what){
+    	sendMessageToService(what, null);
+    }
+    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        //load the database
+        database = new DatabaseHandler(this);
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news

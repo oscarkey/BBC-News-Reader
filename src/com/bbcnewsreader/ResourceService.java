@@ -2,6 +2,7 @@ package com.bbcnewsreader;
 
 import java.util.ArrayList;
 
+import com.bbcnewsreader.data.DatabaseHandler;
 import com.bbcnewsreader.resource.rss.RSSItem;
 import com.bbcnewsreader.resource.rss.RSSManager;
 
@@ -19,13 +20,15 @@ public class ResourceService extends Service implements ResourceInterface {
 	/* variables */
 	ArrayList<Messenger> clients = new ArrayList<Messenger>(); //holds references to all of our clients
 	final Messenger messenger = new Messenger(new IncomingHandler()); //the messenger used for communication
+	DatabaseHandler database; //the database
 	RSSManager rssManager;
 	
 	/* command definitions */
-	static final int MSG_REGISTER_CLIENT = 1;
+	static final int MSG_REGISTER_CLIENT_WITH_DATABASE = 1;
 	static final int MSG_UNREGISTER_CLIENT = 2;
 	static final int MSG_CLIENT_REGISTERED = 3; //returned to a client when registered
 	static final int MSG_LOAD_DATA = 4; //sent to request a data load
+	static final int MSG_ERROR = 5; //help! An error occurred
 	
 	//the handler class to process new messages
 	class IncomingHandler extends Handler {
@@ -33,7 +36,7 @@ public class ResourceService extends Service implements ResourceInterface {
 		public void handleMessage(Message msg){
 			//decide what to do with the message
 			switch(msg.what){
-			case MSG_REGISTER_CLIENT:
+			case MSG_REGISTER_CLIENT_WITH_DATABASE:
 				clients.add(msg.replyTo); //add a reference to the client to our list
 				sendMsg(msg.replyTo, MSG_CLIENT_REGISTERED);
 				break;
@@ -51,6 +54,10 @@ public class ResourceService extends Service implements ResourceInterface {
 		ResourceService getService(){
 			return ResourceService.this;
 		}
+	}
+	
+	void setDatabase(DatabaseHandler database){
+		this.database = database;
 	}
 	
 	void loadData(){
