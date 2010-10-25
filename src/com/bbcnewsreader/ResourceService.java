@@ -2,6 +2,9 @@ package com.bbcnewsreader;
 
 import java.util.ArrayList;
 
+import com.bbcnewsreader.resource.rss.RSSItem;
+import com.bbcnewsreader.resource.rss.RSSManager;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -16,12 +19,13 @@ public class ResourceService extends Service implements ResourceInterface {
 	/* variables */
 	ArrayList<Messenger> clients = new ArrayList<Messenger>(); //holds references to all of our clients
 	final Messenger messenger = new Messenger(new IncomingHandler()); //the messenger used for communication
+	RSSManager rssManager;
 	
 	/* command definitions */
 	static final int MSG_REGISTER_CLIENT = 1;
 	static final int MSG_UNREGISTER_CLIENT = 2;
 	static final int MSG_CLIENT_REGISTERED = 3; //returned to a client when registered
-	static final int MSG_LOAD_DATA = 4; //sent when a data load has been requested
+	static final int MSG_LOAD_DATA = 4; //sent to request a data load
 	
 	//the handler class to process new messages
 	class IncomingHandler extends Handler {
@@ -50,7 +54,12 @@ public class ResourceService extends Service implements ResourceInterface {
 	}
 	
 	void loadData(){
-		//TODO load the data
+		//TODO retrieve the active categories
+		//for now just load in all of them
+		String[] names = getResources().getStringArray(R.array.category_names);
+		String[] urls = getResources().getStringArray(R.array.catergory_rss_urls);
+		//start the RSS Manager
+		rssManager = new RSSManager(names, urls);
 	}
 	
 	void sendMsg(Messenger client, int what){
@@ -65,13 +74,17 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 	}
 	
-	void sendMsg(int clientId, int what){
+	void sendMsg(int clientId, int what, Object object){
 		//simply call the main sendMessage but with an actual client
 		sendMsg(clients.get(clientId), what);
 	}
 	
-	public void rssLoaded(){
-		//TODO send to database
+	/**
+	 * Called when an RSS feed has loaded
+	 * @param item The item that has been loaded */
+	public void rssItemLoaded(RSSItem item, String category){
+		//TODO add the item in the database
+		
 	}
 	
 	@Override

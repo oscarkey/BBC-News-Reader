@@ -2,6 +2,7 @@ package com.bbcnewsreader.resource.rss;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -9,9 +10,17 @@ import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
+import com.bbcnewsreader.ResourceInterface;
+
 
 public class RSSManager implements Runnable {
+	/* constants */
+	
+	
+	/* variables */
+	ResourceInterface resourceInterface;
 	Thread thread;
+	String[] names;
 	String[] urls;
 	ArrayList<RSSFeed> feeds;
 	
@@ -42,10 +51,12 @@ public class RSSManager implements Runnable {
     	}
 	}
 	
-	public RSSManager(String[] urls){
+	public RSSManager(String[] names, String[] urls){
+		this.names = names; //store the names
 		this.urls = urls; //store the URLS
 		feeds = new ArrayList<RSSFeed>();
 		thread = new Thread(this);
+		thread.start();
 	}
 	
 	public void run(){
@@ -53,8 +64,11 @@ public class RSSManager implements Runnable {
 		for(int i = 0; i < urls.length; i++){
 			RSSFeed feed = getFeed(urls[i]);
 			feeds.add(feed);
+			List<RSSItem> items = feed.getAllItems();
+			//loop through the items and send them to the parent service
+			for(int t = 0; t < 3; t++){
+				resourceInterface.rssItemLoaded(items.get(t), names[i]);
+			}
 		}
-		//as we have loaded feeds, report this
-		
 	}
 }

@@ -65,7 +65,6 @@ public class ReaderActivity extends Activity {
 	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg){
-			Log.v(getLocalClassName(), "Activity got message of what:" + msg.what);
 			//decide what to do with the message
 			switch(msg.what){
 			case(ResourceService.MSG_CLIENT_REGISTERED):
@@ -167,15 +166,6 @@ public class ReaderActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        //scroller = (ScrollView)findViewById("news_scroller");
-
-
-
-
-
-
-
-
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news
@@ -207,7 +197,6 @@ public class ReaderActivity extends Activity {
         //start the service and tell it to start to refresh XML data
         doBindService(); //loads the service
     }
-}
     
     protected void onDestory(){
     	super.onDestroy(); //pass the destroy command to the super

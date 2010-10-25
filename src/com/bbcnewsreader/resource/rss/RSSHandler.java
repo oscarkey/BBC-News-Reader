@@ -2,7 +2,6 @@ package com.bbcnewsreader.resource.rss;
 
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.*;
-import android.util.Log;
 
 
 public class RSSHandler extends DefaultHandler 
@@ -116,7 +115,7 @@ public class RSSHandler extends DefaultHandler
     public void characters(char ch[], int start, int length)
     {
         String theString = new String(ch,start,length);
-        Log.i("RSSReader","characters[" + theString + "]");
+        //Log.i("RSSReader","characters[" + theString + "]");
         
         switch (currentstate)
         {
