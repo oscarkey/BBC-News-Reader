@@ -13,24 +13,40 @@ android:background="#660000">
 		android:layout_height="match_parent"
 		android:gravity="center_horizontal">
 			<LinearLayout
-			android:orientation="vertical"
+			android:orientation="horizontal"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
+			android:paddingTop="5dp"
 			android:paddingLeft="10dp"
 			android:paddingRight="10dp">
-				<TextView
-				android:text="@string/title"
+				<LinearLayout
+				android:orientation="vertical"
 				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:paddingTop="5dp"
-				android:paddingBottom="2dp"
-				android:textSize="24sp"/>
-				<TextView
-				android:text="Last updated ???"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:padding="2dp"
-				android:textSize="15sp"/>
+				android:layout_height="wrap_content">
+					<TextView
+					android:text="@string/title"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:paddingBottom="2dp"
+					android:textSize="24sp"/>
+					<TextView
+					android:text="Last updated ???"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:padding="2dp"
+					android:textSize="15sp"/>
+				</LinearLayout>
+				<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:orientation="vertical"
+				android:gravity="center">
+					<ImageButton
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:src="@drawable/refresh"
+					android:onClick="refreshClicked"/>
+				</LinearLayout>
 			</LinearLayout>
 		</LinearLayout>
 	</ScrollView>

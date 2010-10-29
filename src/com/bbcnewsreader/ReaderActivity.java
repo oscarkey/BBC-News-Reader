@@ -99,6 +99,10 @@ public class ReaderActivity extends Activity {
     	return true; //we have received the press so we can report true
     }
     
+    public void refreshClicked(View item){
+    	//TODO refresh
+    }
+    
     public void itemClicked(View item){
     	//TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
     	//create an intent to launch the next activity
