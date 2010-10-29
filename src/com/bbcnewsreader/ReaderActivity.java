@@ -3,16 +3,10 @@ package com.bbcnewsreader;
 
 
 
-import java.lang.ref.WeakReference;
-
-import com.bbcnewsreader.data.DatabaseHandler;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ScrollView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,15 +14,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import com.bbcnewsreader.data.DatabaseHandler;
 
 public class ReaderActivity extends Activity {
 	/* constants */
 	static final int ACTIVITY_CHOOSE_CATEGORIES = 1;
 	
 	/* variables */
+	boolean[] booleans;
 	ScrollView scroller;
 	static final int rowLength = 4;
 	DatabaseHandler database;
@@ -64,6 +62,7 @@ public class ReaderActivity extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	booleans = new boolean[15];
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         //load the database
@@ -111,7 +110,8 @@ public class ReaderActivity extends Activity {
     		//create an intent to launch the next activity
         	Intent intent = new Intent(this, CategoryChooserActivity.class);
         	//load the boolean array of currently enabled categories
-        	boolean[] categoryBooleans = database.getCategoryBooleans();
+        	//boolean[] categoryBooleans = database.getCategoryBooleans();
+        	boolean[] categoryBooleans = booleans;
         	intent.putExtra("categorybooleans", categoryBooleans);
         	startActivityForResult(intent, ACTIVITY_CHOOSE_CATEGORIES);
     	}
@@ -120,10 +120,15 @@ public class ReaderActivity extends Activity {
     }
     
     public void onActivityResult(int requestCode, int resultCode, Intent data){
+    	Log.v(getLocalClassName(), "result received, code:"+resultCode);
     	//wait for activities to send us result data
     	switch(requestCode){
     	case ACTIVITY_CHOOSE_CATEGORIES:
-    		//TODO store the data sent back
+    		//check the request was a success
+    		if(resultCode == RESULT_OK){
+    			//TODO store the data sent back
+    			booleans = data.getBooleanArrayExtra("categorybooleans");
+    		}
     		break;
     	}
     }
