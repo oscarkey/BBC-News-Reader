@@ -3,6 +3,8 @@ package com.bbcnewsreader.data;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
+import com.bbcnewsreader.R;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -82,6 +84,24 @@ public class DatabaseHandler {
 	   this.insertStmt.executeInsert();
    }
    /**
+    * Adds all the start categories from the XML
+    */
+   public void addCategories()
+   {
+	   try
+	   {
+		   String[] categoryNames = context.getResources().getStringArray(R.array.category_names);
+		   String[] categoryUrls = context.getResources().getStringArray(R.array.catergory_rss_urls);
+		   for(int i=0;i<categoryNames.length;i++)
+		   {
+			   insertCategory(categoryNames[i],true,categoryUrls[i]);
+		   }
+	   }catch(NullPointerException e)
+	   {
+		   Log.e("categories-xml","Categories XML is broken");
+	   }
+   }
+   /**
     * Inserts a category into the category table.
     * @param name Name of the category as String
     * @param enabled Whether the RSSFeed should be fetched as Boolean
@@ -155,6 +175,22 @@ public class DatabaseHandler {
 	   }
 	   return categories;
 	   
+   }
+   /**
+    * Takes an array of booleans and sets the first n categories
+    * to those values. Where n is length of array
+    * @param enabled A boolean array of "enabled" values
+    */
+   public void setEnabledCategories(boolean[] enabled) throws NullPointerException
+   {
+	   ContentValues cv=new ContentValues(1);
+	   for(int i=1;i<enabled.length;i++)
+	   {
+		   if(enabled[i]){cv.put("enabled", 1);}
+		   else{cv.put("enabled", 0);}
+		   db.update(TABLE2_NAME, cv, "category_Id='"+i+"'", null);
+		   cv.clear();
+	   }
    }
    /**
     * Takes a category and returns all the title, description and link of all
