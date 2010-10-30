@@ -28,7 +28,8 @@ public class ResourceService extends Service implements ResourceInterface {
 	static final int MSG_UNREGISTER_CLIENT = 2;
 	static final int MSG_CLIENT_REGISTERED = 3; //returned to a client when registered
 	static final int MSG_LOAD_DATA = 4; //sent to request a data load
-	static final int MSG_ERROR = 5; //help! An error occurred
+	static final int MSG_CATEOGRY_LOADED = 6; //sent when a category has loaded
+	static final int MSG_ERROR = 7; //help! An error occurred
 	
 	//the handler class to process new messages
 	class IncomingHandler extends Handler {
