@@ -1,5 +1,8 @@
 package com.bbcnewsreader;
 
+import java.util.List;
+
+import com.bbcnewsreader.data.DatabaseHandler;
 
 
 
@@ -22,12 +25,14 @@ import android.widget.TextView;
 import com.bbcnewsreader.data.DatabaseHandler;
 
 public class ReaderActivity extends Activity {
+	/** variables */
 	/* constants */
 	static final int ACTIVITY_CHOOSE_CATEGORIES = 1;
 	
 	/* variables */
 	boolean[] booleans;
 	ScrollView scroller;
+	private DatabaseHandler dh;
 	static final int rowLength = 4;
 	DatabaseHandler database;
 	LayoutInflater inflater; //used to create objects from the XML
@@ -65,6 +70,21 @@ public class ReaderActivity extends Activity {
     	booleans = new boolean[15];
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        this.dh = new DatabaseHandler(this);
+        dh.dropTables();
+        dh.insertItem("Title1", "description1", "link1", "pubdate1", "World");
+        dh.insertItem("Title2", "description2", "link2", "pubdate2", "World");
+        dh.insertCategory("World",true,"http://feeds.bbci.co.uk/world/rss.xml");
+        dh.insertCategory("Technology",false,"http://feeds.bbci.co.uk/news/rss.xml");
+        dh.insertCategory("Science",true,"http://feeds.bbci.co.uk/science/rss.xml");
+        String[] categories = dh.getEnabledCategories();
+        Log.v("TEST",categories[0]+categories[1]);
+
+
+
+
+
+
         //load the database
         database = new DatabaseHandler(this);
         //set up the inflater to allow us to construct layouts from the raw XML code
