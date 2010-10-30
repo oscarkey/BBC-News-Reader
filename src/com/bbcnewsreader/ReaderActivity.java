@@ -22,17 +22,13 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.bbcnewsreader.data.DatabaseHandler;
-
 public class ReaderActivity extends Activity {
 	/** variables */
 	/* constants */
 	static final int ACTIVITY_CHOOSE_CATEGORIES = 1;
 	
 	/* variables */
-	boolean[] booleans;
 	ScrollView scroller;
-	private DatabaseHandler dh;
 	static final int rowLength = 4;
 	DatabaseHandler database;
 	LayoutInflater inflater; //used to create objects from the XML
@@ -67,26 +63,15 @@ public class ReaderActivity extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-    	booleans = new boolean[15];
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        this.dh = new DatabaseHandler(this);
-        dh.dropTables();
-        dh.insertItem("Title1", "description1", "link1", "pubdate1", "World");
-        dh.insertItem("Title2", "description2", "link2", "pubdate2", "World");
-        dh.insertCategory("World",true,"http://feeds.bbci.co.uk/world/rss.xml");
-        dh.insertCategory("Technology",false,"http://feeds.bbci.co.uk/news/rss.xml");
-        dh.insertCategory("Science",true,"http://feeds.bbci.co.uk/science/rss.xml");
-        String[] categories = dh.getEnabledCategories();
-        Log.v("TEST",categories[0]+categories[1]);
-
-
-
-
-
-
+        
         //load the database
         database = new DatabaseHandler(this);
+        database.dropTables();
+        //load in the categories if necessary
+        database.addCategories();
+        
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news
@@ -130,8 +115,7 @@ public class ReaderActivity extends Activity {
     		//create an intent to launch the next activity
         	Intent intent = new Intent(this, CategoryChooserActivity.class);
         	//load the boolean array of currently enabled categories
-        	//boolean[] categoryBooleans = database.getCategoryBooleans();
-        	boolean[] categoryBooleans = booleans;
+        	boolean[] categoryBooleans = database.getCategoryBooleans();
         	intent.putExtra("categorybooleans", categoryBooleans);
         	startActivityForResult(intent, ACTIVITY_CHOOSE_CATEGORIES);
     	}
@@ -147,7 +131,7 @@ public class ReaderActivity extends Activity {
     		//check the request was a success
     		if(resultCode == RESULT_OK){
     			//TODO store the data sent back
-    			booleans = data.getBooleanArrayExtra("categorybooleans");
+    			database.setEnabledCategories(data.getBooleanArrayExtra("categorybooleans"));
     		}
     		break;
     	}
