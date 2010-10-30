@@ -1,5 +1,8 @@
 package com.bbcnewsreader.data;
 
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -20,7 +23,7 @@ public class DatabaseHandler {
 									          "title varchar(255), " +
 									          "description varchar(255), " +
 									          "link varchar(255), " +
-									          "pubdate varchar(255))";
+									          "pubdate int)";
    private static final String TABLE2_CREATE="CREATE TABLE " + TABLE2_NAME +
 									          "(category_Id integer PRIMARY KEY," +
 									          "name varchar(255)," +
@@ -50,12 +53,29 @@ public class DatabaseHandler {
     */
    public void insertItem(String title, String description, String link, String pubdate, String category)
    {
+	   //Formats the date of the item to Date object, then gets the UNIX TIMESTAMP from the Date.
+	   SimpleDateFormat format=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+	   long timestamp=0;
+	   try
+	   {
+		   Date parsed=format.parse(pubdate);
+		   timestamp=parsed.getTime();
+		   Log.v("TEST",Long.toString(timestamp));
+	   }catch(Exception e)
+	   {
+		   Log.v("ERROR",e.toString());
+	   }
 	   //Compiles then executes the insertion of the item into the items database.
 	   //Takes the rowid of the new record and uses it to get the item_id.
 	   //Moves to first item in Cursor then inserts item_id and category into relationship table.
-	   this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " values (NULL, '"+title+"', '"+description+"', '"+link+"', '"+pubdate+"')");
-	   long rowid=this.insertStmt.executeInsert();
-	   Cursor cursor=db.query(false,"items",new String[]{"item_Id"},("rowid='"+rowid+"'"),null,null,null,null, null);
+	   Cursor cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},("title='"+title+"'"),null,null,null,null,null);
+	   if(cursor.getCount()==0)
+	   {
+		   this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " values (NULL, '"+title+"', '"+description+"', '"+link+"', '"+timestamp+"')");
+		   long rowid=this.insertStmt.executeInsert();
+		   cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},("rowid='"+rowid+"'"),null,null,null,null, null);
+		   Log.v("TEST",title);
+	   }
 	   cursor.moveToNext();
 	   int itemid=cursor.getInt(0);
 	   this.insertStmt=this.db.compileStatement("insert into " + TABLE3_NAME + " values ('"+category+"', '"+itemid+"')");
@@ -144,7 +164,7 @@ public class DatabaseHandler {
     */
    public String[][] getItems(String category)
    {
-	   //FIXME Optimise
+	   //FIXME Optimise, add limit?
 	   //Query the relation table to get a list of Item_Ids.
 	   Cursor cursor=db.query(TABLE3_NAME, new String[]{"itemId"}, "categoryName='"+category+"'", null, null, null, null);
 	   /*Create a string consisting of the first item_Id, then a loop appending
@@ -189,6 +209,30 @@ public class DatabaseHandler {
 	   else{cv.put("enabled", 0);}
 	   //push up to database.
 	   db.update(TABLE2_NAME, cv, "category_Id='"+categoryId+"'", null);
+   }
+   /**
+    * When called will remove all articles that are
+    * over one month to the second old. Then cleans up
+    * the relationship table. Possibly resource intensive.
+    */
+   public void clearOld()
+   {
+	   //FIXME Add parameter, customize the date it wipes from. Optimise?
+	   //Creates a java.util date object with current time
+	   //Subtracts one month in milliseconds and deletes all
+	   //items with a pubdate less than that value.
+	   Date now=new Date();
+	   long oldTime=(now.getTime()-2629743000L);
+	   Log.v("TEST",Long.toString(oldTime));
+	   Cursor cursor=db.query(TABLE_NAME,new String[]{"item_Id"},"pubdate<'"+oldTime+"'",null,null,null,null);
+	   Log.v("TEST",Integer.toString(cursor.getCount()));
+	   for(int i=1;i<=cursor.getCount();i++)
+	   {
+		   cursor.moveToNext();
+		   db.delete(TABLE3_NAME,"itemId='"+cursor.getInt(0)+"'",null);
+	   }
+	   db.delete(TABLE_NAME,"pubdate<'"+oldTime+"'",null);
+	   
    }
    private static class OpenHelper extends SQLiteOpenHelper {
 
