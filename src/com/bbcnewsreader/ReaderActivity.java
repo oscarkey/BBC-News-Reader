@@ -95,7 +95,12 @@ public class ReaderActivity extends Activity {
         	Intent intent = new Intent(this, CategoryChooserActivity.class);
         	startActivity(intent);
     	}
-    	//TODO add code to show the settings menu
+    	if(item.getTitle().equals("Settings")){
+    		//TODO add code to show the settings menu
+    	}
+    	if(item.getTitle().equals("Reset")){
+    		//TODO reset the database
+    	}
     	return true; //we have received the press so we can report true
     }
     
