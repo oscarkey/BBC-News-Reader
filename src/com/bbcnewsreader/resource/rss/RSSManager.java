@@ -51,10 +51,11 @@ public class RSSManager implements Runnable {
     	}
 	}
 	
-	public RSSManager(String[] names, String[] urls){
+	public RSSManager(String[] names, String[] urls, ResourceInterface service){
 		this.names = names; //store the names
 		this.urls = urls; //store the URLS
 		feeds = new ArrayList<RSSFeed>();
+		resourceInterface = service;
 		thread = new Thread(this);
 		thread.start();
 	}
@@ -66,8 +67,9 @@ public class RSSManager implements Runnable {
 			feeds.add(feed);
 			List<RSSItem> items = feed.getAllItems();
 			//loop through the items and send them to the parent service
+			//FIXME don't just assume that we want three items
 			for(int t = 0; t < 3; t++){
-				resourceInterface.rssItemLoaded(items.get(t), names[i]);
+				resourceInterface.itemRssLoaded(items.get(t), names[i]);
 			}
 		}
 	}

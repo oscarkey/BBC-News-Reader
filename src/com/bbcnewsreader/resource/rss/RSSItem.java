@@ -9,7 +9,7 @@ public class RSSItem
     private String _pubdate = null;
 
     
-    RSSItem()
+    public RSSItem()
     {
     }
     void setTitle(String title)
@@ -36,11 +36,11 @@ public class RSSItem
     {
         return _title;
     }
-    String getDescription()
+    public String getDescription()
     {
         return _description;
     }
-    String getLink()
+    public String getLink()
     {
         return _link;
     }
@@ -48,7 +48,7 @@ public class RSSItem
     {
         return _category;
     }
-    String getPubDate()
+    public String getPubDate()
     {
         return _pubdate;
     }

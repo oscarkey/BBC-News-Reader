@@ -41,10 +41,15 @@ public class ResourceService extends Service implements ResourceInterface {
 				clients.add(msg.replyTo); //add a reference to the client to our list
 				sendMsg(msg.replyTo, MSG_CLIENT_REGISTERED);
 				break;
-			case(MSG_UNREGISTER_CLIENT):
+			case MSG_UNREGISTER_CLIENT:
 				clients.remove(msg.replyTo); //remove our reference to the client
-			case(MSG_LOAD_DATA):
+				//check if that was our last client
+				if(clients.size() == 0)
+					System.exit(0);
+				break;
+			case MSG_LOAD_DATA:
 				loadData(); //start of the loading of data
+				break;
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
 			}
@@ -57,17 +62,31 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 	}
 	
-	void setDatabase(DatabaseHandler database){
-		this.database = database;
+	public synchronized void setDatabase(DatabaseHandler db){
+		this.database = db;
+	}
+	
+	public synchronized DatabaseHandler getDatabase(){
+		return database;
 	}
 	
 	void loadData(){
-		//TODO retrieve the active categories
-		//for now just load in all of them
-		String[] names = getResources().getStringArray(R.array.category_names);
-		String[] urls = getResources().getStringArray(R.array.catergory_rss_urls);
+		//retrieve the active category urls
+		String[] urls = getDatabase().getEnabledCategories();
+		//work out the names
+		String[] names = new String[urls.length];
+		String[] allNames = getResources().getStringArray(R.array.category_names);
+		String[] allUrls = getResources().getStringArray(R.array.catergory_rss_urls);
+		//FIXME very inefficient, should be done by database
+		for(int i = 0; i < allUrls.length; i++){
+			for(int j = 0; j < urls.length; j++){
+				if(allUrls[i].equals(urls[j])){
+					names[j] = allNames[i];
+				}
+			}
+		}
 		//start the RSS Manager
-		rssManager = new RSSManager(names, urls);
+		rssManager = new RSSManager(names, urls, this);
 	}
 	
 	void sendMsg(Messenger client, int what){
@@ -90,14 +109,21 @@ public class ResourceService extends Service implements ResourceInterface {
 	/**
 	 * Called when an RSS feed has loaded
 	 * @param item The item that has been loaded */
-	public void rssItemLoaded(RSSItem item, String category){
-		//TODO add the item in the database
-		
+	public synchronized void itemRssLoaded(RSSItem item, String category){
+		//create the database if needed
+		Log.v("resourceservice", "database: "+getDatabase());
+		//FIXME no description given
+		getDatabase().insertItem(item.getTitle(), null, item.getLink(), item.getPubDate(), category);
 	}
 	
 	@Override
 	public void onCreate(){
-		
+		//create the database if needed
+		if(database == null){
+			//load the database
+			Log.v("resourceservice", "creating database");
+			setDatabase(new DatabaseHandler(this));
+		}
 	}
 	
 	@Override

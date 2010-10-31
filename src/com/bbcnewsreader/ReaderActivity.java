@@ -76,10 +76,12 @@ public class ReaderActivity extends Activity {
 		public void handleMessage(Message msg){
 			//decide what to do with the message
 			switch(msg.what){
-			case(ResourceService.MSG_CLIENT_REGISTERED):
+			case ResourceService.MSG_CLIENT_REGISTERED :
 				loadData(); //start of the loading of data
-			case(ResourceService.MSG_ERROR):
+				break;
+			case ResourceService.MSG_ERROR:
 				errorOccured();
+				break;
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
 			}
@@ -95,7 +97,7 @@ public class ReaderActivity extends Activity {
 	        resourceMessenger = new Messenger(service);
 	        //try and tell the service that we have connected
 	        //this means it will keep talking to us
-	        sendMessageToService(ResourceService.MSG_REGISTER_CLIENT_WITH_DATABASE, database);
+	        sendMessageToService(ResourceService.MSG_REGISTER_CLIENT_WITH_DATABASE, null);
 	    }
 
 	    public void onServiceDisconnected(ComponentName className) {
