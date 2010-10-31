@@ -62,7 +62,6 @@ public class DatabaseHandler {
 	   {
 		   Date parsed=format.parse(pubdate);
 		   timestamp=parsed.getTime();
-		   Log.v("TEST",Long.toString(timestamp));
 	   }catch(Exception e)
 	   {
 		   Log.v("ERROR",e.toString());
@@ -70,18 +69,25 @@ public class DatabaseHandler {
 	   //Compiles then executes the insertion of the item into the items database.
 	   //Takes the rowid of the new record and uses it to get the item_id.
 	   //Moves to first item in Cursor then inserts item_id and category into relationship table.
-	   Cursor cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},("title='"+title+"'"),null,null,null,null,null);
+	   Cursor cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"title=?",new String[] {title},null,null,null,null);
+	   ContentValues cv=null;
 	   if(cursor.getCount()==0)
 	   {
-		   this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " values (NULL, '"+title+"', '"+description+"', '"+link+"', '"+timestamp+"')");
-		   long rowid=this.insertStmt.executeInsert();
-		   cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},("rowid='"+rowid+"'"),null,null,null,null, null);
-		   Log.v("TEST",title);
+		   cv=new ContentValues(4);
+		   cv.put("title",title);
+		   cv.put("description",description);
+		   cv.put("link",link);
+		   cv.put("pubdate",timestamp);
+		   long rowid=db.insert(TABLE_NAME, null, cv);
+		   cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
 	   }
 	   cursor.moveToNext();
 	   int itemid=cursor.getInt(0);
-	   this.insertStmt=this.db.compileStatement("insert into " + TABLE3_NAME + " values ('"+category+"', '"+itemid+"')");
-	   this.insertStmt.executeInsert();
+	   cv=new ContentValues(2);
+	   cv.put("categoryName",category);
+	   cv.put("itemId",itemid);
+	   db.insert(TABLE3_NAME, null, cv);
+	   cursor.close();
    }
    /**
     * Adds all the start categories from the XML
@@ -110,8 +116,11 @@ public class DatabaseHandler {
    {
 	   int enabledI;
 	   if(enabledB){enabledI=1;}else{enabledI=0;}
-	   this.insertStmt=this.db.compileStatement("insert into " +TABLE2_NAME + " values (NULL, '"+name+"', '"+enabledI+"', '"+url+"')");
-	   this.insertStmt.executeInsert();
+	   ContentValues cv=new ContentValues(3);
+	   cv.put("name",name);
+	   cv.put("enabled",enabledI);
+	   cv.put("url",url);
+	   db.insert(TABLE2_NAME, null, cv);
    }
    /**
     * Clears all the tables in the database, leaving structure intact.
@@ -144,7 +153,6 @@ public class DatabaseHandler {
 	   //FIXME Optimise
 	   Cursor cursor=db.query(TABLE2_NAME, new String[]{"enabled"}, null, null, null, null, "category_Id");
 	   boolean[] enabledCategories = new boolean[cursor.getCount()];
-	   Log.v("TEST",cursor.toString());
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
 		   cursor.moveToNext();
@@ -157,6 +165,7 @@ public class DatabaseHandler {
 			   enabledCategories[i-1]=true;
 		   }
 	   }
+	   cursor.close();
 	return enabledCategories;
    }
    /**
@@ -173,6 +182,7 @@ public class DatabaseHandler {
 		   cursor.moveToNext();
 		   categories[i-1]=cursor.getString(0);
 	   }
+	   cursor.close();
 	   return categories;
 	   
    }
@@ -188,7 +198,7 @@ public class DatabaseHandler {
 	   {
 		   if(enabled[i]){cv.put("enabled", 1);}
 		   else{cv.put("enabled", 0);}
-		   db.update(TABLE2_NAME, cv, "category_Id='"+i+"'", null);
+		   db.update(TABLE2_NAME, cv, "category_Id=?", new String[]{Integer.toString(i)});
 		   cv.clear();
 	   }
    }
@@ -200,9 +210,9 @@ public class DatabaseHandler {
     */
    public String[][] getItems(String category)
    {
-	   //FIXME Optimise, add limit?
+	   //FIXME Optimise, add limit? NOT SQL INJECTION SAFE (But internal, so k)
 	   //Query the relation table to get a list of Item_Ids.
-	   Cursor cursor=db.query(TABLE3_NAME, new String[]{"itemId"}, "categoryName='"+category+"'", null, null, null, null);
+	   Cursor cursor=db.query(TABLE3_NAME, new String[]{"itemId"}, "categoryName=?", new String[]{category}, null, null, null);
 	   /*Create a string consisting of the first item_Id, then a loop appending
 	    * ORs and further item_Id
 	   */
@@ -224,6 +234,7 @@ public class DatabaseHandler {
 		   items[1][i-1]=cursor.getString(1);
 		   items[2][i-1]=cursor.getString(2);
 	   }
+	   cursor.close();
 	   return items;
    }
    /**
@@ -236,7 +247,7 @@ public class DatabaseHandler {
 	   //FIXME Skip first step?
 	   //Query the categories table for the id of the category with that name
 	   //Then fetch the id from the first one returned
-	   Cursor cursor=db.query(TABLE2_NAME,new String[]{"category_Id"},"name='"+category+"'",null,null,null,null);
+	   Cursor cursor=db.query(TABLE2_NAME,new String[]{"category_Id"},"name=?",new String[]{category},null,null,null);
 	   cursor.moveToNext();
 	   int categoryId=cursor.getInt(0);
 	   //Create a box containing the new value/column
@@ -244,7 +255,8 @@ public class DatabaseHandler {
 	   if(enabled){cv.put("enabled", 1);}
 	   else{cv.put("enabled", 0);}
 	   //push up to database.
-	   db.update(TABLE2_NAME, cv, "category_Id='"+categoryId+"'", null);
+	   db.update(TABLE2_NAME, cv, "category_Id=?", new String[]{Integer.toString(categoryId)});
+	   cursor.close();
    }
    /**
     * When called will remove all articles that are
@@ -259,16 +271,14 @@ public class DatabaseHandler {
 	   //items with a pubdate less than that value.
 	   Date now=new Date();
 	   long oldTime=(now.getTime()-2629743000L);
-	   Log.v("TEST",Long.toString(oldTime));
-	   Cursor cursor=db.query(TABLE_NAME,new String[]{"item_Id"},"pubdate<'"+oldTime+"'",null,null,null,null);
-	   Log.v("TEST",Integer.toString(cursor.getCount()));
+	   Cursor cursor=db.query(TABLE_NAME,new String[]{"item_Id"},"pubdate<?",new String[]{Long.toString(oldTime)},null,null,null);
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
 		   cursor.moveToNext();
-		   db.delete(TABLE3_NAME,"itemId='"+cursor.getInt(0)+"'",null);
+		   db.delete(TABLE3_NAME,"itemId=?",new String[]{Integer.toString(cursor.getInt(0))});
 	   }
-	   db.delete(TABLE_NAME,"pubdate<'"+oldTime+"'",null);
-	   
+	   db.delete(TABLE_NAME,"pubdate<?",new String[]{Long.toString(oldTime)});
+	   cursor.close();
    }
    private static class OpenHelper extends SQLiteOpenHelper {
 
