@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.bbcnewsreader.data.DatabaseHandler;
 import com.bbcnewsreader.resource.rss.RSSItem;
 import com.bbcnewsreader.resource.rss.RSSManager;
+import com.bbcnewsreader.resource.web.WebManager;
 
 import android.app.Service;
 import android.content.Intent;
@@ -22,6 +23,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	final Messenger messenger = new Messenger(new IncomingHandler()); //the messenger used for communication
 	DatabaseHandler database; //the database
 	RSSManager rssManager;
+	WebManager webmanager = new WebManager(true,true);
 	
 	/* command definitions */
 	static final int MSG_REGISTER_CLIENT_WITH_DATABASE = 1;

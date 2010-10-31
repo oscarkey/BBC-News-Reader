@@ -8,7 +8,7 @@ public class WebManager {
 	boolean extractData; //extract or just save the entire page
 	boolean extractImage; //extract the image as well as the text
 	
-	public void loadFromDesktopUrl(String url){
+	public void add(String url){
 		//launch a new ContentExtracter to extract the text from the document
 	}
 	
