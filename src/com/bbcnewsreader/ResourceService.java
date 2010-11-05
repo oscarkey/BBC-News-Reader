@@ -39,7 +39,7 @@ public class ResourceService extends Service implements ResourceInterface {
 			switch(msg.what){
 			case MSG_REGISTER_CLIENT_WITH_DATABASE:
 				clients.add(msg.replyTo); //add a reference to the client to our list
-				sendMsg(msg.replyTo, MSG_CLIENT_REGISTERED);
+				sendMsg(msg.replyTo, MSG_CLIENT_REGISTERED, null);
 				break;
 			case MSG_UNREGISTER_CLIENT:
 				clients.remove(msg.replyTo); //remove our reference to the client
@@ -89,10 +89,10 @@ public class ResourceService extends Service implements ResourceInterface {
 		rssManager = new RSSManager(names, urls, this);
 	}
 	
-	void sendMsg(Messenger client, int what){
+	void sendMsg(Messenger client, int what, Object object){
 		try{
 			//create a message according to parameters
-			Message msg = Message.obtain(null, what);
+			Message msg = Message.obtain(null, what, object);
 			client.send(msg); //send the message
 		}
 		catch(RemoteException e){
@@ -103,17 +103,31 @@ public class ResourceService extends Service implements ResourceInterface {
 	
 	void sendMsg(int clientId, int what, Object object){
 		//simply call the main sendMessage but with an actual client
-		sendMsg(clients.get(clientId), what);
+		sendMsg(clients.get(clientId), what, object);
+	}
+	
+	void sendMsgToAll(int what, Object object){
+		//loop through and send the message to all the clients
+		for(int i = 0; i < clients.size(); i++){
+			sendMsg(i, what, object);
+		}
 	}
 	
 	/**
 	 * Called when an RSS feed has loaded
 	 * @param item The item that has been loaded */
 	public synchronized void itemRssLoaded(RSSItem item, String category){
-		//create the database if needed
-		Log.v("resourceservice", "database: "+getDatabase());
+		//insert the item into the database
 		//FIXME no description given
 		getDatabase().insertItem(item.getTitle(), null, item.getLink(), item.getPubDate(), category);
+		//TODO tell the web manager to load this item's web page
+	}
+	
+	public synchronized void reportError(boolean fatal, String msg){
+		//an error has occurred, send a message to the gui
+		//this will display something useful to the user
+		String[] msgs = {Boolean.toString(fatal), msg};
+		//sendMessageToAll(MSG_ERROR, msgs);
 	}
 	
 	@Override
@@ -121,7 +135,6 @@ public class ResourceService extends Service implements ResourceInterface {
 		//create the database if needed
 		if(database == null){
 			//load the database
-			Log.v("resourceservice", "creating database");
 			setDatabase(new DatabaseHandler(this));
 		}
 	}
