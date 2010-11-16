@@ -70,14 +70,20 @@ public class DatabaseHandler {
 	   //Compiles then executes the insertion of the item into the items database.
 	   //Takes the rowid of the new record and uses it to get the item_id.
 	   //Moves to first item in Cursor then inserts item_id and category into relationship table.
-	   Cursor cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},("title='"+title+"'"),null,null,null,null,null);
+	   Cursor cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"title=?",new String[] {title},null,null,null,null);
 	   if(cursor.getCount()==0)
-	   {
-		   this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " values (NULL, '"+title+"', '"+description+"', '"+link+"', '"+timestamp+"')");
-		   long rowid=this.insertStmt.executeInsert();
-		   cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},("rowid='"+rowid+"'"),null,null,null,null, null);
-		   Log.v("TEST",title);
-	   }
+	    {
+	     ContentValues cv=new ContentValues(4);
+	     cv.put("title",title);
+	     cv.put("description",description);
+	     cv.put("link",link);
+	     cv.put("pubdate",timestamp);
+	     long rowid=db.insert(TABLE_NAME, null, cv);
+	     //this.insertStmt=this.db.compileStatement("insert into " + TABLE_NAME + " values (NULL, '"+title+"', '"+description+"', '"+link+"', '"+timestamp+"')");
+	     //long rowid=this.insertStmt.executeInsert();
+	     cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
+	     Log.v("TEST",title);
+	    }
 	   cursor.moveToNext();
 	   int itemid=cursor.getInt(0);
 	   this.insertStmt=this.db.compileStatement("insert into " + TABLE3_NAME + " values ('"+category+"', '"+itemid+"')");

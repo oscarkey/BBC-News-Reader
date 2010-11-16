@@ -80,7 +80,7 @@ public class ReaderActivity extends Activity {
 				loadData(); //start of the loading of data
 				break;
 			case ResourceService.MSG_ERROR:
-				errorOccured();
+				errorOccured(msg.obj);
 				break;
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
@@ -107,10 +107,23 @@ public class ReaderActivity extends Activity {
 	    }
 	};
     
-    void errorOccured(){
-    	//TODO display sensible error message
-    	Log.e("BBC News Reader", "Oops something broke. We'll crash now.");
-    	System.exit(1); //closes the app with an error code
+    void errorOccured(Object obj){
+    	//check if fatal or not
+    	String[] msgs = (String[])obj;
+    	boolean fatal = Boolean.parseBoolean(msgs[0]);
+    	String msg = msgs[1];
+    	//do we need to crash or not
+    	if(fatal){
+    		//TODO display sensible error message
+    		Log.e("BBC News Reader", "Error: "+msg);
+        	Log.e("BBC News Reader", "Oops something broke. We'll crash now.");
+        	System.exit(1); //closes the app with an error code
+    	}
+    	else{
+    		//TODO display sensible error message
+    		Log.e("BBC News Reader", "Error: "+msg);
+        	Log.e("BBC News Reader", "Oops something broke. Lets keep going.");
+    	}
     }
     
     void loadData(){

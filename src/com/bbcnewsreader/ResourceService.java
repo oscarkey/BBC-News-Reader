@@ -127,7 +127,7 @@ public class ResourceService extends Service implements ResourceInterface {
 		//an error has occurred, send a message to the gui
 		//this will display something useful to the user
 		String[] msgs = {Boolean.toString(fatal), msg};
-		//sendMessageToAll(MSG_ERROR, msgs);
+		sendMsgToAll(MSG_ERROR, msgs);
 	}
 	
 	@Override
