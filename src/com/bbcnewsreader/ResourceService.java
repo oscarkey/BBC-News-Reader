@@ -1,10 +1,11 @@
 package com.bbcnewsreader;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import org.mcsoxford.rss.RSSItem;
+
 import com.bbcnewsreader.data.DatabaseHandler;
-import com.bbcnewsreader.resource.rss.RSSItem;
-import com.bbcnewsreader.resource.rss.RSSManager;
 
 import android.app.Service;
 import android.content.Intent;
@@ -119,7 +120,10 @@ public class ResourceService extends Service implements ResourceInterface {
 	public synchronized void itemRssLoaded(RSSItem item, String category){
 		//insert the item into the database
 		//FIXME no description given
-		getDatabase().insertItem(item.getTitle(), null, item.getLink(), item.getPubDate(), category);
+		//FIXME stupid conversion and reconversion of date format. The database needs updating.
+		SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+		String date = dateFormat.format(item.getPubDate());
+		getDatabase().insertItem(item.getTitle(), null, item.getLink().toString(), date, category);
 		//TODO tell the web manager to load this item's web page
 	}
 	
