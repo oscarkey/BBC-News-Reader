@@ -64,7 +64,7 @@ public class ReaderActivity extends Activity {
         
         //load the database
         database = new DatabaseHandler(this);
-        database.dropTables();
+        //database.dropTables();
         //load in the categories if necessary
         database.addCategories();
         
@@ -119,7 +119,11 @@ public class ReaderActivity extends Activity {
     		//TODO add code to show the settings menu
     	}
     	if(item.getTitle().equals("Reset")){
-    		//TODO reset the database
+    		//clear the database tables and then crash out
+    		//FIXME shouldn't crash on a table clear...
+    		database.dropTables();
+    		Log.w(this.getLocalClassName(), "Tables dropped. The app will now crash...");
+    		System.exit(0);
     	}
     	return true; //we have received the press so we can report true
     }
@@ -149,4 +153,4 @@ public class ReaderActivity extends Activity {
     	Intent intent = new Intent(this, ArticleActivity.class);
     	startActivity(intent);
     }
-
+}
