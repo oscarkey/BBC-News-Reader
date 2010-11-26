@@ -22,16 +22,16 @@ public class ReaderActivity extends Activity {
 	/** variables */
 	/* constants */
 	static final int ACTIVITY_CHOOSE_CATEGORIES = 1;
+	static final int CATEGORY_ROW_LENGTH = 4;
 	
 	/* variables */
 	ScrollView scroller;
-	static final int rowLength = 4;
 	DatabaseHandler database;
 	LayoutInflater inflater; //used to create objects from the XML
 	String[] categoryNames;
 	TableLayout[] categories;
 	LinearLayout[] items;
-	String[] itemNames = {"lorem", "ipsum", "dolor", "sit", "amet",
+	/*String[] itemNames = {"lorem", "ipsum", "dolor", "sit", "amet",
 			"consectetuer", "adipiscing", "elit", "morbi", "vel",
 			"ligula", "vitae", "arcu", "aliquet", "mollis",
 			"etiam", "vel", "erat", "placerat", "ante",
@@ -54,7 +54,7 @@ public class ReaderActivity extends Activity {
 			"ligula", "vitae", "arcu", "aliquet", "mollis",
 			"etiam", "vel", "erat", "placerat", "ante",
 			"porttitor", "sodales", "pellentesque", "augue",
-			"purus"};
+			"purus"};*/
 
     /** Called when the activity is first created. */
     @Override
@@ -72,9 +72,9 @@ public class ReaderActivity extends Activity {
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news
         //create the categories
-        categoryNames = getResources().getStringArray(R.array.category_names); //string array with category names in it
+        categoryNames = database.getEnabledCategories(); //string array with category names in it
         categories = new TableLayout[categoryNames.length];
-        items = new LinearLayout[categoryNames.length * rowLength]; //the array to hold the news items
+        items = new LinearLayout[categoryNames.length * CATEGORY_ROW_LENGTH]; //the array to hold the news items
         //loop through adding category views
         for(int i = 0; i < categoryNames.length; i++){
         	//create the category
@@ -84,17 +84,23 @@ public class ReaderActivity extends Activity {
         	name.setText(categoryNames[i]);
         	//retrieve the row for the news items
         	TableRow newsRow = (TableRow)category.findViewById(R.id.rowNewsItem);
+        	//load up the item titles
+        	String[] itemTitles = database.getItems(categoryNames[i])[0];
         	//loop through and add 3 news items
-        	for(int t = 0; t < 4; t++){
+        	for(int t = 0; t < CATEGORY_ROW_LENGTH; t++){
         		LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_news_item, null);
         		TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
-        		title.setText(itemNames[(i*rowLength)+t]);
-        		items[(i*rowLength)+t] = item;
+        		title.setText(itemTitles[t]);
+        		items[(i*CATEGORY_ROW_LENGTH)+t] = item;
         		newsRow.addView(item);
         	}
         	categories[i] = category;
         	content.addView(category); //add the category to the screen
         }
+    }
+    
+    void reloadNewsItems(){
+    	//TODO add news reload code
     }
     
     public boolean onCreateOptionsMenu(Menu menu){
