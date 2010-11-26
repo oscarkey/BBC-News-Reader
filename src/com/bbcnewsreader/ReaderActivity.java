@@ -1,6 +1,8 @@
 package com.bbcnewsreader;
 
 
+import java.net.URI;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +26,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.bbcnewsreader.data.DatabaseHandler;
+import com.bbcnewsreader.resource.web.HtmlParser;
 
 
 
@@ -160,6 +163,10 @@ public class ReaderActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+       //testrunning //FIXME Remove
+        try{HtmlParser.getPage(new URI("http://www.bbc.co.uk/news/mobile/uk-england-11778873"));}
+        catch(Exception e){System.out.println(e.toString());}
         
         //load the database
         database = new DatabaseHandler(this);
