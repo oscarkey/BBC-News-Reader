@@ -64,7 +64,7 @@ public class DatabaseHandler {
 		   timestamp=parsed.getTime();
 	   }catch(Exception e)
 	   {
-		   Log.v("ERROR",e.toString());
+		   //Log.v("ERROR",e.toString());
 	   }
 	   //Compiles then executes the insertion of the item into the items database.
 	   //Takes the rowid of the new record and uses it to get the item_id.
@@ -94,6 +94,7 @@ public class DatabaseHandler {
     */
    public void addCategories()
    {
+	   
 	   try
 	   {
 		   String[] categoryNames = context.getResources().getStringArray(R.array.category_names);
@@ -105,6 +106,22 @@ public class DatabaseHandler {
 	   }catch(NullPointerException e)
 	   {
 		   Log.e("categories-xml","Categories XML is broken");
+	   }
+   }
+   /**
+    * Checks whether there are any records in category
+    * @return true or false
+    */
+   public boolean isCreated()
+   {
+	   try
+	   {
+		   getCategoryBooleans()[0]=true;
+		   return true;
+	   }
+	   catch(Exception e)
+	   {
+		   return false;
 	   }
    }
    /**
