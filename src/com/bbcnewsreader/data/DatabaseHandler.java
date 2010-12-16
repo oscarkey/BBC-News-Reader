@@ -155,9 +155,23 @@ public class DatabaseHandler {
 	  db.execSQL("DROP TABLE "+TABLE_NAME);
 	  db.execSQL("DROP TABLE "+TABLE2_NAME);
 	  db.execSQL("DROP TABLE "+TABLE3_NAME);
-	  db.execSQL(TABLE_CREATE);
-	  db.execSQL(TABLE2_CREATE);
-	  db.execSQL(TABLE3_CREATE);
+   }
+   /**
+    * Attempts to create the tables.
+    */
+   public void createTables()
+   {
+	   db.execSQL(TABLE_CREATE);
+	   db.execSQL(TABLE2_CREATE);
+	   db.execSQL(TABLE3_CREATE);
+   }
+   /**
+    * Drops then recreates all the tables.
+    */
+   public void reset()
+   {
+	   dropTables();
+	   createTables();
    }
    /**
     * Queries the categories table for the enabled column of all rows,
@@ -306,9 +320,7 @@ public class DatabaseHandler {
       @Override
       public void onCreate(SQLiteDatabase db) {
     	  //Creates the three tables
-    	  db.execSQL(TABLE_CREATE);
-    	  db.execSQL(TABLE2_CREATE);
-    	  db.execSQL(TABLE3_CREATE);
+    	  
       }
 
       @Override
