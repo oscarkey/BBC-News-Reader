@@ -31,7 +31,7 @@ public class ReaderActivity extends Activity {
 	String[] categoryNames;
 	TableLayout[] categories;
 	LinearLayout[] items;
-	/*String[] itemNames = {"lorem", "ipsum", "dolor", "sit", "amet",
+	String[] itemNames = {"lorem", "ipsum", "dolor", "sit", "amet",
 			"consectetuer", "adipiscing", "elit", "morbi", "vel",
 			"ligula", "vitae", "arcu", "aliquet", "mollis",
 			"etiam", "vel", "erat", "placerat", "ante",
@@ -54,7 +54,7 @@ public class ReaderActivity extends Activity {
 			"ligula", "vitae", "arcu", "aliquet", "mollis",
 			"etiam", "vel", "erat", "placerat", "ante",
 			"porttitor", "sodales", "pellentesque", "augue",
-			"purus"};*/
+			"purus"};
 
     /** Called when the activity is first created. */
     @Override
@@ -64,15 +64,16 @@ public class ReaderActivity extends Activity {
         
         //load the database
         database = new DatabaseHandler(this);
-        database.dropTables();
-        //load in the categories if necessary
-        database.addCategories();
+        if(!database.isCreated()){
+        	database.createTables();
+        	database.addCategories();
+        }
         
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news
         //create the categories
-        categoryNames = database.getEnabledCategories(); //string array with category names in it
+        categoryNames = database.getEnabledCategories()[1]; //string array with category names in it
         categories = new TableLayout[categoryNames.length];
         items = new LinearLayout[categoryNames.length * CATEGORY_ROW_LENGTH]; //the array to hold the news items
         //loop through adding category views
@@ -85,7 +86,8 @@ public class ReaderActivity extends Activity {
         	//retrieve the row for the news items
         	TableRow newsRow = (TableRow)category.findViewById(R.id.rowNewsItem);
         	//load up the item titles
-        	String[] itemTitles = database.getItems(categoryNames[i])[0];
+        	//String[] itemTitles = database.getItems(categoryNames[i])[0];
+        	String[] itemTitles = itemNames;
         	//loop through and add 3 news items
         	for(int t = 0; t < CATEGORY_ROW_LENGTH; t++){
         		LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_news_item, null);
