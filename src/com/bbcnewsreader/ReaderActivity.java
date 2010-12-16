@@ -64,7 +64,7 @@ public class ReaderActivity extends Activity {
         
         //load the database
         database = new DatabaseHandler(this);
-        //database.dropTables();
+        database.dropTables();
         //load in the categories if necessary
         database.addCategories();
         
