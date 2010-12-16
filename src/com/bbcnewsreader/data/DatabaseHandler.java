@@ -10,7 +10,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 public class DatabaseHandler {
@@ -37,8 +36,6 @@ public class DatabaseHandler {
 
    private Context context;
    private SQLiteDatabase db;
-
-   private SQLiteStatement insertStmt;
    public DatabaseHandler(Context context) {
       this.context = context;
       OpenHelper openHelper = new OpenHelper(this.context);
@@ -200,22 +197,25 @@ public class DatabaseHandler {
 	return enabledCategories;
    }
    /**
-    * Returns the links of all the categories that are enabled.
-    * @return A string[] containing the String urls.
+    * Returns the links and names of all the categories that are enabled.
+    * @return A string[][] containing the String urls in [0] and String names in [1].
     */
-   public String[] getEnabledCategories()
+   public String[][] getEnabledCategories()
    {
 	   //Queries the category table to get a list of enabled categories
 	   Cursor cursor=db.query(TABLE2_NAME, new String[]{"url"}, "enabled='1'", null, null, null, "category_Id");
-	   String[] categories=new String[cursor.getCount()];
+	   Cursor cursor2=db.query(TABLE2_NAME, new String[]{"name"}, "enabled='1'", null, null, null, "category_Id");
+	   String[][] categories=new String[2][cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
 		   cursor.moveToNext();
-		   categories[i-1]=cursor.getString(0);
+		   cursor2.moveToNext();
+		   categories[0][i-1]=cursor.getString(0);
+		   categories[1][i-1]=cursor2.getString(0);
 	   }
 	   cursor.close();
+	   cursor2.close();
 	   return categories;
-	   
    }
    /**
     * Takes an array of booleans and sets the first n categories
@@ -236,12 +236,14 @@ public class DatabaseHandler {
    /**
     * Takes a category and returns all the title, description and link of all
     * the items related to it.
+    * Returns null if no items exists
     * @param category The Case-sensitive name of the category
     * @return A String[{title,description,link}][{item1,item2}].
     */
    public String[][] getItems(String category)
    {
 	   //FIXME Optimise, add limit? NOT SQL INJECTION SAFE (But internal, so k)
+	   try{
 	   //Query the relation table to get a list of Item_Ids.
 	   Cursor cursor=db.query(TABLE3_NAME, new String[]{"itemId"}, "categoryName=?", new String[]{category}, null, null, null);
 	   /*Create a string consisting of the first item_Id, then a loop appending
@@ -266,7 +268,12 @@ public class DatabaseHandler {
 		   items[2][i-1]=cursor.getString(2);
 	   }
 	   cursor.close();
-	   return items;
+	   return items;}
+	   catch(Exception e)
+	   {
+		   Log.i("Database","Tried to get items from an empty table (Items)");
+		   return null;
+	   }
    }
    /**
     * Sets the given category to the given boolean
