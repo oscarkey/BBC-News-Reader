@@ -32,7 +32,7 @@ public class HtmlParser {
 
 		String html = "";
 		InputStream in = response.getEntity().getContent();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in),50000);
 		StringBuilder str = new StringBuilder();
 		String line = null;
 		while((line = reader.readLine()) != null)
@@ -41,12 +41,15 @@ public class HtmlParser {
 		}
 		in.close();
 		html = str.toString();
+		Log.v("TEST",html);
+		Log.v("TEST",Integer.toString(html.length()));
 		String parsed;
 		Pattern p=Pattern.compile("<div class=\"storybody\">.*?</div>");
 		Matcher m = p.matcher(html);
 		parsed=m.toMatchResult().group(0);
-		Log.v("TEST",html);
-		Log.v("TEST",parsed);
+		
+		Log.v("TEST","parsed:"+parsed);
+		Log.v("TEST","nothing");
 	}
 
 }
