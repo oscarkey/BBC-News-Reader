@@ -42,9 +42,10 @@ public class HtmlParser {
 		in.close();
 		html = str.toString();
 		String parsed;
-		Pattern p=Pattern.compile("<div class=\"storybody\">.</div>");
+		Pattern p=Pattern.compile("<div class=\"storybody\">.*?</div>");
 		Matcher m = p.matcher(html);
 		parsed=m.toMatchResult().group(0);
+		Log.v("TEST",html);
 		Log.v("TEST",parsed);
 	}
 
