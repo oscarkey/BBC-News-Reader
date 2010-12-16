@@ -52,7 +52,7 @@ public class CategoryChooserActivity extends ListActivity {
 		boolean[] categoryBooleans = getIntent().getBooleanArrayExtra("categorybooleans");
 		//loop through enabling the categories as needed
 		for(int i = 0; i < categoryBooleans.length; i++){
-			getListView().setItemChecked(i, categoryBooleans[i]);
+			getListView().setItemChecked(i + 1, categoryBooleans[i]);
 		}
 	}
 }

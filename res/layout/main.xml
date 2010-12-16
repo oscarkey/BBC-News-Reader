@@ -7,7 +7,7 @@ android:background="#660000">
 	<ScrollView android:id="@+id/newsScroller"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
-		<LinearLayout android:id="@+id/newsScrollerContent"
+		<LinearLayout
 		android:orientation="vertical"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
@@ -47,6 +47,11 @@ android:background="#660000">
 					android:src="@drawable/refresh"
 					android:onClick="refreshClicked"/>
 				</LinearLayout>
+			</LinearLayout>
+			<LinearLayout android:id="@+id/newsScrollerContent"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:orientation="vertical">
 			</LinearLayout>
 		</LinearLayout>
 	</ScrollView>

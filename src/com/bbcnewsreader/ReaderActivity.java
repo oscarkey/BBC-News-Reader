@@ -71,7 +71,14 @@ public class ReaderActivity extends Activity {
         
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news
+        
+        createNewsDisplay();
+    }
+    
+    void createNewsDisplay(){
+    	LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news
+    	//clear the content area
+    	content.removeAllViewsInLayout();
         //create the categories
         categoryNames = database.getEnabledCategories()[1]; //string array with category names in it
         categories = new TableLayout[categoryNames.length];
@@ -129,7 +136,7 @@ public class ReaderActivity extends Activity {
     	if(item.getTitle().equals("Reset")){
     		//clear the database tables and then crash out
     		//FIXME shouldn't crash on a table clear...
-    		database.dropTables();
+    		database.reset();
     		Log.w(this.getLocalClassName(), "Tables dropped. The app will now crash...");
     		System.exit(0);
     	}
@@ -145,6 +152,8 @@ public class ReaderActivity extends Activity {
     		if(resultCode == RESULT_OK){
     			//TODO store the data sent back
     			database.setEnabledCategories(data.getBooleanArrayExtra("categorybooleans"));
+    			//reload the ui
+    			createNewsDisplay();
     		}
     		break;
     	}
@@ -152,6 +161,8 @@ public class ReaderActivity extends Activity {
     
     public void refreshClicked(View item){
     	//TODO refresh
+    	//reload the ui
+    	createNewsDisplay();
     }
     
     public void itemClicked(View item){
