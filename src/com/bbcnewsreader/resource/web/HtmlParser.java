@@ -46,14 +46,17 @@ public class HtmlParser {
 			Log.v("TEST",html);
 			Log.v("TEST",Integer.toString(html.length()));
 			String parsed;
-			String pattern=new String("<div class=\"storybody\">.*?</div>");
+			//String pattern=new String("<div class=\"storybody\">.*?</div>");
 			//pattern="<div class=.storybody.>.*?</div>";
-			pattern=".";
-			Log.v("TEST",pattern);
-			Pattern p=Pattern.compile(pattern,Pattern.DOTALL | Pattern.UNIX_LINES);
+			//String pattern=".";
+			//Log.v("TEST",pattern);
+			Pattern p=Pattern.compile("(html)",Pattern.DOTALL);
 			Matcher m = p.matcher(html);
+			
+					parsed=m.group();
+			//parsed=":(";
 			//parsed=m.toMatchResult().group(0);
-			parsed=m.group();
+			//parsed=m.group();
 			
 			Log.v("TEST","parsed:"+parsed);
 			Log.v("TEST","nothing");
