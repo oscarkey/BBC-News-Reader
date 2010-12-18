@@ -23,33 +23,45 @@ public class HtmlParser {
 	 * @throws IOException 
 	 * @throws ClientProtocolException 
 	 */
-	public static void getPage(URI uri) throws ClientProtocolException, IOException {
-		// TODO Auto-generated method stub
-		HttpClient client = new DefaultHttpClient();
-		//HttpGet request = new HttpGet(uri.toString());
-		HttpGet request = new HttpGet(uri.toString());
-		HttpResponse response = client.execute(request);
-
-		String html = "";
-		InputStream in = response.getEntity().getContent();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in),50000);
-		StringBuilder str = new StringBuilder();
-		String line = null;
-		while((line = reader.readLine()) != null)
+	public static void getPage(URI uri){
+		try
 		{
-		    str.append(line);
+			// TODO Auto-generated method stub
+			HttpClient client = new DefaultHttpClient();
+			//HttpGet request = new HttpGet(uri.toString());
+			HttpGet request = new HttpGet(uri.toString());
+			HttpResponse response = client.execute(request);
+	
+			String html = "";
+			InputStream in = response.getEntity().getContent();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in),100000);
+			StringBuilder str = new StringBuilder();
+			String line = null;
+			while((line = reader.readLine()) != null)
+			{
+			    str.append(line);
+			}
+			in.close();
+			html = str.toString();
+			Log.v("TEST",html);
+			Log.v("TEST",Integer.toString(html.length()));
+			String parsed;
+			String pattern=new String("<div class=\"storybody\">.*?</div>");
+			//pattern="<div class=.storybody.>.*?</div>";
+			pattern=".";
+			Log.v("TEST",pattern);
+			Pattern p=Pattern.compile(pattern,Pattern.DOTALL | Pattern.UNIX_LINES);
+			Matcher m = p.matcher(html);
+			//parsed=m.toMatchResult().group(0);
+			parsed=m.group();
+			
+			Log.v("TEST","parsed:"+parsed);
+			Log.v("TEST","nothing");
 		}
-		in.close();
-		html = str.toString();
-		Log.v("TEST",html);
-		Log.v("TEST",Integer.toString(html.length()));
-		String parsed;
-		Pattern p=Pattern.compile("<div class=\"storybody\">.*?</div>");
-		Matcher m = p.matcher(html);
-		parsed=m.toMatchResult().group(0);
-		
-		Log.v("TEST","parsed:"+parsed);
-		Log.v("TEST","nothing");
+		catch(Exception e)
+		{
+			Log.e("htmlparser",e.getMessage());
+		}
 	}
 
 }
