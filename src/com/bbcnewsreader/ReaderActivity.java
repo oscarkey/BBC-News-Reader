@@ -178,9 +178,10 @@ public class ReaderActivity extends Activity {
         
         //load the database
         database = new DatabaseHandler(this);
-        database.dropTables();
-        //load in the categories if necessary
-        database.addCategories();
+        if(!database.isCreated()){
+        	database.createTables();
+        	database.addCategories();
+        }
         
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

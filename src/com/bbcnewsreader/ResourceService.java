@@ -73,7 +73,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	
 	void loadData(){
 		//retrieve the active category urls
-		String[] urls = getDatabase().getEnabledCategories();
+		String[] urls = getDatabase().getEnabledCategories()[0];
 		//work out the names
 		String[] names = new String[urls.length];
 		String[] allNames = getResources().getStringArray(R.array.category_names);
@@ -140,6 +140,11 @@ public class ResourceService extends Service implements ResourceInterface {
 		if(database == null){
 			//load the database
 			setDatabase(new DatabaseHandler(this));
+			//create tables in the database if needed
+			if(!getDatabase().isCreated()){
+				getDatabase().createTables();
+				getDatabase().addCategories();
+	        }
 		}
 	}
 	
