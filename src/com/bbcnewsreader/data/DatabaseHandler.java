@@ -33,7 +33,6 @@ public class DatabaseHandler {
    private static final String TABLE3_CREATE="CREATE TABLE " + TABLE3_NAME +
 									          "(categoryName varchar(255), " +
 									          "itemId INT)";
-
    private Context context;
    private SQLiteDatabase db;
    public DatabaseHandler(Context context) {
