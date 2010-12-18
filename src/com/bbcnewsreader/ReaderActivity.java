@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,15 +38,14 @@ public class ReaderActivity extends Activity {
 	/* variables */
 	ScrollView scroller;
 
-	static final int rowLength = 4;
-
 	private Messenger resourceMessenger;
 	boolean resourceServiceBound;
 	private DatabaseHandler database;
 	LayoutInflater inflater; //used to create objects from the XML
 	String[] categoryNames;
-	TableLayout[] categories;
-	LinearLayout[] items;
+	TableLayout[] physicalCategories;
+	LinearLayout[][] physicalItems;
+	String[][] itemUrls;
 	String[] itemNames = {"lorem", "ipsum", "dolor", "sit", "amet",
 			"consectetuer", "adipiscing", "elit", "morbi", "vel",
 			"ligula", "vitae", "arcu", "aliquet", "mollis",
@@ -83,8 +83,14 @@ public class ReaderActivity extends Activity {
 				loadData(); //start of the loading of data
 				break;
 			case ResourceService.MSG_ERROR:
-				errorOccured(msg.obj);
+				Parcel parcel = (Parcel)msg.obj; //unpackage the parcel
+				String[] msgs = new String[2];
+				parcel.readStringArray(msgs);
+				errorOccured(Boolean.parseBoolean(msgs[0]), msgs[1]);
 				break;
+			case ResourceService.MSG_CATEOGRY_LOADED:
+				Parcel categoryParcel = (Parcel)msg.obj; //unpackage the parcel
+				categoryLoadFinished(categoryParcel.readString());
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
 			}
@@ -110,11 +116,7 @@ public class ReaderActivity extends Activity {
 	    }
 	};
     
-    void errorOccured(Object obj){
-    	//check if fatal or not
-    	String[] msgs = (String[])obj;
-    	boolean fatal = Boolean.parseBoolean(msgs[0]);
-    	String msg = msgs[1];
+    void errorOccured(boolean fatal, String msg){
     	//do we need to crash or not
     	if(fatal){
     		//TODO display sensible error message
@@ -196,11 +198,11 @@ public class ReaderActivity extends Activity {
     	LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news
     	//clear the content area
     	content.removeAllViewsInLayout();
+    	
         //create the categories
-        categoryNames = getResources().getStringArray(R.array.category_names); //string array with category names in it
         categoryNames = database.getEnabledCategories()[1]; //string array with category names in it
-        categories = new TableLayout[categoryNames.length];
-        items = new LinearLayout[categoryNames.length * CATEGORY_ROW_LENGTH]; //the array to hold the news items
+        physicalCategories = new TableLayout[categoryNames.length];
+        physicalItems = new LinearLayout[categoryNames.length][CATEGORY_ROW_LENGTH]; //the array to hold the news items
         //loop through adding category views
         for(int i = 0; i < categoryNames.length; i++){
         	//create the category
@@ -210,38 +212,59 @@ public class ReaderActivity extends Activity {
         	name.setText(categoryNames[i]);
         	//retrieve the row for the news items
         	TableRow newsRow = (TableRow)category.findViewById(R.id.rowNewsItem);
-        	//load up the item titles
-        	String[][] newsItems = database.getItems(categoryNames[i]);
-        	Log.v(this.getLocalClassName(), "items: "+newsItems);
-        	String[] itemTitles = null;
-        	//check there are actually some news items
-        	if(newsItems != null)
-        		itemTitles = newsItems[0];
-        	//String[] itemTitles = itemNames;
-        	//FIXME deal with no or few items being returned
-        	//loop through and add 4 news items
+        	
+        	//add some items to each category display
+        	//loop through and add 4 physical news items
         	for(int t = 0; t < CATEGORY_ROW_LENGTH; t++){
+        		//add a new item to the display
         		LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_news_item, null);
-        		TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
-        		if(itemTitles != null){
-        			if(t < itemTitles.length)
-        				title.setText(itemTitles[t]);
-        		}
-        		items[(i*rowLength)+t] = item;
-        		items[(i*CATEGORY_ROW_LENGTH)+t] = item;
-        		newsRow.addView(item);
+        		physicalItems[i][t] = item; //store the item for future use
+        		newsRow.addView(item); //add the item to the display
         	}
-        	categories[i] = category;
+        	physicalCategories[i] = category; //store the category for future use
         	content.addView(category); //add the category to the screen
+        	
+        	//populate this category with news
+        	displayCategoryItems(i);
         }
         
         //start the service and tell it to start to refresh XML data
         doBindService(); //loads the service
     }
     
+    void displayCategoryItems(int category){
+    	//load from the database, if there's anything in it
+    	if(database.getItems(categoryNames[category]) != null){
+    		String[] itemTitles = database.getItems(categoryNames[category])[0];
+    		//change the physical items to match this
+    		for(int i = 0; i < CATEGORY_ROW_LENGTH; i++){
+    			//check we have not gone out of range of the available news
+    			if(i < itemTitles.length){
+    				TextView titleText = (TextView)physicalItems[category][i].findViewById(R.id.textNewsItemTitle);
+    				titleText.setText(itemTitles[i]);
+    			}
+    		}
+    	}
+    }
+    
+    void categoryLoadFinished(String category){
+    	//the database has finished loading a category, we can update
+    	//FIXME very inefficient way to turn (string) name into (int) id
+    	int id = 0; //the id of the client
+    	for(int i = 0; i < categoryNames.length; i++){
+    		//check if the name we have been given matches this category
+    		if(category.equals(categoryNames[i]))
+    			id = i;
+    	}
+    	displayCategoryItems(id); //redisplay this category
+    }
+    
     void reloadNewsItems(){
-    	//TODO add news reload code
-    	//TODO tell the database to discard old items
+    	//start the loading of new data
+    	sendMessageToService(ResourceService.MSG_LOAD_DATA);
+    	//tell the database to delete old items
+    	database.clearOld();
+    	//FIXME probably clearOld() at other points...
     }
     
     public boolean onCreateOptionsMenu(Menu menu){
@@ -268,9 +291,9 @@ public class ReaderActivity extends Activity {
         	intent.putExtra("categorybooleans", categoryBooleans);
         	startActivityForResult(intent, ACTIVITY_CHOOSE_CATEGORIES);
     	}
-    	//TODO add code to show the settings menu
     	if(item.getTitle().equals("Settings")){
     		//TODO add code to show the settings menu
+    		//TODO add a settings menu
     	}
     	if(item.getTitle().equals("Reset")){
     		//clear the database tables and then crash out
@@ -299,9 +322,7 @@ public class ReaderActivity extends Activity {
     }
     
     public void refreshClicked(View item){
-    	//TODO refresh
-    	//reload the ui
-    	createNewsDisplay();
+    	reloadNewsItems();
     }
     
     public void itemClicked(View item){

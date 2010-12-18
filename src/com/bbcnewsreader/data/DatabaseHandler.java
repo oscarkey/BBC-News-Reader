@@ -77,14 +77,14 @@ public class DatabaseHandler {
 		   cv.put("pubdate",timestamp);
 		   long rowid=db.insert(TABLE_NAME, null, cv);
 		   cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
+		   cursor.moveToNext();
+		   int itemid=cursor.getInt(0);
+		   cv=new ContentValues(2);
+		   cv.put("categoryName",category);
+		   cv.put("itemId",itemid);
+		   db.insert(TABLE3_NAME, null, cv);
+		   cursor.close();
 	   }
-	   cursor.moveToNext();
-	   int itemid=cursor.getInt(0);
-	   cv=new ContentValues(2);
-	   cv.put("categoryName",category);
-	   cv.put("itemId",itemid);
-	   db.insert(TABLE3_NAME, null, cv);
-	   cursor.close();
    }
    /**
     * Adds all the start categories from the XML

@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -125,13 +126,19 @@ public class ResourceService extends Service implements ResourceInterface {
 		String date = dateFormat.format(item.getPubDate());
 		getDatabase().insertItem(item.getTitle(), null, item.getLink().toString(), date, category);
 		//TODO tell the web manager to load this item's web page
+		//send a message to the gui to tell it that we have loaded the category
+		Parcel parcel = Parcel.obtain();
+		parcel.writeString(category);
+		sendMsgToAll(MSG_CATEOGRY_LOADED, parcel);
 	}
 	
 	public synchronized void reportError(boolean fatal, String msg){
 		//an error has occurred, send a message to the gui
 		//this will display something useful to the user
 		String[] msgs = {Boolean.toString(fatal), msg};
-		sendMsgToAll(MSG_ERROR, msgs);
+		Parcel parcel = Parcel.obtain();
+		parcel.writeStringArray(msgs);
+		sendMsgToAll(MSG_ERROR, parcel);
 	}
 	
 	@Override
