@@ -211,15 +211,23 @@ public class ReaderActivity extends Activity {
         	//retrieve the row for the news items
         	TableRow newsRow = (TableRow)category.findViewById(R.id.rowNewsItem);
         	//load up the item titles
-        	//String[] itemTitles = database.getItems(categoryNames[i])[0];
-        	String[] itemTitles = itemNames;
-        	//loop through and add 3 news items
+        	String[][] newsItems = database.getItems(categoryNames[i]);
+        	Log.v(this.getLocalClassName(), "items: "+newsItems);
+        	String[] itemTitles = null;
+        	//check there are actually some news items
+        	if(newsItems != null)
+        		itemTitles = newsItems[0];
+        	//String[] itemTitles = itemNames;
+        	//FIXME deal with no or few items being returned
+        	//loop through and add 4 news items
         	for(int t = 0; t < CATEGORY_ROW_LENGTH; t++){
         		LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_news_item, null);
         		TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
-        		title.setText(itemNames[(i*rowLength)+t]);
+        		if(itemTitles != null){
+        			if(t < itemTitles.length)
+        				title.setText(itemTitles[t]);
+        		}
         		items[(i*rowLength)+t] = item;
-        		title.setText(itemTitles[t]);
         		items[(i*CATEGORY_ROW_LENGTH)+t] = item;
         		newsRow.addView(item);
         	}
@@ -233,6 +241,7 @@ public class ReaderActivity extends Activity {
     
     void reloadNewsItems(){
     	//TODO add news reload code
+    	//TODO tell the database to discard old items
     }
     
     public boolean onCreateOptionsMenu(Menu menu){

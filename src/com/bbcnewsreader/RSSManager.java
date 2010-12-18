@@ -44,8 +44,7 @@ public class RSSManager implements Runnable {
 				feeds.add(feed);
 				List<RSSItem> items = (List<RSSItem>) feed.getItems();
 				//loop through the items and send them to the parent service
-				//FIXME don't just assume that we want three items
-				for(int t = 0; t < 3; t++){
+				for(int t = 0; t < items.size(); t++){
 					resourceInterface.itemRssLoaded(items.get(t), names[i]);
 				}
 			} catch (RSSReaderException e) {
