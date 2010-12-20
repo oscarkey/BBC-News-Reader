@@ -11,7 +11,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -83,14 +82,11 @@ public class ReaderActivity extends Activity {
 				loadData(); //start of the loading of data
 				break;
 			case ResourceService.MSG_ERROR:
-				Parcel parcel = (Parcel)msg.obj; //unpackage the parcel
-				String[] msgs = new String[2];
-				parcel.readStringArray(msgs);
-				errorOccured(Boolean.parseBoolean(msgs[0]), msgs[1]);
+				Bundle bundle = msg.getData(); //retrieve the data
+				errorOccured(bundle.getBoolean("fatal"), bundle.getString("error"));
 				break;
 			case ResourceService.MSG_CATEOGRY_LOADED:
-				Parcel categoryParcel = (Parcel)msg.obj; //unpackage the parcel
-				categoryLoadFinished(categoryParcel.readString());
+				categoryLoadFinished(msg.getData().getString("category"));
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
 			}
@@ -135,6 +131,9 @@ public class ReaderActivity extends Activity {
     	//TODO display old news as old
     	//tell the service to load the data
     	sendMessageToService(ResourceService.MSG_LOAD_DATA);
+    	//tell the database to delete old items
+    	database.clearOld();
+    	//FIXME probably clearOld() at other points...
     }
     
     void doBindService(){
@@ -259,14 +258,6 @@ public class ReaderActivity extends Activity {
     	displayCategoryItems(id); //redisplay this category
     }
     
-    void reloadNewsItems(){
-    	//start the loading of new data
-    	sendMessageToService(ResourceService.MSG_LOAD_DATA);
-    	//tell the database to delete old items
-    	database.clearOld();
-    	//FIXME probably clearOld() at other points...
-    }
-    
     public boolean onCreateOptionsMenu(Menu menu){
     	super.onCreateOptionsMenu(menu);
     	//inflate the menu XML file
@@ -322,7 +313,7 @@ public class ReaderActivity extends Activity {
     }
     
     public void refreshClicked(View item){
-    	reloadNewsItems();
+    	loadData();
     }
     
     public void itemClicked(View item){

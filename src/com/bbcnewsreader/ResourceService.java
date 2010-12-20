@@ -5,18 +5,18 @@ import java.util.ArrayList;
 
 import org.mcsoxford.rss.RSSItem;
 
-import com.bbcnewsreader.data.DatabaseHandler;
-
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.bbcnewsreader.data.DatabaseHandler;
 
 public class ResourceService extends Service implements ResourceInterface {
 	/* variables */
@@ -91,10 +91,13 @@ public class ResourceService extends Service implements ResourceInterface {
 		rssManager = new RSSManager(names, urls, this);
 	}
 	
-	void sendMsg(Messenger client, int what, Object object){
+	void sendMsg(Messenger client, int what, Bundle bundle){
 		try{
 			//create a message according to parameters
-			Message msg = Message.obtain(null, what, object);
+			Message msg = Message.obtain(null, what);
+			if(bundle != null){
+				msg.setData(bundle);
+			}
 			client.send(msg); //send the message
 		}
 		catch(RemoteException e){
@@ -103,42 +106,44 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 	}
 	
-	void sendMsg(int clientId, int what, Object object){
+	void sendMsg(int clientId, int what, Bundle bundle){
 		//simply call the main sendMessage but with an actual client
-		sendMsg(clients.get(clientId), what, object);
+		sendMsg(clients.get(clientId), what, bundle);
 	}
 	
-	void sendMsgToAll(int what, Object object){
+	void sendMsgToAll(int what, Bundle bundle){
 		//loop through and send the message to all the clients
 		for(int i = 0; i < clients.size(); i++){
-			sendMsg(i, what, object);
+			sendMsg(i, what, bundle);
 		}
 	}
 	
 	/**
 	 * Called when an RSS feed has loaded
 	 * @param item The item that has been loaded */
-	public synchronized void itemRssLoaded(RSSItem item, String category){
-		//insert the item into the database
-		//FIXME no description given
-		//FIXME stupid conversion and reconversion of date format. The database needs updating.
-		SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
-		String date = dateFormat.format(item.getPubDate());
-		getDatabase().insertItem(item.getTitle(), null, item.getLink().toString(), date, category);
-		//TODO tell the web manager to load this item's web page
+	public synchronized void categoryRssLoaded(RSSItem[] items, String category){
+		//insert the items into the database
+		for(int i = 0; i < items.length; i++){
+			//FIXME no description given
+			//FIXME stupid conversion and reconversion of date format. The database needs updating.
+			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+			String date = dateFormat.format(items[i].getPubDate());
+			getDatabase().insertItem(items[i].getTitle(), null, items[i].getLink().toString(), date, category);
+			//TODO tell the web manager to load this item's web page
+		}
 		//send a message to the gui to tell it that we have loaded the category
-		Parcel parcel = Parcel.obtain();
-		parcel.writeString(category);
-		sendMsgToAll(MSG_CATEOGRY_LOADED, parcel);
+		Bundle bundle = new Bundle();
+		bundle.putString("category", category);
+		sendMsgToAll(MSG_CATEOGRY_LOADED, bundle);
 	}
 	
 	public synchronized void reportError(boolean fatal, String msg){
 		//an error has occurred, send a message to the gui
 		//this will display something useful to the user
-		String[] msgs = {Boolean.toString(fatal), msg};
-		Parcel parcel = Parcel.obtain();
-		parcel.writeStringArray(msgs);
-		sendMsgToAll(MSG_ERROR, parcel);
+		Bundle bundle = new Bundle();
+		bundle.putBoolean("fatal", fatal);
+		bundle.putString("error", msg);
+		sendMsgToAll(MSG_ERROR, bundle);
 	}
 	
 	@Override

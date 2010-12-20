@@ -44,9 +44,7 @@ public class RSSManager implements Runnable {
 				feeds.add(feed);
 				List<RSSItem> items = (List<RSSItem>) feed.getItems();
 				//loop through the items and send them to the parent service
-				for(int t = 0; t < items.size(); t++){
-					resourceInterface.itemRssLoaded(items.get(t), names[i]);
-				}
+				resourceInterface.categoryRssLoaded((RSSItem[])items.toArray(new RSSItem[0]), names[i]);
 			} catch (RSSReaderException e) {
 				resourceInterface.reportError(true, e.getMessage()); //report a fatal error
 			} catch (URISyntaxException e) {
