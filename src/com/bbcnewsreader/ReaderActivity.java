@@ -1,6 +1,8 @@
 package com.bbcnewsreader;
 
 
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -18,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -44,7 +47,7 @@ public class ReaderActivity extends Activity {
 	String[] categoryNames;
 	TableLayout[] physicalCategories;
 	LinearLayout[][] physicalItems;
-	String[][] itemUrls;
+	HashMap<String, String> itemUrls;
 	String[] itemNames = {"lorem", "ipsum", "dolor", "sit", "amet",
 			"consectetuer", "adipiscing", "elit", "morbi", "vel",
 			"ligula", "vitae", "arcu", "aliquet", "mollis",
@@ -202,6 +205,7 @@ public class ReaderActivity extends Activity {
         categoryNames = database.getEnabledCategories()[1]; //string array with category names in it
         physicalCategories = new TableLayout[categoryNames.length];
         physicalItems = new LinearLayout[categoryNames.length][CATEGORY_ROW_LENGTH]; //the array to hold the news items
+        itemUrls = new HashMap<String, String>();
         //loop through adding category views
         for(int i = 0; i < categoryNames.length; i++){
         	//create the category
@@ -234,13 +238,16 @@ public class ReaderActivity extends Activity {
     void displayCategoryItems(int category){
     	//load from the database, if there's anything in it
     	if(database.getItems(categoryNames[category]) != null){
-    		String[] itemTitles = database.getItems(categoryNames[category])[0];
+    		String[] titles = database.getItems(categoryNames[category])[0];
+    		String[] urls = database.getItems(categoryNames[category])[2];
     		//change the physical items to match this
     		for(int i = 0; i < CATEGORY_ROW_LENGTH; i++){
     			//check we have not gone out of range of the available news
-    			if(i < itemTitles.length){
+    			if(i < titles.length){
     				TextView titleText = (TextView)physicalItems[category][i].findViewById(R.id.textNewsItemTitle);
-    				titleText.setText(itemTitles[i]);
+    				titleText.setText(titles[i]);
+    				//save the urls
+    				itemUrls.put((String)titleText.getText(), urls[i]);
     			}
     		}
     	}
@@ -289,7 +296,7 @@ public class ReaderActivity extends Activity {
     	if(item.getTitle().equals("Reset")){
     		//clear the database tables and then crash out
     		//FIXME shouldn't crash on a table clear...
-    		database.reset();
+    		database.dropTables();
     		Log.w(this.getLocalClassName(), "Tables dropped. The app will now crash...");
     		System.exit(0);
     	}
@@ -321,6 +328,12 @@ public class ReaderActivity extends Activity {
     	//create an intent to launch the next activity
     	//TODO work out how to use an intent to tell the article activity what to display
     	Intent intent = new Intent(this, ArticleActivity.class);
-    	startActivity(intent);
+    	TextView titleText = (TextView)item.findViewById(R.id.textNewsItemTitle);
+    	intent.putExtra("url", (String)itemUrls.get(titleText.getText()));
+    	//startActivity(intent);
+    	
+    	//TODO add a article view system to replace web view
+    	WebView webView = new WebView(this);
+		webView.loadUrl((String)itemUrls.get(titleText.getText()));
     }
 }
