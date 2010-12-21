@@ -42,7 +42,7 @@ public class DatabaseHandler {
    }
    /**
     * Inserts an RSSItem into the items table, then creates an entry in the relationship
-    * table between it and its category
+    * table between it and its category, ONLY if it is more recent than a month.
     * @param title News item's Title as String
     * @param description News item's Description as String
     * @param link News item's link as String
@@ -62,12 +62,19 @@ public class DatabaseHandler {
 	   {
 		   //Log.v("ERROR",e.toString());
 	   }
+	   //FIXME Change time to a variable.
+	   Boolean recent=false;
+	   Date now=new Date();
+	   if(timestamp>(now.getTime()-2629743000L))
+		{
+		   recent=true;
+		}
 	   //Compiles then executes the insertion of the item into the items database.
 	   //Takes the rowid of the new record and uses it to get the item_id.
 	   //Moves to first item in Cursor then inserts item_id and category into relationship table.
 	   Cursor cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"title=?",new String[] {title},null,null,null,null);
 	   ContentValues cv=null;
-	   if(cursor.getCount()==0)
+	   if((cursor.getCount()==0)&&recent)
 	   {
 		   cv=new ContentValues(4);
 		   cv.put("title",title);
@@ -76,14 +83,16 @@ public class DatabaseHandler {
 		   cv.put("pubdate",timestamp);
 		   long rowid=db.insert(TABLE_NAME, null, cv);
 		   cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
+		   
+		   cursor.moveToNext();
+		   int itemid=cursor.getInt(0);
+		   cv=new ContentValues(2);
+		   cv.put("categoryName",category);
+		   cv.put("itemId",itemid);
+		   db.insert(TABLE3_NAME, null, cv);
+		   cursor.close();
 	   }
-	   cursor.moveToNext();
-	   int itemid=cursor.getInt(0);
-	   cv=new ContentValues(2);
-	   cv.put("categoryName",category);
-	   cv.put("itemId",itemid);
-	   db.insert(TABLE3_NAME, null, cv);
-	   cursor.close();
+	   
    }
    /**
     * Adds all the start categories from the XML
