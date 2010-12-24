@@ -20,6 +20,7 @@ import com.bbcnewsreader.data.DatabaseHandler;
 
 public class ResourceService extends Service implements ResourceInterface {
 	/* variables */
+	public boolean loadInProgress; //a flag to tell the activity if there is a load in progress
 	ArrayList<Messenger> clients = new ArrayList<Messenger>(); //holds references to all of our clients
 	final Messenger messenger = new Messenger(new IncomingHandler()); //the messenger used for communication
 	DatabaseHandler database; //the database
@@ -30,7 +31,9 @@ public class ResourceService extends Service implements ResourceInterface {
 	static final int MSG_UNREGISTER_CLIENT = 2;
 	static final int MSG_CLIENT_REGISTERED = 3; //returned to a client when registered
 	static final int MSG_LOAD_DATA = 4; //sent to request a data load
+	static final int MSG_STOP_DATA_LOAD = 9; //sent to stop data loading
 	static final int MSG_CATEOGRY_LOADED = 6; //sent when a category has loaded
+	static final int MSG_LOAD_COMPLETE = 8; //sent when all the data has been loaded
 	static final int MSG_ERROR = 7; //help! An error occurred
 	
 	//the handler class to process new messages
@@ -51,6 +54,9 @@ public class ResourceService extends Service implements ResourceInterface {
 				break;
 			case MSG_LOAD_DATA:
 				loadData(); //start of the loading of data
+				break;
+			case MSG_STOP_DATA_LOAD:
+				stopDataLoad();
 				break;
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
@@ -73,6 +79,8 @@ public class ResourceService extends Service implements ResourceInterface {
 	}
 	
 	void loadData(){
+		//set the flag saying that we are loading
+		loadInProgress = true;
 		//retrieve the active category urls
 		String[] urls = getDatabase().getEnabledCategories()[0];
 		//work out the names
@@ -89,6 +97,13 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 		//start the RSS Manager
 		rssManager = new RSSManager(names, urls, this);
+	}
+	
+	void stopDataLoad(){
+		//stop the data loading
+		rssManager.stopLoading();
+		//report that we have done so
+		sendMsgToAll(MSG_LOAD_COMPLETE, null);
 	}
 	
 	void sendMsg(Messenger client, int what, Bundle bundle){
@@ -146,8 +161,17 @@ public class ResourceService extends Service implements ResourceInterface {
 		sendMsgToAll(MSG_ERROR, bundle);
 	}
 	
+	public synchronized void loadComplete(){
+		//set the flag to false
+		loadInProgress = false;
+		//send a message saying that we have loaded
+		sendMsgToAll(MSG_LOAD_COMPLETE, null);
+	}
+	
 	@Override
 	public void onCreate(){
+		//init the loading flag
+		loadInProgress = false;
 		//create the database if needed
 		if(database == null){
 			//load the database

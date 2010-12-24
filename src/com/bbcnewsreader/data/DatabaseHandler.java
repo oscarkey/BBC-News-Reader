@@ -326,8 +326,6 @@ public class DatabaseHandler {
 
       @Override
       public void onCreate(SQLiteDatabase db) {
-    	  //Creates the three tables
-    	  
       }
 
       @Override

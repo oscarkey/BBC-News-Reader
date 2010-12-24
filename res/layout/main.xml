@@ -41,7 +41,7 @@ android:background="#660000">
 				android:layout_height="match_parent"
 				android:orientation="vertical"
 				android:gravity="center">
-					<ImageButton
+					<ImageButton android:id="@+id/refreshButton"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:src="@drawable/refresh"

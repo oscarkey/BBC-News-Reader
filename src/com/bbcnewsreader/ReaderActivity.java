@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -42,8 +43,10 @@ public class ReaderActivity extends Activity {
 
 	private Messenger resourceMessenger;
 	boolean resourceServiceBound;
+	boolean loadInProgress;
 	private DatabaseHandler database;
 	LayoutInflater inflater; //used to create objects from the XML
+	ImageButton refreshButton;
 	String[] categoryNames;
 	TableLayout[] physicalCategories;
 	LinearLayout[][] physicalItems;
@@ -90,6 +93,10 @@ public class ReaderActivity extends Activity {
 				break;
 			case ResourceService.MSG_CATEOGRY_LOADED:
 				categoryLoadFinished(msg.getData().getString("category"));
+				break;
+			case ResourceService.MSG_LOAD_COMPLETE:
+				loadComplete();
+				break;
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
 			}
@@ -131,12 +138,34 @@ public class ReaderActivity extends Activity {
     }
     
     void loadData(){
-    	//TODO display old news as old
-    	//tell the service to load the data
-    	sendMessageToService(ResourceService.MSG_LOAD_DATA);
-    	//tell the database to delete old items
-    	database.clearOld();
-    	//FIXME probably clearOld() at other points...
+    	//check we aren't currently loading news
+    	if(!loadInProgress){
+	    	//TODO display old news as old
+	    	loadInProgress = true; //flag the data as being loaded
+	    	//show the loading image on the button
+	    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.stop));
+	    	//tell the service to load the data
+	    	sendMessageToService(ResourceService.MSG_LOAD_DATA);
+    	}
+    }
+    
+    void stopDataLoad(){
+    	//check we are actually loading news
+    	if(loadInProgress){
+    		//send a message to the service to stop it loading the data
+    		sendMessageToService(ResourceService.MSG_STOP_DATA_LOAD);
+    	}
+    }
+    
+    void loadComplete(){
+    	//check we are actually loading news
+    	if(loadInProgress){
+	    	loadInProgress = false;
+	    	//display the reloading image on the button
+	    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh));
+	    	//tell the database to delete old items
+	    	database.clearOld();
+    	}
     }
     
     void doBindService(){
@@ -183,6 +212,8 @@ public class ReaderActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+        loadInProgress = false;
+        
         //load the database
         database = new DatabaseHandler(this);
         if(!database.isCreated()){
@@ -192,6 +223,9 @@ public class ReaderActivity extends Activity {
         
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        
+        //make a reference to the refresh button
+        refreshButton = (ImageButton) findViewById(R.id.refreshButton);
         
         createNewsDisplay();
     }
@@ -320,7 +354,11 @@ public class ReaderActivity extends Activity {
     }
     
     public void refreshClicked(View item){
-    	loadData();
+    	//start the load if we are not loading
+    	if(!loadInProgress)
+    		loadData();
+    	else
+    		stopDataLoad();
     }
     
     public void itemClicked(View item){
