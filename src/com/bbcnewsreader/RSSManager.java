@@ -10,8 +10,6 @@ import org.mcsoxford.rss.RSSItem;
 import org.mcsoxford.rss.RSSReader;
 import org.mcsoxford.rss.RSSReaderException;
 
-import android.util.Log;
-
 
 
 public class RSSManager implements Runnable {
@@ -54,7 +52,7 @@ public class RSSManager implements Runnable {
 					feeds.add(feed);
 					List<RSSItem> items = (List<RSSItem>) feed.getItems();
 					//loop through the items and send them to the parent service
-					resourceInterface.categoryRssLoaded((RSSItem[])items.toArray(new RSSItem[0]), names[i]);
+					resourceInterface.categoryRssLoaded((RSSItem[])items.toArray(new RSSItem[items.size()]), names[i]);
 				} catch (RSSReaderException e) {
 					resourceInterface.reportError(true, e.getMessage()); //report a fatal error
 				} catch (URISyntaxException e) {
