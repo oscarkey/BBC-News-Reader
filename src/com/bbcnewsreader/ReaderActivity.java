@@ -4,8 +4,11 @@ package com.bbcnewsreader;
 import java.util.HashMap;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -37,6 +40,7 @@ public class ReaderActivity extends Activity {
 	/* constants */
 	static final int ACTIVITY_CHOOSE_CATEGORIES = 1;
 	static final int CATEGORY_ROW_LENGTH = 4;
+	static final int DIALOG_ERROR = 0;
 	
 	/* variables */
 	ScrollView scroller;
@@ -50,6 +54,8 @@ public class ReaderActivity extends Activity {
 	String[] categoryNames;
 	TableLayout[] physicalCategories;
 	LinearLayout[][] physicalItems;
+	Dialog errorDialog;
+	boolean errorWasFatal;
 	HashMap<String, String> itemUrls;
 	String[] itemNames = {"lorem", "ipsum", "dolor", "sit", "amet",
 			"consectetuer", "adipiscing", "elit", "morbi", "vel",
@@ -123,17 +129,39 @@ public class ReaderActivity extends Activity {
 	};
     
     void errorOccured(boolean fatal, String msg){
+    	errorWasFatal = fatal; //so we know if we need to crash or not
     	//do we need to crash or not
     	if(fatal){
-    		//TODO display sensible error message
+    		showErrorDialog("Fatal error:\n"+msg+"\nPlease try resetting the app.");
     		Log.e("BBC News Reader", "Error: "+msg);
-        	Log.e("BBC News Reader", "Oops something broke. We'll crash now.");
-        	System.exit(1); //closes the app with an error code
     	}
     	else{
-    		//TODO display sensible error message
-    		Log.e("BBC News Reader", "Error: "+msg);
+    		showErrorDialog("Error: "+msg);
+    		Log.e("BBC News Reader", "Error:\n"+msg);
         	Log.e("BBC News Reader", "Oops something broke. Lets keep going.");
+    	}
+    }
+    
+    void showErrorDialog(String error){
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	builder.setMessage(error);
+    	builder.setCancelable(false);
+    	builder.setPositiveButton("Close", new DialogInterface.OnClickListener() {
+           public void onClick(DialogInterface dialog, int id) {
+                closeErrorDialog();
+           }
+    	});
+    	errorDialog = builder.create();
+    	errorDialog.show();
+    }
+    
+    void closeErrorDialog(){
+    	errorDialog = null; //destroy the dialog
+    	//see if we need to end the program
+    	if(errorWasFatal){
+    		//crash out
+    		Log.e("BBC News Reader", "Oops something broke. We'll crash now.");
+        	System.exit(1); //closes the app with an error code
     	}
     }
     
