@@ -276,7 +276,7 @@ public class ReaderActivity extends Activity {
         	TextView name = (TextView)category.findViewById(R.id.textCategoryName);
         	name.setText(categoryNames[i]);
         	//retrieve the row for the news items
-        	TableRow newsRow = (TableRow)category.findViewById(R.id.rowNewsItem);
+        	LinearLayout newsRow = (LinearLayout)category.findViewById(R.id.rowNewsItem);
         	
         	//add some items to each category display
         	//loop through and add 4 physical news items
@@ -382,6 +382,7 @@ public class ReaderActivity extends Activity {
     }
     
     public void refreshClicked(View item){
+    	//Log.v("view", "width is: "+physicalCategories[1]].getWidth());
     	//start the load if we are not loading
     	if(!loadInProgress)
     		loadData();
