@@ -3,6 +3,8 @@ package com.bbcnewsreader;
 
 import java.net.URI;
 
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -20,7 +22,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -34,18 +39,21 @@ public class ReaderActivity extends Activity {
 	
 	/* constants */
 	static final int ACTIVITY_CHOOSE_CATEGORIES = 1;
+	static final int CATEGORY_ROW_LENGTH = 4;
 	
 	/* variables */
-
-	static final int rowLength = 4;
+	ScrollView scroller;
 
 	private Messenger resourceMessenger;
 	boolean resourceServiceBound;
+	boolean loadInProgress;
 	private DatabaseHandler database;
 	LayoutInflater inflater; //used to create objects from the XML
+	ImageButton refreshButton;
 	String[] categoryNames;
-	TableLayout[] categories;
-	LinearLayout[] items;
+	TableLayout[] physicalCategories;
+	LinearLayout[][] physicalItems;
+	HashMap<String, String> itemUrls;
 	String[] itemNames = {"lorem", "ipsum", "dolor", "sit", "amet",
 			"consectetuer", "adipiscing", "elit", "morbi", "vel",
 			"ligula", "vitae", "arcu", "aliquet", "mollis",
@@ -79,10 +87,19 @@ public class ReaderActivity extends Activity {
 		public void handleMessage(Message msg){
 			//decide what to do with the message
 			switch(msg.what){
-			case(ResourceService.MSG_CLIENT_REGISTERED):
+			case ResourceService.MSG_CLIENT_REGISTERED :
 				loadData(); //start of the loading of data
-			case(ResourceService.MSG_ERROR):
-				errorOccured();
+				break;
+			case ResourceService.MSG_ERROR:
+				Bundle bundle = msg.getData(); //retrieve the data
+				errorOccured(bundle.getBoolean("fatal"), bundle.getString("error"));
+				break;
+			case ResourceService.MSG_CATEOGRY_LOADED:
+				categoryLoadFinished(msg.getData().getString("category"));
+				break;
+			case ResourceService.MSG_LOAD_COMPLETE:
+				loadComplete();
+				break;
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
 			}
@@ -98,7 +115,7 @@ public class ReaderActivity extends Activity {
 	        resourceMessenger = new Messenger(service);
 	        //try and tell the service that we have connected
 	        //this means it will keep talking to us
-	        sendMessageToService(ResourceService.MSG_REGISTER_CLIENT_WITH_DATABASE, database);
+	        sendMessageToService(ResourceService.MSG_REGISTER_CLIENT_WITH_DATABASE, null);
 	    }
 
 	    public void onServiceDisconnected(ComponentName className) {
@@ -108,16 +125,50 @@ public class ReaderActivity extends Activity {
 	    }
 	};
     
-    void errorOccured(){
-    	//TODO display sensible error message
-    	Log.e("BBC News Reader", "Oops something broke. We'll crash now.");
-    	System.exit(1); //closes the app with an error code
+    void errorOccured(boolean fatal, String msg){
+    	//do we need to crash or not
+    	if(fatal){
+    		//TODO display sensible error message
+    		Log.e("BBC News Reader", "Error: "+msg);
+        	Log.e("BBC News Reader", "Oops something broke. We'll crash now.");
+        	System.exit(1); //closes the app with an error code
+    	}
+    	else{
+    		//TODO display sensible error message
+    		Log.e("BBC News Reader", "Error: "+msg);
+        	Log.e("BBC News Reader", "Oops something broke. Lets keep going.");
+    	}
     }
     
     void loadData(){
-    	//TODO display old news as old
-    	//tell the service to load the data
-    	sendMessageToService(ResourceService.MSG_LOAD_DATA);
+    	//check we aren't currently loading news
+    	if(!loadInProgress){
+	    	//TODO display old news as old
+	    	loadInProgress = true; //flag the data as being loaded
+	    	//show the loading image on the button
+	    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.stop));
+	    	//tell the service to load the data
+	    	sendMessageToService(ResourceService.MSG_LOAD_DATA);
+    	}
+    }
+    
+    void stopDataLoad(){
+    	//check we are actually loading news
+    	if(loadInProgress){
+    		//send a message to the service to stop it loading the data
+    		sendMessageToService(ResourceService.MSG_STOP_DATA_LOAD);
+    	}
+    }
+    
+    void loadComplete(){
+    	//check we are actually loading news
+    	if(loadInProgress){
+	    	loadInProgress = false;
+	    	//display the reloading image on the button
+	    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh));
+	    	//tell the database to delete old items
+	    	database.clearOld();
+    	}
     }
     
     void doBindService(){
@@ -168,19 +219,34 @@ public class ReaderActivity extends Activity {
         try{HtmlParser.getPage(new URI("http://www.bbc.co.uk/news/mobile/uk-england-11778873"));}
         catch(Exception e){System.out.println(e.toString());}
         
+        loadInProgress = false;
+        
         //load the database
         database = new DatabaseHandler(this);
-        database.dropTables();
-        //load in the categories if necessary
-        database.addCategories();
+        if(!database.isCreated()){
+        	database.createTables();
+        	database.addCategories();
+        }
         
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news
+        
+        //make a reference to the refresh button
+        refreshButton = (ImageButton) findViewById(R.id.refreshButton);
+        
+        createNewsDisplay();
+    }
+    
+    void createNewsDisplay(){
+    	LinearLayout content = (LinearLayout)findViewById(R.id.newsScrollerContent); //a reference to the layout where we put the news
+    	//clear the content area
+    	content.removeAllViewsInLayout();
+    	
         //create the categories
-        categoryNames = getResources().getStringArray(R.array.category_names); //string array with category names in it
-        categories = new TableLayout[categoryNames.length];
-        items = new LinearLayout[categoryNames.length * rowLength]; //the array to hold the news items
+        categoryNames = database.getEnabledCategories()[1]; //string array with category names in it
+        physicalCategories = new TableLayout[categoryNames.length];
+        physicalItems = new LinearLayout[categoryNames.length][CATEGORY_ROW_LENGTH]; //the array to hold the news items
+        itemUrls = new HashMap<String, String>();
         //loop through adding category views
         for(int i = 0; i < categoryNames.length; i++){
         	//create the category
@@ -190,20 +256,54 @@ public class ReaderActivity extends Activity {
         	name.setText(categoryNames[i]);
         	//retrieve the row for the news items
         	TableRow newsRow = (TableRow)category.findViewById(R.id.rowNewsItem);
-        	//loop through and add 3 news items
-        	for(int t = 0; t < 4; t++){
+        	
+        	//add some items to each category display
+        	//loop through and add 4 physical news items
+        	for(int t = 0; t < CATEGORY_ROW_LENGTH; t++){
+        		//add a new item to the display
         		LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_news_item, null);
-        		TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
-        		title.setText(itemNames[(i*rowLength)+t]);
-        		items[(i*rowLength)+t] = item;
-        		newsRow.addView(item);
+        		physicalItems[i][t] = item; //store the item for future use
+        		newsRow.addView(item); //add the item to the display
         	}
-        	categories[i] = category;
+        	physicalCategories[i] = category; //store the category for future use
         	content.addView(category); //add the category to the screen
+        	
+        	//populate this category with news
+        	displayCategoryItems(i);
         }
         
         //start the service and tell it to start to refresh XML data
         doBindService(); //loads the service
+    }
+    
+    void displayCategoryItems(int category){
+    	//load from the database, if there's anything in it
+    	if(database.getItems(categoryNames[category]) != null){
+    		String[] titles = database.getItems(categoryNames[category])[0];
+    		String[] urls = database.getItems(categoryNames[category])[2];
+    		//change the physical items to match this
+    		for(int i = 0; i < CATEGORY_ROW_LENGTH; i++){
+    			//check we have not gone out of range of the available news
+    			if(i < titles.length){
+    				TextView titleText = (TextView)physicalItems[category][i].findViewById(R.id.textNewsItemTitle);
+    				titleText.setText(titles[i]);
+    				//save the urls
+    				itemUrls.put((String)titleText.getText(), urls[i]);
+    			}
+    		}
+    	}
+    }
+    
+    void categoryLoadFinished(String category){
+    	//the database has finished loading a category, we can update
+    	//FIXME very inefficient way to turn (string) name into (int) id
+    	int id = 0; //the id of the client
+    	for(int i = 0; i < categoryNames.length; i++){
+    		//check if the name we have been given matches this category
+    		if(category.equals(categoryNames[i]))
+    			id = i;
+    	}
+    	displayCategoryItems(id); //redisplay this category
     }
     
     public boolean onCreateOptionsMenu(Menu menu){
@@ -230,7 +330,17 @@ public class ReaderActivity extends Activity {
         	intent.putExtra("categorybooleans", categoryBooleans);
         	startActivityForResult(intent, ACTIVITY_CHOOSE_CATEGORIES);
     	}
-    	//TODO add code to show the settings menu
+    	if(item.getTitle().equals("Settings")){
+    		//TODO add code to show the settings menu
+    		//TODO add a settings menu
+    	}
+    	if(item.getTitle().equals("Reset")){
+    		//clear the database tables and then crash out
+    		//FIXME shouldn't crash on a table clear...
+    		database.dropTables();
+    		Log.w(this.getLocalClassName(), "Tables dropped. The app will now crash...");
+    		System.exit(0);
+    	}
     	return true; //we have received the press so we can report true
     }
     
@@ -243,9 +353,19 @@ public class ReaderActivity extends Activity {
     		if(resultCode == RESULT_OK){
     			//TODO store the data sent back
     			database.setEnabledCategories(data.getBooleanArrayExtra("categorybooleans"));
+    			//reload the ui
+    			createNewsDisplay();
     		}
     		break;
     	}
+    }
+    
+    public void refreshClicked(View item){
+    	//start the load if we are not loading
+    	if(!loadInProgress)
+    		loadData();
+    	else
+    		stopDataLoad();
     }
     
     public void itemClicked(View item){
@@ -253,6 +373,12 @@ public class ReaderActivity extends Activity {
     	//create an intent to launch the next activity
     	//TODO work out how to use an intent to tell the article activity what to display
     	Intent intent = new Intent(this, ArticleActivity.class);
-    	startActivity(intent);
+    	TextView titleText = (TextView)item.findViewById(R.id.textNewsItemTitle);
+    	intent.putExtra("url", (String)itemUrls.get(titleText.getText()));
+    	//startActivity(intent);
+    	
+    	//TODO add a article view system to replace web view
+    	WebView webView = new WebView(this);
+		webView.loadUrl((String)itemUrls.get(titleText.getText()));
     }
 }

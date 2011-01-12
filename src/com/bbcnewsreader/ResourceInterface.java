@@ -1,7 +1,10 @@
 package com.bbcnewsreader;
 
-import com.bbcnewsreader.resource.rss.RSSItem;
+import org.mcsoxford.rss.RSSItem;
+
 
 public interface ResourceInterface {
-	public void rssItemLoaded(RSSItem item, String category); //called when the RSS has loaded
+	public void categoryRssLoaded(RSSItem[] items, String category); //called when the RSS has loaded
+	public void reportError(boolean fatal, String msg);
+	public void loadComplete();
 }
