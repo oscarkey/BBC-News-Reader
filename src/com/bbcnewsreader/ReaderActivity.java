@@ -256,6 +256,12 @@ public class ReaderActivity extends Activity {
         refreshButton = (ImageButton) findViewById(R.id.refreshButton);
         
         createNewsDisplay();
+        
+        //bind a listener to test for orientation changes
+        
+        
+        //start the service and tell it to start to refresh XML data
+        doBindService(); //loads the service
     }
     
     void createNewsDisplay(){
@@ -292,9 +298,10 @@ public class ReaderActivity extends Activity {
         	//populate this category with news
         	displayCategoryItems(i);
         }
-        
-        //start the service and tell it to start to refresh XML data
-        doBindService(); //loads the service
+    }
+    
+    void onOrientationChanged(int orientation){
+    	Log.v("orientation", "orientation was changed... "+orientation);
     }
     
     void displayCategoryItems(int category){
