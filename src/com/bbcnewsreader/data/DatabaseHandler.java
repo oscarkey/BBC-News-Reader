@@ -92,7 +92,7 @@ public class DatabaseHandler {
 		   db.insert(TABLE3_NAME, null, cv);
 		   cursor.close();
 	   }
-	   
+	   cursor.close();
    }
    /**
     * Adds all the start categories from the XML
@@ -266,6 +266,7 @@ public class DatabaseHandler {
 	   }
 	   //Query the items table to get a the rows with that category
 	   //then fill the String[][] and return it
+	   cursor.close();
 	   cursor=db.query(TABLE_NAME,new String[]{"title", "description", "link"},itemIdQuery,null,null,null,"pubdate");
 	   String[][] items=new String[3][cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)

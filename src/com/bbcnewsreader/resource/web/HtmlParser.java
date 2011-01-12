@@ -23,12 +23,11 @@ public class HtmlParser {
 	 * @throws IOException 
 	 * @throws ClientProtocolException 
 	 */
-	public static void getPage(URI uri){
+	public static String getPage(URI uri){
 		try
 		{
 			// TODO Auto-generated method stub
 			HttpClient client = new DefaultHttpClient();
-			//HttpGet request = new HttpGet(uri.toString());
 			HttpGet request = new HttpGet(uri.toString());
 			HttpResponse response = client.execute(request);
 	
@@ -43,27 +42,15 @@ public class HtmlParser {
 			}
 			in.close();
 			html = str.toString();
-			Log.v("TEST",html);
-			Log.v("TEST",Integer.toString(html.length()));
 			String parsed;
-			//String pattern=new String("<div class=\"storybody\">.*?</div>");
-			//pattern="<div class=.storybody.>.*?</div>";
-			//String pattern=".";
-			//Log.v("TEST",pattern);
-			Pattern p=Pattern.compile("(html)",Pattern.DOTALL);
-			Matcher m = p.matcher(html);
-			
-					parsed=m.group();
-			//parsed=":(";
-			//parsed=m.toMatchResult().group(0);
-			//parsed=m.group();
-			
-			Log.v("TEST","parsed:"+parsed);
-			Log.v("TEST","nothing");
+			parsed=html.split("<div class=\"storybody\">")[1];
+			parsed=parsed.split("</div>")[0];
+			return parsed;
 		}
 		catch(Exception e)
 		{
 			Log.e("htmlparser",e.getMessage());
+			return null;
 		}
 	}
 

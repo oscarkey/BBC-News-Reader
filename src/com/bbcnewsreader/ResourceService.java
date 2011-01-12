@@ -26,7 +26,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	final Messenger messenger = new Messenger(new IncomingHandler()); //the messenger used for communication
 	DatabaseHandler database; //the database
 	RSSManager rssManager;
-	WebManager webmanager = new WebManager(true,true);
+	WebManager webmanager = new WebManager();
 	
 	/* command definitions */
 	static final int MSG_REGISTER_CLIENT_WITH_DATABASE = 1;
@@ -168,6 +168,10 @@ public class ResourceService extends Service implements ResourceInterface {
 		loadInProgress = false;
 		//send a message saying that we have loaded
 		sendMsgToAll(MSG_LOAD_COMPLETE, null);
+	}
+	
+	public synchronized void downloadComplete(int itemId, int type, Object download){
+		//placeHolder
 	}
 	
 	@Override
