@@ -40,6 +40,8 @@ public class ReaderActivity extends Activity {
 	
 	/* constants */
 	static final int ACTIVITY_CHOOSE_CATEGORIES = 1;
+	static final int CATEGORY_ROW_LENGTH = 4;
+	static final int DIALOG_ERROR = 0;
 	static final int NEWS_ITEM_DP_WIDTH = 70; //FIXME item width shouldn't be predefined
 	
 	/* variables */
@@ -200,6 +202,7 @@ public class ReaderActivity extends Activity {
     void doBindService(){
     	//load the resource service
     	bindService(new Intent(this, ResourceService.class), resourceServiceConnection, Context.BIND_AUTO_CREATE);
+    	resourceServiceBound = true;
     }
     
     void doUnbindService(){
@@ -256,6 +259,7 @@ public class ReaderActivity extends Activity {
         refreshButton = (ImageButton) findViewById(R.id.refreshButton);
         
         createNewsDisplay();
+
         
         //start the service
         doBindService(); //loads the service
@@ -275,6 +279,7 @@ public class ReaderActivity extends Activity {
         //create the categories
         categoryNames = database.getEnabledCategories()[1]; //string array with category names in it
         physicalCategories = new TableLayout[categoryNames.length];
+        physicalItems = new LinearLayout[categoryNames.length][CATEGORY_ROW_LENGTH]; //the array to hold the news items
         physicalItems = new LinearLayout[categoryNames.length][categoryRowLength]; //the array to hold the news items
         itemUrls = new HashMap<String, String>();
         //loop through adding category views
@@ -303,6 +308,10 @@ public class ReaderActivity extends Activity {
         }
     }
     
+
+
+
+
     void displayCategoryItems(int category){
     	//load from the database, if there's anything in it
     	if(database.getItems(categoryNames[category]) != null){
