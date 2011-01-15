@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -39,8 +40,7 @@ public class ReaderActivity extends Activity {
 	
 	/* constants */
 	static final int ACTIVITY_CHOOSE_CATEGORIES = 1;
-	static final int CATEGORY_ROW_LENGTH = 4;
-	static final int DIALOG_ERROR = 0;
+	static final int NEWS_ITEM_DP_WIDTH = 70; //FIXME item width shouldn't be predefined
 	
 	/* variables */
 	ScrollView scroller;
@@ -54,6 +54,7 @@ public class ReaderActivity extends Activity {
 	String[] categoryNames;
 	TableLayout[] physicalCategories;
 	LinearLayout[][] physicalItems;
+	int categoryRowLength; //the number of items to show per row
 	Dialog errorDialog;
 	boolean errorWasFatal;
 	HashMap<String, String> itemUrls;
@@ -90,8 +91,7 @@ public class ReaderActivity extends Activity {
 		public void handleMessage(Message msg){
 			//decide what to do with the message
 			switch(msg.what){
-			case ResourceService.MSG_CLIENT_REGISTERED :
-				loadData(); //start of the loading of data
+			case ResourceService.MSG_CLIENT_REGISTERED:
 				break;
 			case ResourceService.MSG_ERROR:
 				Bundle bundle = msg.getData(); //retrieve the data
@@ -114,11 +114,12 @@ public class ReaderActivity extends Activity {
 	    public void onServiceConnected(ComponentName className, IBinder service) {
 	    	Log.v(getLocalClassName(), "Service connected");
 	        //this runs when the service connects
+	    	resourceServiceBound = true; //flag the service as bound
 	    	//save a pointer to the service to a local variable
 	        resourceMessenger = new Messenger(service);
 	        //try and tell the service that we have connected
 	        //this means it will keep talking to us
-	        sendMessageToService(ResourceService.MSG_REGISTER_CLIENT_WITH_DATABASE, null);
+	        sendMessageToService(ResourceService.MSG_REGISTER_CLIENT, null);
 	    }
 
 	    public void onServiceDisconnected(ComponentName className) {
@@ -199,7 +200,6 @@ public class ReaderActivity extends Activity {
     void doBindService(){
     	//load the resource service
     	bindService(new Intent(this, ResourceService.class), resourceServiceConnection, Context.BIND_AUTO_CREATE);
-    	resourceServiceBound = true;
     }
     
     void doUnbindService(){
@@ -256,6 +256,10 @@ public class ReaderActivity extends Activity {
         refreshButton = (ImageButton) findViewById(R.id.refreshButton);
         
         createNewsDisplay();
+        
+        //start the service
+        doBindService(); //loads the service
+        //TODO start a refresh if we haven't refreshed recently
     }
     
     void createNewsDisplay(){
@@ -263,10 +267,15 @@ public class ReaderActivity extends Activity {
     	//clear the content area
     	content.removeAllViewsInLayout();
     	
+    	//find the width and work out how many items we can add
+    	int rowPixelWidth = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth();
+    	int rowWidth =  (int)Math.floor(rowPixelWidth / this.getResources().getDisplayMetrics().density); //formula to convert from pixels to dp
+    	categoryRowLength = (int)Math.floor(rowWidth / NEWS_ITEM_DP_WIDTH);
+    	
         //create the categories
         categoryNames = database.getEnabledCategories()[1]; //string array with category names in it
         physicalCategories = new TableLayout[categoryNames.length];
-        physicalItems = new LinearLayout[categoryNames.length][CATEGORY_ROW_LENGTH]; //the array to hold the news items
+        physicalItems = new LinearLayout[categoryNames.length][categoryRowLength]; //the array to hold the news items
         itemUrls = new HashMap<String, String>();
         //loop through adding category views
         for(int i = 0; i < categoryNames.length; i++){
@@ -276,11 +285,11 @@ public class ReaderActivity extends Activity {
         	TextView name = (TextView)category.findViewById(R.id.textCategoryName);
         	name.setText(categoryNames[i]);
         	//retrieve the row for the news items
-        	LinearLayout newsRow = (LinearLayout)category.findViewById(R.id.rowNewsItem);
+        	TableRow newsRow = (TableRow)category.findViewById(R.id.rowNewsItem);
         	
         	//add some items to each category display
         	//loop through and add 4 physical news items
-        	for(int t = 0; t < CATEGORY_ROW_LENGTH; t++){
+        	for(int t = 0; t < categoryRowLength; t++){
         		//add a new item to the display
         		LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_news_item, null);
         		physicalItems[i][t] = item; //store the item for future use
@@ -292,9 +301,6 @@ public class ReaderActivity extends Activity {
         	//populate this category with news
         	displayCategoryItems(i);
         }
-        
-        //start the service and tell it to start to refresh XML data
-        doBindService(); //loads the service
     }
     
     void displayCategoryItems(int category){
@@ -303,7 +309,7 @@ public class ReaderActivity extends Activity {
     		String[] titles = database.getItems(categoryNames[category])[0];
     		String[] urls = database.getItems(categoryNames[category])[2];
     		//change the physical items to match this
-    		for(int i = 0; i < CATEGORY_ROW_LENGTH; i++){
+    		for(int i = 0; i < categoryRowLength; i++){
     			//check we have not gone out of range of the available news
     			if(i < titles.length){
     				TextView titleText = (TextView)physicalItems[category][i].findViewById(R.id.textNewsItemTitle);
@@ -335,10 +341,11 @@ public class ReaderActivity extends Activity {
     	return true; //we have made the menu so we can return true
     }
     
-    protected void onDestory(){
-    	super.onDestroy(); //pass the destroy command to the super
+    protected void onDestroy(){
+    	Log.v("ReaderActivity", "shutting down");
     	//disconnect the service
     	doUnbindService();
+    	super.onDestroy(); //pass the destroy command to the super
     }
     
     public boolean onOptionsItemSelected(MenuItem item){
@@ -352,6 +359,7 @@ public class ReaderActivity extends Activity {
         	startActivityForResult(intent, ACTIVITY_CHOOSE_CATEGORIES);
     	}
     	if(item.getTitle().equals("Settings")){
+    		showErrorDialog("Not implemented.");
     		//TODO add code to show the settings menu
     		//TODO add a settings menu
     	}

@@ -27,7 +27,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	RSSManager rssManager;
 	
 	/* command definitions */
-	static final int MSG_REGISTER_CLIENT_WITH_DATABASE = 1;
+	static final int MSG_REGISTER_CLIENT = 1;
 	static final int MSG_UNREGISTER_CLIENT = 2;
 	static final int MSG_CLIENT_REGISTERED = 3; //returned to a client when registered
 	static final int MSG_LOAD_DATA = 4; //sent to request a data load
@@ -42,15 +42,14 @@ public class ResourceService extends Service implements ResourceInterface {
 		public void handleMessage(Message msg){
 			//decide what to do with the message
 			switch(msg.what){
-			case MSG_REGISTER_CLIENT_WITH_DATABASE:
+			case MSG_REGISTER_CLIENT:
 				clients.add(msg.replyTo); //add a reference to the client to our list
 				sendMsg(msg.replyTo, MSG_CLIENT_REGISTERED, null);
 				break;
 			case MSG_UNREGISTER_CLIENT:
+				Log.v("ResourceService", "unregister request recieved");
 				clients.remove(msg.replyTo); //remove our reference to the client
-				//check if that was our last client
-				if(clients.size() == 0)
-					System.exit(0);
+				//FIXME when should the service shutdown?
 				break;
 			case MSG_LOAD_DATA:
 				loadData(); //start of the loading of data
@@ -192,7 +191,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	
 	@Override
 	public void onDestroy(){
-		
+		Log.v("ResourceService", "service is shutting down");
 	}
 	
 	@Override
