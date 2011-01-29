@@ -90,7 +90,6 @@ public class DatabaseHandler {
 		   cv.put("categoryName",category);
 		   cv.put("itemId",itemid);
 		   db.insert(TABLE3_NAME, null, cv);
-		   cursor.close();
 	   }
 	   cursor.close();
    }
@@ -312,6 +311,7 @@ public class DatabaseHandler {
     */
    public void clearOld()
    {
+	   
 	   //FIXME Add parameter, customize the date it wipes from. Optimise?
 	   //Creates a java.util date object with current time
 	   //Subtracts one month in milliseconds and deletes all

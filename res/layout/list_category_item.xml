@@ -21,5 +21,14 @@ android:padding="10dp">
 	android:padding="2dp"
 	android:background="#3D3D3D"
 	android:gravity="center_horizontal">
+	<!-- <TableRow
+	android:background="#3D3D3D">
+		<LinearLayout android:id="@+id/rowNewsItem"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="horizontal"
+		android:padding="2dp"
+		android:gravity="center_horizontal">
+		</LinearLayout>-->
 	</TableRow>
 </TableLayout>

@@ -19,4 +19,6 @@
 
 
 <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+<supports-screens android:normalScreens="true" android:anyDensity="false" android:largeScreens="true" android:smallScreens="true" android:resizeable="true"></supports-screens>
+
 </manifest> 
