@@ -102,6 +102,8 @@ public class ReaderActivity extends Activity {
 			case ResourceService.MSG_CATEOGRY_LOADED:
 				categoryLoadFinished(msg.getData().getString("category"));
 				break;
+			case ResourceService.MSG_IMAGE_LOADED:
+				break;
 			case ResourceService.MSG_LOAD_COMPLETE:
 				loadComplete();
 				break;
@@ -340,6 +342,10 @@ public class ReaderActivity extends Activity {
     			id = i;
     	}
     	displayCategoryItems(id); //redisplay this category
+    }
+    
+    void imageLoaded(){
+    	
     }
     
     public boolean onCreateOptionsMenu(Menu menu){

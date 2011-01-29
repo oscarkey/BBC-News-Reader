@@ -33,6 +33,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	static final int MSG_LOAD_DATA = 4; //sent to request a data load
 	static final int MSG_STOP_DATA_LOAD = 9; //sent to stop data loading
 	static final int MSG_CATEOGRY_LOADED = 6; //sent when a category has loaded
+	static final int MSG_IMAGE_LOADED = 10; //sent when an image has finished being loaded
 	static final int MSG_LOAD_COMPLETE = 8; //sent when all the data has been loaded
 	static final int MSG_ERROR = 7; //help! An error occurred
 	
