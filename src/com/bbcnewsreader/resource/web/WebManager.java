@@ -50,7 +50,7 @@ public class WebManager {
 		{
 			URI url=new URI(item.getUrl());
 			String html=null;
-			html=HtmlParser.getPage(url);
+			//html=HtmlParser.getPage(url);
 			resourceInterface.downloadComplete(item.getItemId(), item.getType(), html);
 		}
 		catch(Exception e)

@@ -153,13 +153,16 @@ public class ResourceService extends Service implements ResourceInterface {
 		sendMsgToAll(MSG_CATEOGRY_LOADED, bundle);
 	}
 	
-	public synchronized void reportError(boolean fatal, String msg){
+	public synchronized void reportError(boolean fatal, String msg, String error){
 		//an error has occurred, send a message to the gui
 		//this will display something useful to the user
 		Bundle bundle = new Bundle();
 		bundle.putBoolean("fatal", fatal);
-		bundle.putString("error", msg);
+		bundle.putString("msg", msg);
+		bundle.putString("error", error);
 		sendMsgToAll(MSG_ERROR, bundle);
+		//print out the error for debuggers
+		Log.e("ResourceService", "Error - fatal:"+fatal+" msg:"+msg+" error:"+error);
 	}
 	
 	public synchronized void loadComplete(){

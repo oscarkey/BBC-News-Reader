@@ -100,7 +100,7 @@ public class ReaderActivity extends Activity {
 				break;
 			case ResourceService.MSG_ERROR:
 				Bundle bundle = msg.getData(); //retrieve the data
-				errorOccured(bundle.getBoolean("fatal"), bundle.getString("error"));
+				errorOccured(bundle.getBoolean("fatal"), bundle.getString("msg"), bundle.getString("error"));
 				break;
 			case ResourceService.MSG_CATEOGRY_LOADED:
 				categoryLoadFinished(msg.getData().getString("category"));
@@ -134,7 +134,7 @@ public class ReaderActivity extends Activity {
 	    }
 	};
     
-    void errorOccured(boolean fatal, String msg){
+    void errorOccured(boolean fatal, String msg, String error){
     	errorWasFatal = fatal; //so we know if we need to crash or not
     	//do we need to crash or not
     	if(fatal){
@@ -246,9 +246,11 @@ public class ReaderActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-       //testrunning //FIXME Remove
+        /**
+         * //testrunning //FIXME Remove
         try{HtmlParser.getPage(new URI("http://www.bbc.co.uk/news/mobile/uk-england-11778873"));}
-        catch(Exception e){System.out.println(e.toString());}
+        catch(Exception e){System.out.println(e.toString());} 
+        **/
         
         loadInProgress = false;
         

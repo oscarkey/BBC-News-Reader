@@ -54,9 +54,9 @@ public class RSSManager implements Runnable {
 					//loop through the items and send them to the parent service
 					resourceInterface.categoryRssLoaded((RSSItem[])items.toArray(new RSSItem[items.size()]), names[i]);
 				} catch (RSSReaderException e) {
-					resourceInterface.reportError(true, e.getMessage()); //report a fatal error
+					resourceInterface.reportError(true, "The xml was mal formed.", e.getMessage()); //report a fatal error
 				} catch (URISyntaxException e) {
-					resourceInterface.reportError(true, e.getMessage());
+					resourceInterface.reportError(true, "The url was not found.", e.getMessage());
 				}
 			}
 		}
