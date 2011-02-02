@@ -7,9 +7,9 @@ public class QueueItem {
 	
 	public QueueItem(String url, int type, int itemId, int priority)
 	{
-		this.url=url;
-		this.type=type;
-		this.itemId=itemId;
+		this.url = url;
+		this.type = type;
+		this.itemId = itemId;
 	}
 	
 	public int getType()

@@ -14,8 +14,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.bbcnewsreader.ResourceInterface;
 
-import android.util.Log;
-
 public class HtmlParser {
 
 	/**
