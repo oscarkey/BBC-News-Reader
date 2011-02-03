@@ -4,7 +4,7 @@
  * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
  * All rights reserved.
  ******************************************************************************/
-package com.bbcnewsreader;
+package com.digitallizard.bbcnewsreader;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,7 +22,8 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.bbcnewsreader.data.DatabaseHandler;
+import com.digitallizard.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
 public class ResourceService extends Service implements ResourceInterface {
 	/* variables */

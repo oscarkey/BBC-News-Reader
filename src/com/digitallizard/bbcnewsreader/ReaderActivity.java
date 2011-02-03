@@ -4,7 +4,7 @@
  * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
  * All rights reserved.
  ******************************************************************************/
-package com.bbcnewsreader;
+package com.digitallizard.bbcnewsreader;
 
 
 import java.util.HashMap;
@@ -38,7 +38,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.bbcnewsreader.data.DatabaseHandler;
+import com.digitallizard.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
 
 

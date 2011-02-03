@@ -4,7 +4,9 @@
  * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
  * All rights reserved.
  ******************************************************************************/
-package com.bbcnewsreader;
+package com.digitallizard.bbcnewsreader;
+
+import com.digitallizard.bbcnewsreader.R;
 
 import android.app.Activity;
 import android.os.Bundle;

@@ -4,12 +4,12 @@
  * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
  * All rights reserved.
  ******************************************************************************/
-package com.bbcnewsreader.data;
+package com.digitallizard.bbcnewsreader.data;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
-import com.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.R;
 
 import android.content.ContentValues;
 import android.content.Context;
