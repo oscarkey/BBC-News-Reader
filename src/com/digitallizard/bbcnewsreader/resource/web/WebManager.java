@@ -4,7 +4,7 @@
  * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
  * All rights reserved.
  ******************************************************************************/
-package com.bbcnewsreader.resource.web;
+package com.digitallizard.bbcnewsreader.resource.web;
 
 public class WebManager {
 	/* constants */
