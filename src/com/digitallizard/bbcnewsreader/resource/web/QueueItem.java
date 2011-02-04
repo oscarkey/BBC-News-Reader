@@ -1,4 +1,4 @@
-package com.bbcnewsreader.resource.web;
+package com.digitallizard.bbcnewsreader.resource.web;
 
 public class QueueItem {
 	private String url;

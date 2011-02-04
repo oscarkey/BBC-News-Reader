@@ -1,9 +1,9 @@
-package com.bbcnewsreader.resource.web;
+package com.digitallizard.bbcnewsreader.resource.web;
 
 import java.net.URI;
 import java.util.PriorityQueue;
 
-import com.bbcnewsreader.ResourceInterface;
+import com.digitallizard.bbcnewsreader.ResourceInterface;
 
 import android.util.Log;
 

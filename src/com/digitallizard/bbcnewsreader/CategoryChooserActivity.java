@@ -6,7 +6,7 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader;
 
-import com.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.R;
 
 import android.app.ListActivity;
 import android.content.Intent;

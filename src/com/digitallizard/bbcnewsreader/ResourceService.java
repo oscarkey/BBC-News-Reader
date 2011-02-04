@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import org.mcsoxford.rss.RSSItem;
-import com.bbcnewsreader.resource.web.WebManager;
+import com.digitallizard.bbcnewsreader.resource.web.WebManager;
 
 import android.app.Service;
 import android.content.Intent;
@@ -23,7 +23,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
 public class ResourceService extends Service implements ResourceInterface {

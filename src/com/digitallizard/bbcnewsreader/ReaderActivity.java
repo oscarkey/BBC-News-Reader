@@ -40,9 +40,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
-import com.bbcnewsreader.resource.web.HtmlParser;
 
 
 

@@ -1,4 +1,4 @@
-package com.bbcnewsreader.resource.web;
+package com.digitallizard.bbcnewsreader.resource.web;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import com.bbcnewsreader.ResourceInterface;
+import com.digitallizard.bbcnewsreader.ResourceInterface;
 
 public class HtmlParser {
 
