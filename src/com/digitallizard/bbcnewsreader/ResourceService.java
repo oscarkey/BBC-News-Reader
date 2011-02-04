@@ -1,4 +1,10 @@
-package com.bbcnewsreader;
+/*******************************************************************************
+ * BBC News Reader
+ * Released under the BSD License. See README or LICENSE.
+ * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+ * All rights reserved.
+ ******************************************************************************/
+package com.digitallizard.bbcnewsreader;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,7 +23,8 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.bbcnewsreader.data.DatabaseHandler;
+import com.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
 public class ResourceService extends Service implements ResourceInterface {
 	/* variables */

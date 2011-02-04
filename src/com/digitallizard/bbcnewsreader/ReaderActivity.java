@@ -1,4 +1,10 @@
-package com.bbcnewsreader;
+/*******************************************************************************
+ * BBC News Reader
+ * Released under the BSD License. See README or LICENSE.
+ * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+ * All rights reserved.
+ ******************************************************************************/
+package com.digitallizard.bbcnewsreader;
 
 
 import java.net.URI;
@@ -34,7 +40,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.bbcnewsreader.data.DatabaseHandler;
+import com.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.bbcnewsreader.resource.web.HtmlParser;
 
 
