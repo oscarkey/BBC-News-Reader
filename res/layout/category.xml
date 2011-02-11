@@ -17,8 +17,11 @@ android:background="#660000">
 		android:orientation="vertical"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:gravity="center_horizontal">
-			<TextView
+		android:paddingTop="5dp"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:gravity="left">
+			<TextView android:id="@+id/categoryTitle"
 			android:text="No Title"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"

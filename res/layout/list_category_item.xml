@@ -13,7 +13,8 @@ android:stretchColumns="1"
 android:padding="10dp">
 <!-- android:background="#4A4A4A" -->
 	<TableRow
-	android:background="#3D3D3D">
+	android:background="#3D3D3D"
+	android:onClick="categoryClicked">
 		<TextView android:id="@+id/textCategoryName"
 		android:text="No Title"
 		android:layout_span="4"
