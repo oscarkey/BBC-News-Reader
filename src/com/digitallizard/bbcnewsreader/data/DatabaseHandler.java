@@ -1,9 +1,15 @@
-package com.bbcnewsreader.data;
+/*******************************************************************************
+ * BBC News Reader
+ * Released under the BSD License. See README or LICENSE.
+ * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+ * All rights reserved.
+ ******************************************************************************/
+package com.digitallizard.bbcnewsreader.data;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
-import com.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.R;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -241,11 +247,11 @@ public class DatabaseHandler {
 	   }
    }
    /**
-    * Takes a category and returns all the title, description and link of all
+    * Takes a category and returns all the title, description ,link and item_Id of all
     * the items related to it.
     * Returns null if no items exists
     * @param category The Case-sensitive name of the category
-    * @return A String[{title,description,link}][{item1,item2}].
+    * @return A String[{title,description,link,item_Id}][{item1,item2}].
     */
    public String[][] getItems(String category)
    {
@@ -265,7 +271,7 @@ public class DatabaseHandler {
 	   }
 	   //Query the items table to get a the rows with that category
 	   //then fill the String[][] and return it
-	   cursor=db.query(TABLE_NAME,new String[]{"title", "description", "link"},itemIdQuery,null,null,null,"pubdate");
+	   cursor=db.query(TABLE_NAME,new String[]{"title", "description", "link","item_Id"},itemIdQuery,null,null,null,"pubdate desc");
 	   String[][] items=new String[3][cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
@@ -273,6 +279,7 @@ public class DatabaseHandler {
 		   items[0][i-1]=cursor.getString(0);
 		   items[1][i-1]=cursor.getString(1);
 		   items[2][i-1]=cursor.getString(2);
+		   items[3][i-1]=cursor.getString(3);
 	   }
 	   cursor.close();
 	   return items;}
@@ -325,6 +332,10 @@ public class DatabaseHandler {
 	   }
 	   db.delete(TABLE_NAME,"pubdate<?",new String[]{Long.toString(oldTime)});
 	   cursor.close();
+   }
+   public void shutdown()
+   {
+	   db.close();
    }
    private static class OpenHelper extends SQLiteOpenHelper {
 
