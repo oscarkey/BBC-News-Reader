@@ -433,7 +433,6 @@ public class ReaderActivity extends Activity {
     	int id = physicalCategories.indexOf(category);
     	//launch a new activity to show this category
     	Intent intent = new Intent(this, CategoryActivity.class);
-    	intent.putExtra("id", id);
     	intent.putExtra("title", categoryNames[id]);
     	startActivity(intent);
     }
