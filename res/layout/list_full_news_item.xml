@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  BBC News Reader
+  Released under the BSD License. See README or LICENSE.
+  Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+  All rights reserved.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@+id/fullNewsItemRoot"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:paddingBottom="4sp"
+android:orientation="vertical">
+	<LinearLayout
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="horizontal"
+	android:background="#3D3D3D">
+		<ImageView android:id="@+id/fullNewsItemImage"
+		android:src="@drawable/no_thumb"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"/>
+		<LinearLayout 
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		android:paddingLeft="4sp">
+			<TextView android:id="@+id/fullNewsItemName"
+			android:text="No Title"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:maxLines="1"
+			android:textSize="12sp"
+			android:textStyle="bold"/>
+			<TextView android:id="@+id/fullNewsItemDescription"
+			android:text="No description"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:maxLines="2"
+			android:textSize="10sp"/>
+		</LinearLayout>
+		
+	</LinearLayout>
+</LinearLayout>

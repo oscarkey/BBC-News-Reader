@@ -272,7 +272,7 @@ public class DatabaseHandler {
 	   //Query the items table to get a the rows with that category
 	   //then fill the String[][] and return it
 	   cursor=db.query(TABLE_NAME,new String[]{"title", "description", "link","item_Id"},itemIdQuery,null,null,null,"pubdate desc");
-	   String[][] items=new String[3][cursor.getCount()];
+	   String[][] items=new String[4][cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
 		   cursor.moveToNext();

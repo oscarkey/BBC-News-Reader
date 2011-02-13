@@ -7,6 +7,7 @@
 package com.digitallizard.bbcnewsreader;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Activity;
@@ -61,7 +62,7 @@ public class ReaderActivity extends Activity {
 	LayoutInflater inflater; //used to create objects from the XML
 	ImageButton refreshButton;
 	String[] categoryNames;
-	TableLayout[] physicalCategories;
+	ArrayList<TableLayout> physicalCategories;
 	LinearLayout[][] physicalItems;
 	int categoryRowLength; //the number of items to show per row
 	Dialog errorDialog;
@@ -285,7 +286,7 @@ public class ReaderActivity extends Activity {
     	
         //create the categories
         categoryNames = database.getEnabledCategories()[1]; //string array with category names in it
-        physicalCategories = new TableLayout[categoryNames.length];
+        physicalCategories = new ArrayList<TableLayout>(categoryNames.length);
         physicalItems = new LinearLayout[categoryNames.length][CATEGORY_ROW_LENGTH]; //the array to hold the news items
         physicalItems = new LinearLayout[categoryNames.length][categoryRowLength]; //the array to hold the news items
         itemUrls = new HashMap<String, String>();
@@ -307,7 +308,7 @@ public class ReaderActivity extends Activity {
         		physicalItems[i][t] = item; //store the item for future use
         		newsRow.addView(item); //add the item to the display
         	}
-        	physicalCategories[i] = category; //store the category for future use
+        	physicalCategories.add(i, category); //store the category for future use
         	content.addView(category); //add the category to the screen
         	
         	//populate this category with news
@@ -315,15 +316,12 @@ public class ReaderActivity extends Activity {
         }
     }
     
-
-
-
-
     void displayCategoryItems(int category){
     	//load from the database, if there's anything in it
-    	if(database.getItems(categoryNames[category]) != null){
-    		String[] titles = database.getItems(categoryNames[category])[0];
-    		String[] urls = database.getItems(categoryNames[category])[2];
+    	String [][] items = database.getItems(categoryNames[category]);
+    	if(items != null){
+    		String[] titles = items[0];
+    		String[] urls = items[2];
     		//change the physical items to match this
     		for(int i = 0; i < categoryRowLength; i++){
     			//check we have not gone out of range of the available news
@@ -426,5 +424,17 @@ public class ReaderActivity extends Activity {
     	//TODO add a article view system to replace web view
     	WebView webView = new WebView(this);
 		webView.loadUrl((String)itemUrls.get(titleText.getText()));
+    }
+    
+    public void categoryClicked(View view){
+    	//FIXME there must be a more elegant way of doing this...
+    	//get the parent of this view
+    	TableLayout category = (TableLayout)(view.getParent());
+    	//find the id of this category by looking it up in the list
+    	int id = physicalCategories.indexOf(category);
+    	//launch a new activity to show this category
+    	Intent intent = new Intent(this, CategoryActivity.class);
+    	intent.putExtra("title", categoryNames[id]);
+    	startActivity(intent);
     }
 }

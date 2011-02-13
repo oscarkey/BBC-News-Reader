@@ -149,7 +149,7 @@ public class ResourceService extends Service implements ResourceInterface {
 			//FIXME stupid conversion and reconversion of date format. The database needs updating.
 			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 			String date = dateFormat.format(items[i].getPubDate());
-			getDatabase().insertItem(items[i].getTitle(), null, items[i].getLink().toString(), date, category);
+			getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category);
 			//TODO tell the web manager to load this item's web page
 		}
 		//send a message to the gui to tell it that we have loaded the category
