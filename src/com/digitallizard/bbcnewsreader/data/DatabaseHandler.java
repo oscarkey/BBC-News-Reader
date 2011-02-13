@@ -103,7 +103,7 @@ public class DatabaseHandler {
 	   }
 	   cursor.close();
    }
-   public void addHtml(int itemId,byte[] html)
+   public void addHtml(int itemId,String html)
    {
 	   ContentValues cv=null;
 	   cv=new ContentValues(1);
@@ -111,13 +111,13 @@ public class DatabaseHandler {
 	   String itemIdString=Integer.toString(itemId);
 	   db.update(TABLE_NAME, cv, "item_Id=?", new String[]{itemIdString});
    }
-   public byte[] getHtml(int itemId)
+   public String getHtml(int itemId)
    {
 	   Cursor cursor;
 	   String itemIdString=Integer.toString(itemId);
 	   cursor=db.query(TABLE_NAME, new String[]{"html"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
 	   cursor.moveToNext();
-	   byte[] html=cursor.getBlob(0);
+	   String html=cursor.getString(0);
 	   cursor.close();
 	   return html;
    }
