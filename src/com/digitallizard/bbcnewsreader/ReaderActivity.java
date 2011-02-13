@@ -318,9 +318,10 @@ public class ReaderActivity extends Activity {
     
     void displayCategoryItems(int category){
     	//load from the database, if there's anything in it
-    	if(database.getItems(categoryNames[category]) != null){
-    		String[] titles = database.getItems(categoryNames[category])[0];
-    		String[] urls = database.getItems(categoryNames[category])[2];
+    	String [][] items = database.getItems(categoryNames[category]);
+    	if(items != null){
+    		String[] titles = items[0];
+    		String[] urls = items[2];
     		//change the physical items to match this
     		for(int i = 0; i < categoryRowLength; i++){
     			//check we have not gone out of range of the available news

@@ -30,10 +30,16 @@ public class CategoryActivity extends Activity {
 		//load in the news items from the database
 		DatabaseHandler database = new DatabaseHandler(this);
 		String[][] items = database.getItems(title);
-		//display them
-		for(int i = 0; i < items[0].length; i++){
-			LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_full_news_item, null);
-			scroller.addView(item);
+		//check if the database was empty
+		if(items != null){
+			//display them
+			for(int i = 0; i < items[0].length; i++){
+				LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_full_news_item, null);
+				//set the article name
+				((TextView)item.findViewById(R.id.fullNewsItemName)).setText(items[0][i]);
+				((TextView)item.findViewById(R.id.fullNewsItemDescription)).setText(items[1][i]);
+				scroller.addView(item);
+			}
 		}
 	}
 }
