@@ -7,6 +7,7 @@
 package com.digitallizard.bbcnewsreader.data;
 
 import java.util.Date;
+import java.sql.Blob;
 import java.text.SimpleDateFormat;
 
 import com.digitallizard.bbcnewsreader.R;
@@ -30,7 +31,10 @@ public class DatabaseHandler {
 									          "title varchar(255), " +
 									          "description varchar(255), " +
 									          "link varchar(255), " +
-									          "pubdate int)";
+									          "pubdate int, " +
+									          "html text, " +
+									          "image blob, " +
+									          "thumbnail blob)";
    private static final String TABLE2_CREATE="CREATE TABLE " + TABLE2_NAME +
 									          "(category_Id integer PRIMARY KEY," +
 									          "name varchar(255)," +
@@ -98,6 +102,62 @@ public class DatabaseHandler {
 		   db.insert(TABLE3_NAME, null, cv);
 	   }
 	   cursor.close();
+   }
+   public void addHtml(int itemId,byte[] html)
+   {
+	   ContentValues cv=null;
+	   cv=new ContentValues(1);
+	   cv.put("html",html);
+	   String itemIdString=Integer.toString(itemId);
+	   db.update(TABLE_NAME, cv, "item_Id=?", new String[]{itemIdString});
+   }
+   public byte[] getHtml(int itemId)
+   {
+	   Cursor cursor;
+	   String itemIdString=Integer.toString(itemId);
+	   cursor=db.query(TABLE_NAME, new String[]{"html"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
+	   cursor.moveToNext();
+	   byte[] html=cursor.getBlob(0);
+	   cursor.close();
+	   return html;
+   }
+   
+   public void addImage(int itemId,byte[] image)
+   {
+	   ContentValues cv=null;
+	   cv=new ContentValues(1);
+	   cv.put("image",image);
+	   String itemIdString=Integer.toString(itemId);
+	   db.update(TABLE_NAME, cv, "item_Id=?", new String[]{itemIdString});
+   }
+   public byte[] getImage(int itemId)
+   {
+	   Cursor cursor;
+	   String itemIdString=Integer.toString(itemId);
+	   cursor=db.query(TABLE_NAME, new String[]{"image"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
+	   cursor.moveToNext();
+	   byte[] image=cursor.getBlob(0);
+	   cursor.close();
+	   return image;
+   }
+   
+   public void addThumbnail(int itemId,byte[] thumbnail)
+   {
+	   ContentValues cv=null;
+	   cv=new ContentValues(1);
+	   cv.put("thumbnail",thumbnail);
+	   String itemIdString=Integer.toString(itemId);
+	   db.update(TABLE_NAME, cv, "item_Id=?", new String[]{itemIdString});
+   }
+   public byte[] getThumbnail(int itemId)
+   {
+	   Cursor cursor;
+	   String itemIdString=Integer.toString(itemId);
+	   cursor=db.query(TABLE_NAME, new String[]{"thumbnail"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
+	   cursor.moveToNext();
+	   byte[] thumbnail=cursor.getBlob(0);
+	   cursor.close();
+	   return thumbnail;
    }
    /**
     * Adds all the start categories from the XML
@@ -271,8 +331,8 @@ public class DatabaseHandler {
 	   }
 	   //Query the items table to get a the rows with that category
 	   //then fill the String[][] and return it
-	   cursor=db.query(TABLE_NAME,new String[]{"title", "description", "link","item_Id"},itemIdQuery,null,null,null,"pubdate desc");
-	   String[][] items=new String[3][cursor.getCount()];
+	   cursor=db.query(TABLE_NAME,new String[]{"title", "description", "link", "item_Id"},itemIdQuery,null,null,null,"pubdate desc");
+	   String[][] items=new String[4][cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
 		   cursor.moveToNext();
