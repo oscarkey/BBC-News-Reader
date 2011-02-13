@@ -59,8 +59,9 @@ public class DatabaseHandler {
     * @param pubdate News item's published data as String
     * @param category News item's category as String
     */
-   public void insertItem(String title, String description, String link, String pubdate, String category)
+   public int insertItem(String title, String description, String link, String pubdate, String category)
    {
+	   int itemId;
 	   //Formats the date of the item to Date object, then gets the UNIX TIMESTAMP from the Date.
 	   SimpleDateFormat format=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 	   long timestamp=0;
@@ -95,13 +96,19 @@ public class DatabaseHandler {
 		   cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
 		   
 		   cursor.moveToNext();
-		   int itemid=cursor.getInt(0);
+		   itemId=cursor.getInt(0);
 		   cv=new ContentValues(2);
 		   cv.put("categoryName",category);
-		   cv.put("itemId",itemid);
+		   cv.put("itemId",itemId);
 		   db.insert(TABLE3_NAME, null, cv);
 	   }
+	   else
+	   {
+		   cursor.moveToNext();
+		   itemId=cursor.getInt(0);
+	   }
 	   cursor.close();
+	   return itemId;
    }
    public void addHtml(int itemId,String html)
    {
@@ -159,6 +166,7 @@ public class DatabaseHandler {
 	   cursor.close();
 	   return thumbnail;
    }
+   
    /**
     * Adds all the start categories from the XML
     */
