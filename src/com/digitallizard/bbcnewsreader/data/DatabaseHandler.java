@@ -7,6 +7,7 @@
 package com.digitallizard.bbcnewsreader.data;
 
 import java.util.Date;
+import java.sql.Blob;
 import java.text.SimpleDateFormat;
 
 import com.digitallizard.bbcnewsreader.R;
@@ -30,7 +31,10 @@ public class DatabaseHandler {
 									          "title varchar(255), " +
 									          "description varchar(255), " +
 									          "link varchar(255), " +
-									          "pubdate int)";
+									          "pubdate int, " +
+									          "html text, " +
+									          "image blob, " +
+									          "thumbnail blob)";
    private static final String TABLE2_CREATE="CREATE TABLE " + TABLE2_NAME +
 									          "(category_Id integer PRIMARY KEY," +
 									          "name varchar(255)," +
@@ -55,8 +59,9 @@ public class DatabaseHandler {
     * @param pubdate News item's published data as String
     * @param category News item's category as String
     */
-   public void insertItem(String title, String description, String link, String pubdate, String category)
+   public int insertItem(String title, String description, String link, String pubdate, String category)
    {
+	   int itemId;
 	   //Formats the date of the item to Date object, then gets the UNIX TIMESTAMP from the Date.
 	   SimpleDateFormat format=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 	   long timestamp=0;
@@ -91,14 +96,77 @@ public class DatabaseHandler {
 		   cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
 		   
 		   cursor.moveToNext();
-		   int itemid=cursor.getInt(0);
+		   itemId=cursor.getInt(0);
 		   cv=new ContentValues(2);
 		   cv.put("categoryName",category);
-		   cv.put("itemId",itemid);
+		   cv.put("itemId",itemId);
 		   db.insert(TABLE3_NAME, null, cv);
 	   }
+	   else
+	   {
+		   cursor.moveToNext();
+		   itemId=cursor.getInt(0);
+	   }
 	   cursor.close();
+	   return itemId;
    }
+   public void addHtml(int itemId,String html)
+   {
+	   ContentValues cv=null;
+	   cv=new ContentValues(1);
+	   cv.put("html",html);
+	   String itemIdString=Integer.toString(itemId);
+	   db.update(TABLE_NAME, cv, "item_Id=?", new String[]{itemIdString});
+   }
+   public String getHtml(int itemId)
+   {
+	   Cursor cursor;
+	   String itemIdString=Integer.toString(itemId);
+	   cursor=db.query(TABLE_NAME, new String[]{"html"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
+	   cursor.moveToNext();
+	   String html=cursor.getString(0);
+	   cursor.close();
+	   return html;
+   }
+   
+   public void addImage(int itemId,byte[] image)
+   {
+	   ContentValues cv=null;
+	   cv=new ContentValues(1);
+	   cv.put("image",image);
+	   String itemIdString=Integer.toString(itemId);
+	   db.update(TABLE_NAME, cv, "item_Id=?", new String[]{itemIdString});
+   }
+   public byte[] getImage(int itemId)
+   {
+	   Cursor cursor;
+	   String itemIdString=Integer.toString(itemId);
+	   cursor=db.query(TABLE_NAME, new String[]{"image"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
+	   cursor.moveToNext();
+	   byte[] image=cursor.getBlob(0);
+	   cursor.close();
+	   return image;
+   }
+   
+   public void addThumbnail(int itemId,byte[] thumbnail)
+   {
+	   ContentValues cv=null;
+	   cv=new ContentValues(1);
+	   cv.put("thumbnail",thumbnail);
+	   String itemIdString=Integer.toString(itemId);
+	   db.update(TABLE_NAME, cv, "item_Id=?", new String[]{itemIdString});
+   }
+   public byte[] getThumbnail(int itemId)
+   {
+	   Cursor cursor;
+	   String itemIdString=Integer.toString(itemId);
+	   cursor=db.query(TABLE_NAME, new String[]{"thumbnail"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
+	   cursor.moveToNext();
+	   byte[] thumbnail=cursor.getBlob(0);
+	   cursor.close();
+	   return thumbnail;
+   }
+   
    /**
     * Adds all the start categories from the XML
     */
@@ -271,7 +339,7 @@ public class DatabaseHandler {
 	   }
 	   //Query the items table to get a the rows with that category
 	   //then fill the String[][] and return it
-	   cursor=db.query(TABLE_NAME,new String[]{"title", "description", "link","item_Id"},itemIdQuery,null,null,null,"pubdate desc");
+	   cursor=db.query(TABLE_NAME,new String[]{"title", "description", "link", "item_Id"},itemIdQuery,null,null,null,"pubdate desc");
 	   String[][] items=new String[4][cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
