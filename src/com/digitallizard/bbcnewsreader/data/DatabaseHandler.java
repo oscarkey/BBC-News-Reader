@@ -61,7 +61,7 @@ public class DatabaseHandler {
     */
    public int insertItem(String title, String description, String link, String pubdate, String category)
    {
-	   int itemId;
+	   int itemId = -1;
 	   //Formats the date of the item to Date object, then gets the UNIX TIMESTAMP from the Date.
 	   SimpleDateFormat format=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 	   long timestamp=0;
@@ -85,26 +85,29 @@ public class DatabaseHandler {
 	   //Moves to first item in Cursor then inserts item_id and category into relationship table.
 	   Cursor cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"title=?",new String[] {title},null,null,null,null);
 	   ContentValues cv=null;
-	   if((cursor.getCount()==0)&&recent)
+	   if(cursor.getCount()==0)
 	   {
-		   cv=new ContentValues(4);
-		   cv.put("title",title);
-		   cv.put("description",description);
-		   cv.put("link",link);
-		   cv.put("pubdate",timestamp);
-		   long rowid=db.insert(TABLE_NAME, null, cv);
-		   cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
-		   
-		   cursor.moveToNext();
-		   itemId=cursor.getInt(0);
-		   cv=new ContentValues(2);
-		   cv.put("categoryName",category);
-		   cv.put("itemId",itemId);
-		   db.insert(TABLE3_NAME, null, cv);
+		   if(recent){
+			   cv=new ContentValues(4);
+			   cv.put("title",title);
+			   cv.put("description",description);
+			   cv.put("link",link);
+			   cv.put("pubdate",timestamp);
+			   long rowid=db.insert(TABLE_NAME, null, cv);
+			   cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
+			   
+			   cursor.moveToNext();
+			   itemId=cursor.getInt(0);
+			   cv=new ContentValues(2);
+			   cv.put("categoryName",category);
+			   cv.put("itemId",itemId);
+			   db.insert(TABLE3_NAME, null, cv);
+		   }
 	   }
 	   else
 	   {
 		   cursor.moveToNext();
+		   Log.v("database", "count: "+cursor.getCount());
 		   itemId=cursor.getInt(0);
 	   }
 	   cursor.close();
