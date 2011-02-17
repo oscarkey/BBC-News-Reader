@@ -8,6 +8,7 @@ package com.digitallizard.bbcnewsreader;
 
 
 import java.util.ArrayList;
+import java.net.URI;
 import java.util.HashMap;
 
 import android.app.Activity;
@@ -105,7 +106,7 @@ public class ReaderActivity extends Activity {
 				break;
 			case ResourceService.MSG_ERROR:
 				Bundle bundle = msg.getData(); //retrieve the data
-				errorOccured(bundle.getBoolean("fatal"), bundle.getString("error"));
+				errorOccured(bundle.getBoolean("fatal"), bundle.getString("msg"), bundle.getString("error"));
 				break;
 			case ResourceService.MSG_CATEOGRY_LOADED:
 				categoryLoadFinished(msg.getData().getString("category"));
@@ -139,7 +140,7 @@ public class ReaderActivity extends Activity {
 	    }
 	};
     
-    void errorOccured(boolean fatal, String msg){
+    void errorOccured(boolean fatal, String msg, String error){
     	errorWasFatal = fatal; //so we know if we need to crash or not
     	//do we need to crash or not
     	if(fatal){
@@ -251,6 +252,12 @@ public class ReaderActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+
+
+
+
+
+
         loadInProgress = false;
         
         //load the database
