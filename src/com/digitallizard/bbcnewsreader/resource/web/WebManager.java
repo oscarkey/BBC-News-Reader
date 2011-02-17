@@ -9,9 +9,9 @@ import android.util.Log;
 
 public class WebManager implements Runnable {
 	/* constants */
-	static final int ITEM_TYPE_HTML = 2;
-	static final int ITEM_TYPE_THUMB = 1;
-	static final int ITEM_TYPE_IMAGE = 0;
+	public static final int ITEM_TYPE_HTML = 2;
+	public static final int ITEM_TYPE_THUMB = 1;
+	public static final int ITEM_TYPE_IMAGE = 0;
 	
 	/* variables */
 	PriorityQueue<QueueItem> downloadQueue;
@@ -46,30 +46,27 @@ public class WebManager implements Runnable {
 	}
 	
 	private void downloadItem(QueueItem item){
-		while(downloadQueue.size() != 0){
-			item = downloadQueue.poll();
-			switch(item.getType()){
-				case ITEM_TYPE_HTML:
-					downloadHtml(item);
-					break;
-				case ITEM_TYPE_THUMB:
-					downloadThumbnail(item);
-					break;
-				case ITEM_TYPE_IMAGE:
-					downloadImage(item);
-					break;
-			}
+		switch(item.getType()){
+			case ITEM_TYPE_HTML:
+				downloadHtml(item);
+				break;
+			case ITEM_TYPE_THUMB:
+				downloadThumbnail(item);
+				break;
+			case ITEM_TYPE_IMAGE:
+				downloadImage(item);
+				break;
 		}
 	}
 	
 	private void downloadHtml(QueueItem item){
 		try{
 			URI url = new URI(item.getUrl());
-			String html = HtmlParser.getPage(handler, url); //load the page
+			String html = HtmlParser.getPage(url); //load the page
 			handler.downloadComplete(item.getItemId(), item.getType(), html);
 		}
 		catch(Exception e){
-			Log.e("htmlparser",e.getMessage());
+			handler.reportError(false, "There was an error retrieving the article.", e.getMessage());
 		}
 	}
 	
@@ -83,7 +80,7 @@ public class WebManager implements Runnable {
 	
 	private void itemQueued(){
 		//check if we need to start the download thread
-		if(isQueueEmpty()){
+		if(isQueueEmpty() && !downloadThread.isAlive()){
 			//start the download thread
 			setQueueEmpty(false);
 			setKeepDownloading(true);
@@ -93,7 +90,7 @@ public class WebManager implements Runnable {
 	
 	public void addToQueue(String url,int type,int itemId){
 		QueueItem queueItem = new QueueItem(url, type, itemId);
-		downloadQueue.add(queueItem);
+		getQueue().add(queueItem);
 		itemQueued();
 	}
 	
@@ -127,7 +124,9 @@ public class WebManager implements Runnable {
 		}
 	}
 	
-	public WebManager(){
+	public WebManager(ResourceInterface handler){
+		this.handler = handler;
+		setQueueEmpty(true);
 		downloadQueue = new PriorityQueue<QueueItem>();
 		downloadThread = new Thread(this);
 	}

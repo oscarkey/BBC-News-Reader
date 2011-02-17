@@ -68,7 +68,7 @@ public class ReaderActivity extends Activity {
 	int categoryRowLength; //the number of items to show per row
 	Dialog errorDialog;
 	boolean errorWasFatal;
-	HashMap<String, String> itemUrls;
+	HashMap<String, Integer> itemIds;
 	String[] itemNames = {"lorem", "ipsum", "dolor", "sit", "amet",
 			"consectetuer", "adipiscing", "elit", "morbi", "vel",
 			"ligula", "vitae", "arcu", "aliquet", "mollis",
@@ -252,12 +252,6 @@ public class ReaderActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-
-
-
-
-
-
         loadInProgress = false;
         
         //load the database
@@ -296,7 +290,7 @@ public class ReaderActivity extends Activity {
         physicalCategories = new ArrayList<TableLayout>(categoryNames.length);
         physicalItems = new LinearLayout[categoryNames.length][CATEGORY_ROW_LENGTH]; //the array to hold the news items
         physicalItems = new LinearLayout[categoryNames.length][categoryRowLength]; //the array to hold the news items
-        itemUrls = new HashMap<String, String>();
+        itemIds = new HashMap<String, Integer>();
         //loop through adding category views
         for(int i = 0; i < categoryNames.length; i++){
         	//create the category
@@ -325,10 +319,10 @@ public class ReaderActivity extends Activity {
     
     void displayCategoryItems(int category){
     	//load from the database, if there's anything in it
-    	String [][] items = database.getItems(categoryNames[category]);
+    	String[][] items = database.getItems(categoryNames[category]);
     	if(items != null){
     		String[] titles = items[0];
-    		String[] urls = items[2];
+    		String[] ids = items[3];
     		//change the physical items to match this
     		for(int i = 0; i < categoryRowLength; i++){
     			//check we have not gone out of range of the available news
@@ -336,7 +330,7 @@ public class ReaderActivity extends Activity {
     				TextView titleText = (TextView)physicalItems[category][i].findViewById(R.id.textNewsItemTitle);
     				titleText.setText(titles[i]);
     				//save the urls
-    				itemUrls.put((String)titleText.getText(), urls[i]);
+    				itemIds.put((String)titleText.getText(), Integer.parseInt(ids[i]));
     			}
     		}
     	}
@@ -420,17 +414,11 @@ public class ReaderActivity extends Activity {
     }
     
     public void itemClicked(View item){
-    	//TextView title = (TextView)item.findViewById(R.id.textNewsItemTitle);
     	//create an intent to launch the next activity
-    	//TODO work out how to use an intent to tell the article activity what to display
     	Intent intent = new Intent(this, ArticleActivity.class);
     	TextView titleText = (TextView)item.findViewById(R.id.textNewsItemTitle);
-    	intent.putExtra("url", (String)itemUrls.get(titleText.getText()));
-    	//startActivity(intent);
-    	
-    	//TODO add a article view system to replace web view
-    	WebView webView = new WebView(this);
-		webView.loadUrl((String)itemUrls.get(titleText.getText()));
+    	intent.putExtra("id", (int)itemIds.get(titleText.getText()));
+    	startActivity(intent);
     }
     
     public void categoryClicked(View view){

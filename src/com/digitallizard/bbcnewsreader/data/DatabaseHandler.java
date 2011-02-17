@@ -107,7 +107,6 @@ public class DatabaseHandler {
 	   else
 	   {
 		   cursor.moveToNext();
-		   Log.v("database", "count: "+cursor.getCount());
 		   itemId=cursor.getInt(0);
 	   }
 	   cursor.close();

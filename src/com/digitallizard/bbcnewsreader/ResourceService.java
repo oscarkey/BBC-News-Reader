@@ -33,7 +33,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	final Messenger messenger = new Messenger(new IncomingHandler()); //the messenger used for communication
 	DatabaseHandler database; //the database
 	RSSManager rssManager;
-	WebManager webmanager = new WebManager();
+	WebManager webmanager;
 	
 	/* command definitions */
 	static final int MSG_REGISTER_CLIENT = 1;
@@ -84,6 +84,14 @@ public class ResourceService extends Service implements ResourceInterface {
 	
 	public synchronized DatabaseHandler getDatabase(){
 		return database;
+	}
+	
+	public synchronized void setWebManager(WebManager manager){
+		this.webmanager = manager;
+	}
+	
+	public synchronized WebManager getWebManager(){
+		return this.webmanager;
 	}
 	
 	void loadData(){
@@ -151,8 +159,10 @@ public class ResourceService extends Service implements ResourceInterface {
 			//FIXME stupid conversion and reconversion of date format. The database needs updating.
 			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 			String date = dateFormat.format(items[i].getPubDate());
-			getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category);
-			//TODO tell the web manager to load this item's web page
+			int id = getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category);
+			//check if we need to load html
+			//FIXME inefficiencies with converting uri -> string and back
+			webmanager.addToQueue(items[i].getLink().toString(), WebManager.ITEM_TYPE_HTML, id);
 		}
 		//send a message to the gui to tell it that we have loaded the category
 		Bundle bundle = new Bundle();
@@ -180,7 +190,17 @@ public class ResourceService extends Service implements ResourceInterface {
 	}
 	
 	public synchronized void downloadComplete(int itemId, int type, Object download){
-		//placeHolder
+		//choose what to do depending on the type of object
+		if(type == WebManager.ITEM_TYPE_HTML){
+			String html = (String)download;
+			database.addHtml(itemId, html);
+		}
+		if(type == WebManager.ITEM_TYPE_IMAGE){
+			
+		}
+		if(type == WebManager.ITEM_TYPE_THUMB){
+			
+		}
 	}
 	
 	@Override
@@ -196,6 +216,10 @@ public class ResourceService extends Service implements ResourceInterface {
 				getDatabase().createTables();
 				getDatabase().addCategories();
 	        }
+		}
+		if(webmanager == null){
+			//load the web manager
+			setWebManager(new WebManager(this));
 		}
 	}
 	
