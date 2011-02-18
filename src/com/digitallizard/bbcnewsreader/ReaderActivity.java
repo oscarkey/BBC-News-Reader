@@ -8,7 +8,6 @@ package com.digitallizard.bbcnewsreader;
 
 
 import java.util.ArrayList;
-import java.net.URI;
 import java.util.HashMap;
 
 import android.app.Activity;
@@ -32,7 +31,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -40,7 +38,6 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
 
@@ -406,7 +403,6 @@ public class ReaderActivity extends Activity {
     }
     
     public void onActivityResult(int requestCode, int resultCode, Intent data){
-    	Log.v(getLocalClassName(), "result received, code:"+resultCode);
     	//wait for activities to send us result data
     	switch(requestCode){
     	case ACTIVITY_CHOOSE_CATEGORIES:

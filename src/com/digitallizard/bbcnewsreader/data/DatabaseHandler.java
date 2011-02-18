@@ -178,16 +178,16 @@ public class DatabaseHandler {
    public int[][] getUndownloaded(int days)
    {
 	   Cursor cursor1, cursor2, cursor3;
-	   String emptyString = "";
+	   String emptyString = "null";
 	   
 	   Date now=new Date();
 	   long curTime=now.getTime();
 	   long timeComparison= curTime-86400000L*days;
 	   String timeComparisonS=Long.toString(timeComparison);
 	   
-	   cursor1=db.query(ITEM_TABLE, new String[]{"item_Id"}, "html=? AND timestamp>?", new String[] {emptyString,timeComparisonS},null,null,null);
-	   cursor2=db.query(ITEM_TABLE, new String[]{"item_Id"}, "image=? AND timestamp>?", new String[] {emptyString,timeComparisonS},null,null,null);
-	   cursor3=db.query(ITEM_TABLE, new String[]{"item_Id"}, "thumbnail=? AND timestamp>?", new String[] {emptyString,timeComparisonS},null,null,null);
+	   cursor1=db.query(ITEM_TABLE, new String[]{"item_Id"}, "html IS NULL AND pubdate>?", new String[] {timeComparisonS},null,null,null);
+	   cursor2=db.query(ITEM_TABLE, new String[]{"item_Id"}, "image=? AND pubdate>?", new String[] {emptyString,timeComparisonS},null,null,null);
+	   cursor3=db.query(ITEM_TABLE, new String[]{"item_Id"}, "thumbnail=? AND pubdate>?", new String[] {emptyString,timeComparisonS},null,null,null);
 	   
 	   int totalLength=cursor1.getCount()+cursor2.getCount()+cursor3.getCount();
 	   
@@ -405,6 +405,30 @@ public class DatabaseHandler {
 		   items[1][i-1]=cursor.getString(1);
 		   items[2][i-1]=cursor.getString(2);
 		   items[3][i-1]=cursor.getString(3);
+	   }
+	   cursor.close();
+	   return items;}
+	   catch(Exception e)
+	   {
+		   Log.i("Database","Tried to get items from an empty table (Items)");
+		   return null;
+	   }
+   }
+   public String[] getItem(int id)
+   {
+	   //FIXME Optimise, add limit? NOT SQL INJECTION SAFE (But internal, so k)
+	   try{
+	   String itemIdQuery=new String("item_Id='"+id+"'");
+	   //Query the items table to get a the rows with that id
+	   //then fill the String[] and return it
+	   Cursor cursor=db.query(ITEM_TABLE,new String[]{"title", "description", "link", "item_Id"},itemIdQuery,null,null,null,"pubdate desc");
+	   String[] items=new String[3];
+	   for(int i=1;i<=cursor.getCount();i++)
+	   {
+		   cursor.moveToNext();
+		   items[0]=cursor.getString(0);
+		   items[1]=cursor.getString(1);
+		   items[2]=cursor.getString(2);
 	   }
 	   cursor.close();
 	   return items;}

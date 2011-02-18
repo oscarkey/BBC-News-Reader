@@ -161,9 +161,6 @@ public class ResourceService extends Service implements ResourceInterface {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 			String date = dateFormat.format(items[i].getPubDate());
 			int id = getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category);
-			//check if we need to load html
-			//FIXME inefficiencies with converting uri -> string and back
-			getWebManager().addToQueue(items[i].getLink().toString(), WebManager.ITEM_TYPE_HTML, id);
 		}
 		//send a message to the gui to tell it that we have loaded the category
 		Bundle bundle = new Bundle();
@@ -186,6 +183,23 @@ public class ResourceService extends Service implements ResourceInterface {
 	public synchronized void rssLoadComplete(){
 		//tell the gui
 		sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
+		//as the rss load has completed we can begin loading articles etc
+		//TODO the age of downloading should be user specified
+		int[][] items = database.getUndownloaded(1); //find stuff up to 1 day old
+		for(int i = 0; i < items.length; i++){
+			//find out what type the item is
+			if(items[i][1] == 0){
+				//it's html, load the url from the database
+				String url = database.getItem(items[i][0])[2];
+				webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, items[i][0]);
+				//FIXME inefficiencies with converting uri -> string and back
+			}
+			//TODO deal with other types
+		}
+		//if we didn't have to add anything, report the load as fully complete
+		if(items.length == 0){
+			fullLoadComplete();
+		}
 	}
 	
 	public synchronized void fullLoadComplete(){
