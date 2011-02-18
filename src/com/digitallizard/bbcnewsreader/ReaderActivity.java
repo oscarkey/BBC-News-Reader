@@ -62,6 +62,7 @@ public class ReaderActivity extends Activity {
 	private DatabaseHandler database;
 	LayoutInflater inflater; //used to create objects from the XML
 	ImageButton refreshButton;
+	TextView statusText;
 	String[] categoryNames;
 	ArrayList<TableLayout> physicalCategories;
 	LinearLayout[][] physicalItems;
@@ -111,8 +112,11 @@ public class ReaderActivity extends Activity {
 			case ResourceService.MSG_CATEOGRY_LOADED:
 				categoryLoadFinished(msg.getData().getString("category"));
 				break;
-			case ResourceService.MSG_LOAD_COMPLETE:
-				loadComplete();
+			case ResourceService.MSG_FULL_LOAD_COMPLETE:
+				fullLoadComplete();
+				break;
+			case ResourceService.MSG_RSS_LOAD_COMPLETE:
+				rssLoadComplete();
 				break;
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
@@ -184,6 +188,8 @@ public class ReaderActivity extends Activity {
 	    	loadInProgress = true; //flag the data as being loaded
 	    	//show the loading image on the button
 	    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.stop));
+	    	//tell the user what is going on
+	    	statusText.setText("Loading feeds...");
 	    	//tell the service to load the data
 	    	sendMessageToService(ResourceService.MSG_LOAD_DATA);
     	}
@@ -197,14 +203,24 @@ public class ReaderActivity extends Activity {
     	}
     }
     
-    void loadComplete(){
+    void fullLoadComplete(){
     	//check we are actually loading news
     	if(loadInProgress){
 	    	loadInProgress = false;
 	    	//display the reloading image on the button
 	    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh));
+	    	//report the loaded status
+	    	statusText.setText("Last updated ???");
 	    	//tell the database to delete old items
 	    	database.clearOld();
+    	}
+    }
+    
+    void rssLoadComplete(){
+    	//check we are actually loading news
+    	if(loadInProgress){
+    		//tell the user what is going on
+    		statusText.setText("Loading article texts...");
     	}
     }
     
@@ -264,8 +280,9 @@ public class ReaderActivity extends Activity {
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
-        //make a reference to the refresh button
+        //make a reference to ui items
         refreshButton = (ImageButton) findViewById(R.id.refreshButton);
+        statusText = (TextView) findViewById(R.id.statusText);
         
         createNewsDisplay();
 

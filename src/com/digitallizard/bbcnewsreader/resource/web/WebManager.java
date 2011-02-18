@@ -63,7 +63,7 @@ public class WebManager implements Runnable {
 		try{
 			URI url = new URI(item.getUrl());
 			String html = HtmlParser.getPage(url); //load the page
-			handler.downloadComplete(item.getItemId(), item.getType(), html);
+			handler.itemDownloadComplete(item.getItemId(), item.getType(), html);
 		}
 		catch(Exception e){
 			handler.reportError(false, "There was an error retrieving the article.", e.getMessage());
@@ -100,8 +100,15 @@ public class WebManager implements Runnable {
 	}
 	
 	public void stopDownload(){
-		//try and stop the download
-		setKeepDownloading(false); //this will stop it after the current file
+		//check if the download is going
+		if(shouldKeepDownloading()){
+			//try and stop the download
+			setKeepDownloading(false); //this will stop it after the current file
+		}
+		else{
+			//as a load isn't in progress we can report that we have finished
+			handler.fullLoadComplete();
+		}
 	}
 	
 	public void run(){
@@ -117,6 +124,7 @@ public class WebManager implements Runnable {
 					setKeepDownloading(false); //stop the loop
 				}
 			}
+			handler.fullLoadComplete(); //report that the load is complete
 		}
 		else{
 			//as the queue was empty, we should flag it

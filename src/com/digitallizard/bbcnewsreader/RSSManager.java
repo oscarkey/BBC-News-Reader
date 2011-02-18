@@ -67,6 +67,6 @@ public class RSSManager implements Runnable {
 			}
 		}
 		//report that the load is complete
-		resourceInterface.loadComplete();
+		resourceInterface.rssLoadComplete();
 	}
 }

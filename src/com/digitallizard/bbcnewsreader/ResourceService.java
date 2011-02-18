@@ -33,7 +33,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	final Messenger messenger = new Messenger(new IncomingHandler()); //the messenger used for communication
 	DatabaseHandler database; //the database
 	RSSManager rssManager;
-	WebManager webmanager;
+	WebManager webManager;
 	
 	/* command definitions */
 	static final int MSG_REGISTER_CLIENT = 1;
@@ -42,7 +42,8 @@ public class ResourceService extends Service implements ResourceInterface {
 	static final int MSG_LOAD_DATA = 4; //sent to request a data load
 	static final int MSG_STOP_DATA_LOAD = 9; //sent to stop data loading
 	static final int MSG_CATEOGRY_LOADED = 6; //sent when a category has loaded
-	static final int MSG_LOAD_COMPLETE = 8; //sent when all the data has been loaded
+	static final int MSG_FULL_LOAD_COMPLETE = 8; //sent when all the data has been loaded
+	static final int MSG_RSS_LOAD_COMPLETE = 10;
 	static final int MSG_ERROR = 7; //help! An error occurred
 	
 	//the handler class to process new messages
@@ -87,11 +88,11 @@ public class ResourceService extends Service implements ResourceInterface {
 	}
 	
 	public synchronized void setWebManager(WebManager manager){
-		this.webmanager = manager;
+		this.webManager = manager;
 	}
 	
 	public synchronized WebManager getWebManager(){
-		return this.webmanager;
+		return this.webManager;
 	}
 	
 	void loadData(){
@@ -118,8 +119,8 @@ public class ResourceService extends Service implements ResourceInterface {
 	void stopDataLoad(){
 		//stop the data loading
 		rssManager.stopLoading();
-		//report that we have done so
-		sendMsgToAll(MSG_LOAD_COMPLETE, null);
+		getWebManager().stopDownload();
+		//the stopping of loading will be reported by the managers...
 	}
 	
 	void sendMsg(Messenger client, int what, Bundle bundle){
@@ -162,7 +163,7 @@ public class ResourceService extends Service implements ResourceInterface {
 			int id = getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category);
 			//check if we need to load html
 			//FIXME inefficiencies with converting uri -> string and back
-			webmanager.addToQueue(items[i].getLink().toString(), WebManager.ITEM_TYPE_HTML, id);
+			getWebManager().addToQueue(items[i].getLink().toString(), WebManager.ITEM_TYPE_HTML, id);
 		}
 		//send a message to the gui to tell it that we have loaded the category
 		Bundle bundle = new Bundle();
@@ -182,14 +183,19 @@ public class ResourceService extends Service implements ResourceInterface {
 		Log.e("ResourceService", "Error - fatal:"+fatal+" msg:"+msg+" error:"+error);
 	}
 	
-	public synchronized void loadComplete(){
+	public synchronized void rssLoadComplete(){
+		//tell the gui
+		sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
+	}
+	
+	public synchronized void fullLoadComplete(){
 		//set the flag to false
 		loadInProgress = false;
 		//send a message saying that we have loaded
-		sendMsgToAll(MSG_LOAD_COMPLETE, null);
+		sendMsgToAll(MSG_FULL_LOAD_COMPLETE, null);
 	}
 	
-	public synchronized void downloadComplete(int itemId, int type, Object download){
+	public synchronized void itemDownloadComplete(int itemId, int type, Object download){
 		//choose what to do depending on the type of object
 		if(type == WebManager.ITEM_TYPE_HTML){
 			String html = (String)download;
@@ -217,7 +223,7 @@ public class ResourceService extends Service implements ResourceInterface {
 				getDatabase().addCategories();
 	        }
 		}
-		if(webmanager == null){
+		if(webManager == null){
 			//load the web manager
 			setWebManager(new WebManager(this));
 		}
