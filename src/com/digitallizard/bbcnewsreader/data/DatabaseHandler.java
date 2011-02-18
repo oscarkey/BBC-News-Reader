@@ -23,10 +23,10 @@ public class DatabaseHandler {
 
    private static final String DATABASE_NAME = "bbcnewsreader.db";
    private static final int DATABASE_VERSION = 1;
-   private static final String TABLE_NAME = "items";
-   private static final String TABLE2_NAME = "categories";
-   private static final String TABLE3_NAME = "categories_items";
-   private static final String TABLE_CREATE ="CREATE TABLE " + TABLE_NAME + 
+   private static final String ITEM_TABLE = "items";
+   private static final String CATEGORY_TABLE = "categories";
+   private static final String ITEM_CATEGORY_TABLE = "categories_items";
+   private static final String TABLE_CREATE ="CREATE TABLE " + ITEM_TABLE + 
    											  "(item_Id integer PRIMARY KEY," +
 									          "title varchar(255), " +
 									          "description varchar(255), " +
@@ -35,12 +35,12 @@ public class DatabaseHandler {
 									          "html text, " +
 									          "image blob, " +
 									          "thumbnail blob)";
-   private static final String TABLE2_CREATE="CREATE TABLE " + TABLE2_NAME +
+   private static final String TABLE2_CREATE="CREATE TABLE " + CATEGORY_TABLE +
 									          "(category_Id integer PRIMARY KEY," +
 									          "name varchar(255)," +
 									          "enabled int," +
 									          "url varchar(255))";
-   private static final String TABLE3_CREATE="CREATE TABLE " + TABLE3_NAME +
+   private static final String TABLE3_CREATE="CREATE TABLE " + ITEM_CATEGORY_TABLE +
 									          "(categoryName varchar(255), " +
 									          "itemId INT)";
    private Context context;
@@ -83,7 +83,7 @@ public class DatabaseHandler {
 	   //Compiles then executes the insertion of the item into the items database.
 	   //Takes the rowid of the new record and uses it to get the item_id.
 	   //Moves to first item in Cursor then inserts item_id and category into relationship table.
-	   Cursor cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"title=?",new String[] {title},null,null,null,null);
+	   Cursor cursor=db.query(false,ITEM_TABLE,new String[]{"item_Id"},"title=?",new String[] {title},null,null,null,null);
 	   ContentValues cv=null;
 	   if(cursor.getCount()==0)
 	   {
@@ -93,15 +93,15 @@ public class DatabaseHandler {
 			   cv.put("description",description);
 			   cv.put("link",link);
 			   cv.put("pubdate",timestamp);
-			   long rowid=db.insert(TABLE_NAME, null, cv);
-			   cursor=db.query(false,TABLE_NAME,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
+			   long rowid=db.insert(ITEM_TABLE, null, cv);
+			   cursor=db.query(false,ITEM_TABLE,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
 			   
 			   cursor.moveToNext();
 			   itemId=cursor.getInt(0);
 			   cv=new ContentValues(2);
 			   cv.put("categoryName",category);
 			   cv.put("itemId",itemId);
-			   db.insert(TABLE3_NAME, null, cv);
+			   db.insert(ITEM_CATEGORY_TABLE, null, cv);
 		   }
 	   }
 	   else
@@ -118,13 +118,13 @@ public class DatabaseHandler {
 	   cv=new ContentValues(1);
 	   cv.put("html",html);
 	   String itemIdString=Integer.toString(itemId);
-	   db.update(TABLE_NAME, cv, "item_Id=?", new String[]{itemIdString});
+	   db.update(ITEM_TABLE, cv, "item_Id=?", new String[]{itemIdString});
    }
    public String getHtml(int itemId)
    {
 	   Cursor cursor;
 	   String itemIdString=Integer.toString(itemId);
-	   cursor=db.query(TABLE_NAME, new String[]{"html"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
+	   cursor=db.query(ITEM_TABLE, new String[]{"html"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
 	   cursor.moveToNext();
 	   String html=cursor.getString(0);
 	   cursor.close();
@@ -137,13 +137,13 @@ public class DatabaseHandler {
 	   cv=new ContentValues(1);
 	   cv.put("image",image);
 	   String itemIdString=Integer.toString(itemId);
-	   db.update(TABLE_NAME, cv, "item_Id=?", new String[]{itemIdString});
+	   db.update(ITEM_TABLE, cv, "item_Id=?", new String[]{itemIdString});
    }
    public byte[] getImage(int itemId)
    {
 	   Cursor cursor;
 	   String itemIdString=Integer.toString(itemId);
-	   cursor=db.query(TABLE_NAME, new String[]{"image"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
+	   cursor=db.query(ITEM_TABLE, new String[]{"image"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
 	   cursor.moveToNext();
 	   byte[] image=cursor.getBlob(0);
 	   cursor.close();
@@ -156,19 +156,74 @@ public class DatabaseHandler {
 	   cv=new ContentValues(1);
 	   cv.put("thumbnail",thumbnail);
 	   String itemIdString=Integer.toString(itemId);
-	   db.update(TABLE_NAME, cv, "item_Id=?", new String[]{itemIdString});
+	   db.update(ITEM_TABLE, cv, "item_Id=?", new String[]{itemIdString});
    }
    public byte[] getThumbnail(int itemId)
    {
 	   Cursor cursor;
 	   String itemIdString=Integer.toString(itemId);
-	   cursor=db.query(TABLE_NAME, new String[]{"thumbnail"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
+	   cursor=db.query(ITEM_TABLE, new String[]{"thumbnail"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
 	   cursor.moveToNext();
 	   byte[] thumbnail=cursor.getBlob(0);
 	   cursor.close();
 	   return thumbnail;
    }
-   
+   /**
+    * Fetches all the undownloaded items from the last "days" days. Returns an array containing the item Ids of all these items
+    * 
+    * @param days Number of days into the past to return undownloaded items for (Using timestamp from entry)
+    * @return A 2d int[n][2], where n is the number of undownloaded items, and each entry is {itemId,itemTag}.
+    * 			itemTag is either 0, 1 or 2 for html, image or thumbnail respectively.
+    */
+   public int[][] getUndownloaded(int days)
+   {
+	   Cursor cursor1, cursor2, cursor3;
+	   String emptyString = "";
+	   
+	   Date now=new Date();
+	   long curTime=now.getTime();
+	   long timeComparison= curTime-86400000L*days;
+	   String timeComparisonS=Long.toString(timeComparison);
+	   
+	   cursor1=db.query(ITEM_TABLE, new String[]{"item_Id"}, "html=? AND timestamp>?", new String[] {emptyString,timeComparisonS},null,null,null);
+	   cursor2=db.query(ITEM_TABLE, new String[]{"item_Id"}, "image=? AND timestamp>?", new String[] {emptyString,timeComparisonS},null,null,null);
+	   cursor3=db.query(ITEM_TABLE, new String[]{"item_Id"}, "thumbnail=? AND timestamp>?", new String[] {emptyString,timeComparisonS},null,null,null);
+	   
+	   int totalLength=cursor1.getCount()+cursor2.getCount()+cursor3.getCount();
+	   
+	   int returnValues[][]=new int[totalLength][2];
+	   int arrayCounter=0;
+	   
+	   for(int i=0;i<cursor1.getCount();i++)
+	   {
+		   cursor1.moveToNext();
+		   returnValues[arrayCounter][0]=cursor1.getInt(0);
+		   returnValues[arrayCounter][1]=0;
+		   arrayCounter++;
+	   }
+	   
+	   for(int i=0;i<cursor2.getCount();i++)
+	   {
+		   cursor2.moveToNext();
+		   returnValues[arrayCounter][0]=cursor2.getInt(0);
+		   returnValues[arrayCounter][1]=1;
+		   arrayCounter++;
+	   }
+	   
+	   for(int i=0;i<cursor3.getCount();i++)
+	   {
+		   cursor3.moveToNext();
+		   returnValues[arrayCounter][0]=cursor3.getInt(0);
+		   returnValues[arrayCounter][1]=2;
+		   arrayCounter++;
+	   }
+	   
+	   cursor1.close();
+	   cursor2.close();
+	   cursor3.close();
+	   
+	   return returnValues;
+   }
    /**
     * Adds all the start categories from the XML
     */
@@ -217,24 +272,24 @@ public class DatabaseHandler {
 	   cv.put("name",name);
 	   cv.put("enabled",enabledI);
 	   cv.put("url",url);
-	   db.insert(TABLE2_NAME, null, cv);
+	   db.insert(CATEGORY_TABLE, null, cv);
    }
    /**
     * Clears all the tables in the database, leaving structure intact.
     */
    public void clear() {
-      db.execSQL("DELETE from "+TABLE_NAME);
-      db.execSQL("DELETE from "+TABLE2_NAME);
-      db.execSQL("DELETE from "+TABLE3_NAME);
+      db.execSQL("DELETE from "+ITEM_TABLE);
+      db.execSQL("DELETE from "+CATEGORY_TABLE);
+      db.execSQL("DELETE from "+ITEM_CATEGORY_TABLE);
       }
    /**
     * Drops the entire database then rebuilds it.
     */
    public void dropTables()
    {
-	  db.execSQL("DROP TABLE "+TABLE_NAME);
-	  db.execSQL("DROP TABLE "+TABLE2_NAME);
-	  db.execSQL("DROP TABLE "+TABLE3_NAME);
+	  db.execSQL("DROP TABLE "+ITEM_TABLE);
+	  db.execSQL("DROP TABLE "+CATEGORY_TABLE);
+	  db.execSQL("DROP TABLE "+ITEM_CATEGORY_TABLE);
    }
    /**
     * Attempts to create the tables.
@@ -262,7 +317,7 @@ public class DatabaseHandler {
    public boolean[] getCategoryBooleans()
    {
 	   //FIXME Optimise
-	   Cursor cursor=db.query(TABLE2_NAME, new String[]{"enabled"}, null, null, null, null, "category_Id");
+	   Cursor cursor=db.query(CATEGORY_TABLE, new String[]{"enabled"}, null, null, null, null, "category_Id");
 	   boolean[] enabledCategories = new boolean[cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
@@ -286,8 +341,8 @@ public class DatabaseHandler {
    public String[][] getEnabledCategories()
    {
 	   //Queries the category table to get a list of enabled categories
-	   Cursor cursor=db.query(TABLE2_NAME, new String[]{"url"}, "enabled='1'", null, null, null, "category_Id");
-	   Cursor cursor2=db.query(TABLE2_NAME, new String[]{"name"}, "enabled='1'", null, null, null, "category_Id");
+	   Cursor cursor=db.query(CATEGORY_TABLE, new String[]{"url"}, "enabled='1'", null, null, null, "category_Id");
+	   Cursor cursor2=db.query(CATEGORY_TABLE, new String[]{"name"}, "enabled='1'", null, null, null, "category_Id");
 	   String[][] categories=new String[2][cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
@@ -312,7 +367,7 @@ public class DatabaseHandler {
 	   {
 		   if(enabled[i]){cv.put("enabled", 1);}
 		   else{cv.put("enabled", 0);}
-		   db.update(TABLE2_NAME, cv, "category_Id=?", new String[]{Integer.toString(i)});
+		   db.update(CATEGORY_TABLE, cv, "category_Id=?", new String[]{Integer.toString(i)});
 		   cv.clear();
 	   }
    }
@@ -328,7 +383,7 @@ public class DatabaseHandler {
 	   //FIXME Optimise, add limit? NOT SQL INJECTION SAFE (But internal, so k)
 	   try{
 	   //Query the relation table to get a list of Item_Ids.
-	   Cursor cursor=db.query(TABLE3_NAME, new String[]{"itemId"}, "categoryName=?", new String[]{category}, null, null, null);
+	   Cursor cursor=db.query(ITEM_CATEGORY_TABLE, new String[]{"itemId"}, "categoryName=?", new String[]{category}, null, null, null);
 	   /*Create a string consisting of the first item_Id, then a loop appending
 	    * ORs and further item_Id
 	   */
@@ -341,7 +396,7 @@ public class DatabaseHandler {
 	   }
 	   //Query the items table to get a the rows with that category
 	   //then fill the String[][] and return it
-	   cursor=db.query(TABLE_NAME,new String[]{"title", "description", "link", "item_Id"},itemIdQuery,null,null,null,"pubdate desc");
+	   cursor=db.query(ITEM_TABLE,new String[]{"title", "description", "link", "item_Id"},itemIdQuery,null,null,null,"pubdate desc");
 	   String[][] items=new String[4][cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
@@ -369,7 +424,7 @@ public class DatabaseHandler {
 	   //FIXME Skip first step?
 	   //Query the categories table for the id of the category with that name
 	   //Then fetch the id from the first one returned
-	   Cursor cursor=db.query(TABLE2_NAME,new String[]{"category_Id"},"name=?",new String[]{category},null,null,null);
+	   Cursor cursor=db.query(CATEGORY_TABLE,new String[]{"category_Id"},"name=?",new String[]{category},null,null,null);
 	   cursor.moveToNext();
 	   int categoryId=cursor.getInt(0);
 	   //Create a box containing the new value/column
@@ -377,7 +432,7 @@ public class DatabaseHandler {
 	   if(enabled){cv.put("enabled", 1);}
 	   else{cv.put("enabled", 0);}
 	   //push up to database.
-	   db.update(TABLE2_NAME, cv, "category_Id=?", new String[]{Integer.toString(categoryId)});
+	   db.update(CATEGORY_TABLE, cv, "category_Id=?", new String[]{Integer.toString(categoryId)});
 	   cursor.close();
    }
    /**
@@ -394,13 +449,13 @@ public class DatabaseHandler {
 	   //items with a pubdate less than that value.
 	   Date now=new Date();
 	   long oldTime=(now.getTime()-2629743000L);
-	   Cursor cursor=db.query(TABLE_NAME,new String[]{"item_Id"},"pubdate<?",new String[]{Long.toString(oldTime)},null,null,null);
+	   Cursor cursor=db.query(ITEM_TABLE,new String[]{"item_Id"},"pubdate<?",new String[]{Long.toString(oldTime)},null,null,null);
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
 		   cursor.moveToNext();
-		   db.delete(TABLE3_NAME,"itemId=?",new String[]{Integer.toString(cursor.getInt(0))});
+		   db.delete(ITEM_CATEGORY_TABLE,"itemId=?",new String[]{Integer.toString(cursor.getInt(0))});
 	   }
-	   db.delete(TABLE_NAME,"pubdate<?",new String[]{Long.toString(oldTime)});
+	   db.delete(ITEM_TABLE,"pubdate<?",new String[]{Long.toString(oldTime)});
 	   cursor.close();
    }
    public void shutdown()
@@ -422,7 +477,7 @@ public class DatabaseHandler {
       @Override
       public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
          Log.w("Example", "Upgrading database, this will drop tables and recreate.");
-         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+         db.execSQL("DROP TABLE IF EXISTS " + ITEM_TABLE);
          onCreate(db);
       }
    }
