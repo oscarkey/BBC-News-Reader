@@ -40,6 +40,9 @@ public class ResourceService extends Service implements ResourceInterface {
 	static final int MSG_UNREGISTER_CLIENT = 2;
 	static final int MSG_CLIENT_REGISTERED = 3; //returned to a client when registered
 	static final int MSG_LOAD_DATA = 4; //sent to request a data load
+	static final int MSG_LOAD_ARTICLE = 11;
+	static final int MSG_LOAD_THUMB = 12;
+	static final int MSG_LOAD_IMAGE = 13;
 	static final int MSG_STOP_DATA_LOAD = 9; //sent to stop data loading
 	static final int MSG_CATEOGRY_LOADED = 6; //sent when a category has loaded
 	static final int MSG_FULL_LOAD_COMPLETE = 8; //sent when all the data has been loaded
@@ -63,6 +66,15 @@ public class ResourceService extends Service implements ResourceInterface {
 				break;
 			case MSG_LOAD_DATA:
 				loadData(); //start of the loading of data
+				break;
+			case MSG_LOAD_ARTICLE:
+				//TODO load specific article
+				break;
+			case MSG_LOAD_THUMB:
+				//TODO load specific thumb
+				break;
+			case MSG_LOAD_IMAGE:
+				//TODO load specific image
 				break;
 			case MSG_STOP_DATA_LOAD:
 				stopDataLoad();
@@ -114,6 +126,19 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 		//start the RSS Manager
 		rssManager = new RSSManager(names, urls, this);
+	}
+	
+	void loadArticle(int id){
+		String url = database.getItem(id)[2]; //get the url of the item
+		webManager.loadNow(url, WebManager.ITEM_TYPE_HTML, id); //tell the webmanager to load this
+	}
+	
+	void loadThumb(int id){
+		//TODO add specific thumbnail loading
+	}
+	
+	void loadImage(int id){
+		//TODO add specific image loading
 	}
 	
 	void stopDataLoad(){
@@ -209,7 +234,7 @@ public class ResourceService extends Service implements ResourceInterface {
 		sendMsgToAll(MSG_FULL_LOAD_COMPLETE, null);
 	}
 	
-	public synchronized void itemDownloadComplete(int itemId, int type, Object download){
+	public synchronized void itemDownloadComplete(boolean specific, int itemId, int type, Object download){
 		//choose what to do depending on the type of object
 		if(type == WebManager.ITEM_TYPE_HTML){
 			String html = (String)download;
@@ -220,6 +245,10 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 		if(type == WebManager.ITEM_TYPE_THUMB){
 			
+		}
+		//if this item was specifically requested we need to report that it has been loaded
+		if(specific){
+			//TODO report that a specifically requested item has been loaded
 		}
 	}
 	

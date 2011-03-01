@@ -14,5 +14,5 @@ public interface ResourceInterface {
 	public void reportError(boolean fatal, String msg, String error);
 	public void rssLoadComplete();
 	public void fullLoadComplete();
-	public void itemDownloadComplete(int itemId, int type, Object download);
+	public void itemDownloadComplete(boolean specific, int itemId, int type, Object download);
 }

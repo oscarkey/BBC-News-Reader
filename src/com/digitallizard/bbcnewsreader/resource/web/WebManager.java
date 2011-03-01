@@ -63,7 +63,7 @@ public class WebManager implements Runnable {
 		try{
 			URI url = new URI(item.getUrl());
 			String html = HtmlParser.getPage(url); //load the page
-			handler.itemDownloadComplete(item.getItemId(), item.getType(), html);
+			handler.itemDownloadComplete(false, item.getItemId(), item.getType(), html);
 		}
 		catch(Exception e){
 			handler.reportError(false, "There was an error retrieving the article.", e.getMessage());
@@ -88,10 +88,14 @@ public class WebManager implements Runnable {
 		}
 	}
 	
-	public void addToQueue(String url,int type,int itemId){
+	public void addToQueue(String url, int type, int itemId){
 		QueueItem queueItem = new QueueItem(url, type, itemId);
 		getQueue().add(queueItem);
 		itemQueued();
+	}
+	
+	public void loadNow(String url, int type, int itemId){
+		//TODO boost the priority of the item to load in now
 	}
 	
 	public void emptyQueue(){
