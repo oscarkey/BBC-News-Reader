@@ -239,12 +239,16 @@ public class ReaderActivity extends Activity {
     	}
     }
     
-    void sendMessageToService(int what, Object object){
+    void sendMessageToService(int what, Bundle bundle){
     	//check the service is bound before trying to send a message
     	if(resourceServiceBound){
 	    	try{
 				//create a message according to parameters
-				Message msg = Message.obtain(null, what, object);
+				Message msg = Message.obtain(null, what);
+				//add the bundle if needed
+				if(bundle != null){
+					msg.setData(bundle);
+				}
 				msg.replyTo = messenger; //tell the service to reply to us, if needed
 				resourceMessenger.send(msg); //send the message
 			}
@@ -371,7 +375,6 @@ public class ReaderActivity extends Activity {
     }
     
     protected void onDestroy(){
-    	Log.v("ReaderActivity", "shutting down");
     	//disconnect the service
     	doUnbindService();
     	super.onDestroy(); //pass the destroy command to the super

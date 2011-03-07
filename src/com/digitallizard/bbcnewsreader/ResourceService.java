@@ -45,6 +45,8 @@ public class ResourceService extends Service implements ResourceInterface {
 	static final int MSG_LOAD_IMAGE = 13;
 	static final int MSG_STOP_DATA_LOAD = 9; //sent to stop data loading
 	static final int MSG_CATEOGRY_LOADED = 6; //sent when a category has loaded
+	static final int MSG_ARTICLE_LOADED = 15; //article loaded
+	static final int MSG_THUMB_LOADED = 14; //thumbnail loaded
 	static final int MSG_FULL_LOAD_COMPLETE = 8; //sent when all the data has been loaded
 	static final int MSG_RSS_LOAD_COMPLETE = 10;
 	static final int MSG_ERROR = 7; //help! An error occurred
@@ -68,7 +70,7 @@ public class ResourceService extends Service implements ResourceInterface {
 				loadData(); //start of the loading of data
 				break;
 			case MSG_LOAD_ARTICLE:
-				//TODO load specific article
+				loadArticle(msg.getData().getInt("itemId"));
 				break;
 			case MSG_LOAD_THUMB:
 				//TODO load specific thumb
@@ -129,6 +131,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	}
 	
 	void loadArticle(int id){
+		Log.v("service", "id: "+id);
 		String url = database.getItem(id)[2]; //get the url of the item
 		webManager.loadNow(url, WebManager.ITEM_TYPE_HTML, id); //tell the webmanager to load this
 	}
@@ -185,7 +188,7 @@ public class ResourceService extends Service implements ResourceInterface {
 			//FIXME stupid conversion and reconversion of date format. The database needs updating.
 			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 			String date = dateFormat.format(items[i].getPubDate());
-			int id = getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category);
+			getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category);
 		}
 		//send a message to the gui to tell it that we have loaded the category
 		Bundle bundle = new Bundle();
@@ -248,7 +251,10 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 		//if this item was specifically requested we need to report that it has been loaded
 		if(specific){
-			//TODO report that a specifically requested item has been loaded
+			//report that a specifically requested item has been loaded
+			Bundle bundle = new Bundle();
+			bundle.putInt("item", itemId);
+			sendMsgToAll(type, null); //tell every client about the load
 		}
 	}
 	
