@@ -1,6 +1,7 @@
 package com.digitallizard.bbcnewsreader.resource.web;
 
 import java.net.URI;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
@@ -77,11 +78,27 @@ public class WebManager implements Runnable {
 	}
 	
 	private void downloadThumbnail(QueueItem item){
-		
+		try{
+			URL url = new URL(item.getUrl());
+			byte[] thumb = ImageDownloader.getImage(url); //load the image
+			handler.itemDownloadComplete(false, item.getItemId(), item.getType(), thumb);
+		}
+		catch(Exception e){
+			handler.reportError(false, "There was an error retrieving the thumbnail.", e.toString());
+			e.printStackTrace();
+		}
 	}
 	
 	private void downloadImage(QueueItem item){
-		
+		try{
+			URL url = new URL(item.getUrl());
+			byte[] image = ImageDownloader.getImage(url); //load the image
+			handler.itemDownloadComplete(false, item.getItemId(), item.getType(), image);
+		}
+		catch(Exception e){
+			handler.reportError(false, "There was an error retrieving the image.", e.toString());
+			e.printStackTrace();
+		}
 	}
 	
 	private void itemQueued(){

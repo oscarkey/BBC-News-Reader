@@ -130,7 +130,7 @@ public class ArticleActivity extends Activity {
     }
     
     void displayArticle(String html){
-    	webView.loadData(html, "text/html", "utf-8");
+    	webView.loadDataWithBaseURL(null, html, "text/html", "utf-8",null);
     }
     
     public boolean onOptionsItemSelected(MenuItem item){

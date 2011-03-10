@@ -222,7 +222,16 @@ public class ResourceService extends Service implements ResourceInterface {
 				webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, items[i][0]);
 				//FIXME inefficiencies with converting uri -> string and back
 			}
-			//TODO deal with other types
+			else if(items[i][1] ==1){
+				String url = "http://www.conferenceroomsleeds.co.uk/images/icons/google.gif";
+				webManager.addToQueue(url, WebManager.ITEM_TYPE_IMAGE, items[i][0]);
+			}
+			else if(items[i][1] == 2){
+				String url = "http://www.conferenceroomsleeds.co.uk/images/icons/google.gif";
+				webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, items[i][0]);
+			}
+			
+			//TODO Make this actually get the real URLs
 		}
 		//if we didn't have to add anything, report the load as fully complete
 		if(items.length == 0){
@@ -244,10 +253,13 @@ public class ResourceService extends Service implements ResourceInterface {
 			database.addHtml(itemId, html);
 		}
 		if(type == WebManager.ITEM_TYPE_IMAGE){
+			byte[] image = (byte[])download;
+			database.addImage(itemId, image);
 			
 		}
 		if(type == WebManager.ITEM_TYPE_THUMB){
-			
+			byte[] thumb = (byte[])download;
+			database.addThumbnail(itemId, thumb);
 		}
 		//if this item was specifically requested we need to report that it has been loaded
 		if(specific){

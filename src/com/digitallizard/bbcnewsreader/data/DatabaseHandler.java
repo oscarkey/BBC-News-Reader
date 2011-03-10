@@ -94,6 +94,7 @@ public class DatabaseHandler {
 			   cv.put("link",link);
 			   cv.put("pubdate",timestamp);
 			   long rowid=db.insert(ITEM_TABLE, null, cv);
+			   cursor.close();
 			   cursor=db.query(false,ITEM_TABLE,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
 			   
 			   cursor.moveToNext();
@@ -186,8 +187,8 @@ public class DatabaseHandler {
 	   String timeComparisonS=Long.toString(timeComparison);
 	   
 	   cursor1=db.query(ITEM_TABLE, new String[]{"item_Id"}, "html IS NULL AND pubdate>?", new String[] {timeComparisonS},null,null,null);
-	   cursor2=db.query(ITEM_TABLE, new String[]{"item_Id"}, "image=? AND pubdate>?", new String[] {emptyString,timeComparisonS},null,null,null);
-	   cursor3=db.query(ITEM_TABLE, new String[]{"item_Id"}, "thumbnail=? AND pubdate>?", new String[] {emptyString,timeComparisonS},null,null,null);
+	   cursor2=db.query(ITEM_TABLE, new String[]{"item_Id"}, "image IS NULL AND pubdate>?", new String[] {timeComparisonS},null,null,null);
+	   cursor3=db.query(ITEM_TABLE, new String[]{"item_Id"}, "thumbnail IS NULL AND pubdate>?", new String[] {timeComparisonS},null,null,null);
 	   
 	   int totalLength=cursor1.getCount()+cursor2.getCount()+cursor3.getCount();
 	   
@@ -396,6 +397,7 @@ public class DatabaseHandler {
 	   }
 	   //Query the items table to get a the rows with that category
 	   //then fill the String[][] and return it
+	   cursor.close();
 	   cursor=db.query(ITEM_TABLE,new String[]{"title", "description", "link", "item_Id"},itemIdQuery,null,null,null,"pubdate desc");
 	   String[][] items=new String[4][cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)
