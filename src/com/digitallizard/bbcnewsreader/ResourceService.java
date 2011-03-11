@@ -222,12 +222,13 @@ public class ResourceService extends Service implements ResourceInterface {
 				webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, items[i][0]);
 				//FIXME inefficiencies with converting uri -> string and back
 			}
-			else if(items[i][1] ==1){
+			//image loading not supported
+			/*else if(items[i][1] == 1){
 				String url = "http://www.conferenceroomsleeds.co.uk/images/icons/google.gif";
 				webManager.addToQueue(url, WebManager.ITEM_TYPE_IMAGE, items[i][0]);
-			}
+			}*/
 			else if(items[i][1] == 2){
-				String url = "http://www.conferenceroomsleeds.co.uk/images/icons/google.gif";
+				String url = "http://www.kmsolutions.co.uk/images/Google-icon.jpg";
 				webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, items[i][0]);
 			}
 			
@@ -260,6 +261,10 @@ public class ResourceService extends Service implements ResourceInterface {
 		if(type == WebManager.ITEM_TYPE_THUMB){
 			byte[] thumb = (byte[])download;
 			database.addThumbnail(itemId, thumb);
+			//report that the thumbnail has been loaded so it can be displayed
+			Bundle bundle = new Bundle();
+			bundle.putInt("id", itemId);
+			sendMsgToAll(MSG_THUMB_LOADED, bundle);
 		}
 		//if this item was specifically requested we need to report that it has been loaded
 		if(specific){

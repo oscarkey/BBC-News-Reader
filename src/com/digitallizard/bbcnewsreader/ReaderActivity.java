@@ -18,6 +18,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -32,6 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -281,7 +284,7 @@ public class ReaderActivity extends Activity {
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
-        //make a reference to ui items
+        //make references to ui items
         refreshButton = (ImageButton) findViewById(R.id.refreshButton);
         statusText = (TextView) findViewById(R.id.statusText);
         
@@ -347,7 +350,22 @@ public class ReaderActivity extends Activity {
     			if(i < titles.length){
     				TextView titleText = (TextView)physicalItems[category][i].findViewById(R.id.textNewsItemTitle);
     				titleText.setText(titles[i]);
-    				//save the urls
+    				//display an image for the item
+    				ImageView imageView = (ImageView)physicalItems[category][i].findViewById(R.id.imageNewsItem);
+    				//try and get an image for this item
+    				byte[] imageBytes = database.getThumbnail(Integer.parseInt(ids[i]));
+    				Log.v("reader", "bytes: "+imageBytes);
+    				//check if any image data was returned
+    				if(imageBytes != null){
+    					//try to construct an image out of the bytes given by the database
+    					Bitmap imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length); //load the image into a bitmap
+    					imageView.setImageBitmap(imageBitmap);
+    				}
+    				else{
+    					//set the image to the default "X"
+    					imageView.setImageResource(R.drawable.no_thumb);
+    				}
+    				//save the ids for when an item is selected
     				itemIds.put((String)titleText.getText(), Integer.parseInt(ids[i]));
     			}
     		}
