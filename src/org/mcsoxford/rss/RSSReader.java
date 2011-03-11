@@ -1,9 +1,19 @@
-/*******************************************************************************
- * BBC News Reader
- * Released under the BSD License. See README or LICENSE.
- * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
- * All rights reserved.
- ******************************************************************************/
+/*
+ * Copyright (C) 2010 A. Horn
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.mcsoxford.rss;
 
 import java.io.IOException;
@@ -32,26 +42,37 @@ public class RSSReader implements java.io.Closeable {
   private final HttpClient httpclient;
 
   /**
-   * Thread-safe RSS parser.
+   * Thread-safe RSS parser SPI.
    */
-  private final RSSParser parser;
+  private final RSSParserSPI parser;
 
   /**
    * Instantiate a thread-safe HTTP client to retrieve RSS feeds. The injected
    * {@link HttpClient} implementation must be thread-safe.
    * 
    * @param httpclient thread-safe HTTP client implementation
+   * @param parser thread-safe RSS parser SPI implementation
    */
-  public RSSReader(HttpClient httpclient, RSSParser parser) {
+  public RSSReader(HttpClient httpclient, RSSParserSPI parser) {
     this.httpclient = httpclient;
     this.parser = parser;
   }
 
   /**
    * Instantiate a thread-safe HTTP client to retrieve and parse RSS feeds.
+   * Default RSS configuration capacity values are used.
    */
   public RSSReader() {
-    this(new DefaultHttpClient(), new RSSParser());
+    this(new DefaultHttpClient(), new RSSParser(new RSSConfig()));
+  }
+
+  /**
+   * Instantiate a thread-safe HTTP client to retrieve and parse RSS feeds.
+   * Internal memory consumption and load performance can be tweaked with
+   * {@link RSSConfig}.
+   */
+  public RSSReader(RSSConfig config) {
+    this(new DefaultHttpClient(), new RSSParser(config));
   }
 
   /**
@@ -64,7 +85,7 @@ public class RSSReader implements java.io.Closeable {
    *           HTTP error
    * @throws RSSFault if an unrecoverable IO error has occurred
    */
-  public RSSFeed load(java.net.URI uri) throws RSSReaderException {
+  public RSSFeed load(String uri) throws RSSReaderException {
     final HttpGet httpget = new HttpGet(uri);
 
     InputStream feed = null;
@@ -101,3 +122,4 @@ public class RSSReader implements java.io.Closeable {
   }
 
 }
+

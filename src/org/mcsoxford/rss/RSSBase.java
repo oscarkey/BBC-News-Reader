@@ -1,10 +1,22 @@
-/*******************************************************************************
- * BBC News Reader
- * Released under the BSD License. See README or LICENSE.
- * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
- * All rights reserved.
- ******************************************************************************/
+/*
+ * Copyright (C) 2010 A. Horn
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.mcsoxford.rss;
+
+import java.util.ArrayList;
 
 /**
  * Common data about RSS feeds and items.
@@ -14,10 +26,18 @@ package org.mcsoxford.rss;
 abstract class RSSBase {
 
   private String title;
-  private java.net.URI link;
+  private android.net.Uri link;
   private String description;
-  private String category;
+  private java.util.List<String> categories;
   private java.util.Date pubdate;
+
+  /**
+   * Specify initial capacity for the List which contains the category names.
+   */
+  RSSBase(byte categoryCapacity) {
+    categories = categoryCapacity == 0 ? null : new ArrayList<String>(
+        categoryCapacity);
+  }
 
   public String getTitle() {
     return title;
@@ -27,12 +47,16 @@ abstract class RSSBase {
     return description;
   }
 
-  public java.net.URI getLink() {
+  public android.net.Uri getLink() {
     return link;
   }
 
-  public String getCategory() {
-    return category;
+  public java.util.List<String> getCategories() {
+    if (categories == null) {
+      return java.util.Collections.emptyList();
+    }
+
+    return java.util.Collections.unmodifiableList(categories);
   }
 
   public java.util.Date getPubDate() {
@@ -43,7 +67,7 @@ abstract class RSSBase {
     this.title = title;
   }
 
-  void setLink(java.net.URI link) {
+  void setLink(android.net.Uri link) {
     this.link = link;
   }
 
@@ -51,8 +75,12 @@ abstract class RSSBase {
     this.description = description;
   }
 
-  void setCategory(String category) {
-    this.category = category;
+  void addCategory(String category) {
+    if (categories == null) {
+      categories = new ArrayList<String>(3);
+    }
+
+    this.categories.add(category);
   }
 
   void setPubDate(java.util.Date pubdate) {
@@ -66,14 +94,38 @@ abstract class RSSBase {
     return title;
   }
 
+  /**
+   * Returns the hash code of the link.
+   */
   @Override
   public int hashCode() {
-    throw new UnsupportedOperationException();
+    if (link == null) {
+      return 0;
+    }
+
+    return link.hashCode();
   }
 
+  /**
+   * Compares the links for equality.
+   */
   @Override
   public boolean equals(Object object) {
-    throw new UnsupportedOperationException();
+    if (this == object) {
+      return true;
+    } else if (object instanceof RSSBase) {
+      /* other is never null */
+      final RSSBase other = (RSSBase) (object);
+
+      if (link == null) {
+        return other.link == null;
+      }
+
+      return link.equals(other.link);
+    } else {
+      return false;
+    }
   }
 
 }
+

@@ -1,9 +1,19 @@
-/*******************************************************************************
- * BBC News Reader
- * Released under the BSD License. See README or LICENSE.
- * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
- * All rights reserved.
- ******************************************************************************/
+/*
+ * Copyright (C) 2010 A. Horn
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.mcsoxford.rss;
 
 /**
@@ -15,9 +25,9 @@ public class RSSItem extends RSSBase {
   private final java.util.List<MediaThumbnail> thumbnails;
 
   /* Internal constructor for RSSHandler */
-  RSSItem() {
-    super();
-    thumbnails = new java.util.ArrayList<MediaThumbnail>(2);
+  RSSItem(byte categoryCapacity, byte thumbnailCapacity) {
+    super(categoryCapacity);
+    thumbnails = new java.util.ArrayList<MediaThumbnail>(thumbnailCapacity);
   }
 
   /* Internal method for RSSHandler */
@@ -26,11 +36,11 @@ public class RSSItem extends RSSBase {
   }
 
   /**
-   * Returns an unmodifiable list of thumbnails.
-   * The return value is never {@code null}.
-   * Images are in order of importance.
+   * Returns an unmodifiable list of thumbnails. The return value is never
+   * {@code null}. Images are in order of importance.
    */
   public java.util.List<MediaThumbnail> getThumbnails() {
     return java.util.Collections.unmodifiableList(thumbnails);
   }
 }
+
