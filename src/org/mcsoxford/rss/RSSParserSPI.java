@@ -17,34 +17,21 @@
 package org.mcsoxford.rss;
 
 /**
- * Internal helper class for resource-sensitive objects such as streams.
+ * Thread-safe RSS parser service provider interface.
  * 
  * @author Mr Horn
  */
-final class Resources {
-
-  /* Hide constructor */
-  private Resources() {}
+public interface RSSParserSPI {
 
   /**
-   * Closes stream and suppresses IO faults.
+   * Parses an input stream as an RSS feed. It is the responsibility of the
+   * caller to close the specified RSS feed input stream.
    * 
-   * @return {@code null} if stream has been successfully closed,
-   *         {@link java.io.IOException} otherwise
+   * @param feed RSS 2.0 feed input stream
+   * @return in-memory representation of RSS feed
+   * @throws RSSFault if an unrecoverable parse error occurs
    */
-  static java.io.IOException closeQuietly(java.io.Closeable stream) {
-    if (stream == null) {
-      return null;
-    }
-
-    try {
-      stream.close();
-    } catch (java.io.IOException e) {
-      return e;
-    }
-
-    return null;
-  }
+  RSSFeed parse(java.io.InputStream feed);
 
 }
 

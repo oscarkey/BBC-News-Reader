@@ -54,15 +54,13 @@ public class RSSManager implements Runnable {
 			if(keepLoading){
 				RSSFeed feed;
 				try {
-					feed = reader.load(new URI(urls[i]));
+					feed = reader.load(urls[i]);
 					feeds.add(feed);
 					List<RSSItem> items = (List<RSSItem>) feed.getItems();
 					//loop through the items and send them to the parent service
 					resourceInterface.categoryRssLoaded((RSSItem[])items.toArray(new RSSItem[items.size()]), names[i]);
 				} catch (RSSReaderException e) {
 					resourceInterface.reportError(true, e.getMessage()); //report a fatal error
-				} catch (URISyntaxException e) {
-					resourceInterface.reportError(true, e.getMessage());
 				}
 			}
 		}

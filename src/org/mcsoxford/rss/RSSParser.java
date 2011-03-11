@@ -1,9 +1,19 @@
-/*******************************************************************************
- * BBC News Reader
- * Released under the BSD License. See README or LICENSE.
- * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
- * All rights reserved.
- ******************************************************************************/
+/*
+ * Copyright (C) 2010 A. Horn
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.mcsoxford.rss;
 
 import java.io.IOException;
@@ -18,11 +28,18 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 /**
- * Thread-safe RSS parser.
+ * Internal thread-safe RSS parser SPI implementation.
  * 
  * @author Mr Horn
  */
-class RSSParser {
+class RSSParser implements RSSParserSPI {
+
+  private final RSSConfig config;
+
+  /* Internal constructor for RSSReader */
+  RSSParser(RSSConfig config) {
+    this.config = config;
+  }
 
   /**
    * Parses input stream as RSS feed. It is the responsibility of the caller to
@@ -32,9 +49,10 @@ class RSSParser {
    * @return in-memory representation of RSS feed
    * @throws RSSFault if an unrecoverable parse error occurs
    */
-  RSSFeed parse(InputStream feed) {
+  public RSSFeed parse(InputStream feed) {
     try {
-      // TODO: optimize by maintaining factory references
+      // Since SAXParserFactory implementations are not guaranteed to be
+      // thread-safe, a new local object is instantiated.
       final SAXParserFactory factory = SAXParserFactory.newInstance();
       final SAXParser parser = factory.newSAXParser();
 
@@ -54,7 +72,7 @@ class RSSParser {
    * @return in-memory representation of an RSS feed
    * @throws IllegalArgumentException if either argument is {@code null}
    */
-  private static RSSFeed parse(final SAXParser parser, final InputStream feed)
+  private RSSFeed parse(SAXParser parser, InputStream feed)
       throws SAXException, IOException {
     if (parser == null) {
       throw new IllegalArgumentException("RSS parser must not be null.");
@@ -62,9 +80,11 @@ class RSSParser {
       throw new IllegalArgumentException("RSS feed must not be null.");
     }
 
+    // SAX automatically detects the correct character encoding from the stream
+    // See also http://www.w3.org/TR/REC-xml/#sec-guessing
     final InputSource source = new InputSource(feed);
     final XMLReader xmlreader = parser.getXMLReader();
-    final RSSHandler handler = new RSSHandler();
+    final RSSHandler handler = new RSSHandler(config);
 
     xmlreader.setContentHandler(handler);
     xmlreader.parse(source);
@@ -73,3 +93,4 @@ class RSSParser {
   }
 
 }
+
