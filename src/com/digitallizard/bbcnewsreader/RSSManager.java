@@ -6,8 +6,6 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,20 +27,34 @@ public class RSSManager implements Runnable {
 	String[] urls;
 	ArrayList<RSSFeed> feeds;
 	RSSReader reader;
-	boolean keepLoading;
+	boolean isLoading;
 	
-	public RSSManager(String[] names, String[] urls, ResourceInterface service){
-		this.names = names; //store the names
-		this.urls = urls; //store the URLS
-		feeds = new ArrayList<RSSFeed>();
-		resourceInterface = service;
-		keepLoading = true;
-		thread = new Thread(this);
-		thread.start();
+	synchronized void setIsLoading(boolean keepLoading){
+		this.isLoading = keepLoading;
+	}
+	
+	synchronized boolean isLoading(){
+		return isLoading;
+	}
+	
+	public RSSManager(ResourceInterface service){
+		this.resourceInterface = service;
+	}
+	
+	public void load(String[] names, String[] urls){
+		//check we are not already loading
+		if(!isLoading()){
+			this.names = names; //store the names
+			this.urls = urls; //store the URLS
+			feeds = new ArrayList<RSSFeed>();
+			thread = new Thread(this);
+			setIsLoading(true);
+			thread.start();
+		}
 	}
 	
 	public void stopLoading(){
-		keepLoading = false;
+		setIsLoading(false);
 	}
 	
 	public void run(){
@@ -51,7 +63,7 @@ public class RSSManager implements Runnable {
 		//load in the feeds
 		for(int i = 0; i < urls.length; i++){
 			//check we haven't been cancelled
-			if(keepLoading){
+			if(isLoading()){
 				RSSFeed feed;
 				try {
 					feed = reader.load(urls[i]);
@@ -66,5 +78,6 @@ public class RSSManager implements Runnable {
 		}
 		//report that the load is complete
 		resourceInterface.rssLoadComplete();
+		setIsLoading(false); //we are not longer loading
 	}
 }

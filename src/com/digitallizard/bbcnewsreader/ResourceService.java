@@ -128,7 +128,7 @@ public class ResourceService extends Service implements ResourceInterface {
 			}
 		}
 		//start the RSS Manager
-		rssManager = new RSSManager(names, urls, this);
+		rssManager.load(names, urls);
 	}
 	
 	void loadArticle(int id){
@@ -286,9 +286,13 @@ public class ResourceService extends Service implements ResourceInterface {
 				getDatabase().addCategories();
 	        }
 		}
-		if(webManager == null){
+		if(getWebManager() == null){
 			//load the web manager
 			setWebManager(new WebManager(this));
+		}
+		if(rssManager == null){
+			//load the rss manager
+			rssManager = new RSSManager(this);
 		}
 	}
 	
