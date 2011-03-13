@@ -6,6 +6,7 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader.data;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.sql.Blob;
 import java.text.SimpleDateFormat;
@@ -173,57 +174,52 @@ public class DatabaseHandler {
     * Fetches all the undownloaded items from the last "days" days. Returns an array containing the item Ids of all these items
     * 
     * @param days Number of days into the past to return undownloaded items for (Using timestamp from entry)
-    * @return A 2d int[n][2], where n is the number of undownloaded items, and each entry is {itemId,itemTag}.
-    * 			itemTag is either 0, 1 or 2 for html, image or thumbnail respectively.
+    * @return A 2d int[3][n], where 3 is the type of item and n is the number of undownloaded items of that type.
+    * 			type is either 0, 1 or 2 for html, thumbnail or image respectively.
     */
-   public int[][] getUndownloaded(int days)
-   {
-	   Cursor cursor1, cursor2, cursor3;
-	   String emptyString = "null";
+   public Integer[][] getUndownloaded(int days) {
+	   Date now = new Date();
+	   long curTime = now.getTime();
+	   long timeComparison = curTime-86400000L*days;
+	   String timeComparisonS = Long.toString(timeComparison);
 	   
-	   Date now=new Date();
-	   long curTime=now.getTime();
-	   long timeComparison= curTime-86400000L*days;
-	   String timeComparisonS=Long.toString(timeComparison);
+	   Cursor cursorArticles = db.query(ITEM_TABLE, new String[]{"item_Id"}, "html IS NULL AND pubdate>?", new String[] {timeComparisonS},null,null,null);
+	   Cursor cursorThumbnails = db.query(ITEM_TABLE, new String[]{"item_Id"}, "thumbnail IS NULL AND pubdate>?", new String[] {timeComparisonS},null,null,null);
+	   Cursor cursorImages = db.query(ITEM_TABLE, new String[]{"item_Id"}, "image IS NULL AND pubdate>?", new String[] {timeComparisonS},null,null,null);
+	   	   
+	   ArrayList<Integer> unloadedArticles = new ArrayList<Integer>();
+	   ArrayList<Integer> unloadedThumbnails = new ArrayList<Integer>();
+	   ArrayList<Integer> unloadedImages = new ArrayList<Integer>();
 	   
-	   cursor1=db.query(ITEM_TABLE, new String[]{"item_Id"}, "html IS NULL AND pubdate>?", new String[] {timeComparisonS},null,null,null);
-	   cursor2=db.query(ITEM_TABLE, new String[]{"item_Id"}, "image IS NULL AND pubdate>?", new String[] {timeComparisonS},null,null,null);
-	   cursor3=db.query(ITEM_TABLE, new String[]{"item_Id"}, "thumbnail IS NULL AND pubdate>?", new String[] {timeComparisonS},null,null,null);
 	   
-	   int totalLength=cursor1.getCount()+cursor2.getCount()+cursor3.getCount();
-	   
-	   int returnValues[][]=new int[totalLength][2];
-	   int arrayCounter=0;
-	   
-	   for(int i=0;i<cursor1.getCount();i++)
+	   //loop through and store the ids of the articles that need to be loaded
+	   for(int i=0; i < cursorArticles.getCount(); i++)
 	   {
-		   cursor1.moveToNext();
-		   returnValues[arrayCounter][0]=cursor1.getInt(0);
-		   returnValues[arrayCounter][1]=0;
-		   arrayCounter++;
+		   cursorArticles.moveToNext();
+		   unloadedArticles.add(cursorArticles.getInt(0));
+	   }
+	   //loop through and store the ids of the thumbnails that need to be loaded
+	   for(int i=0; i < cursorThumbnails.getCount(); i++)
+	   {
+		   cursorThumbnails.moveToNext();
+		   unloadedThumbnails.add(cursorThumbnails.getInt(0));
+	   }
+	   //loop through and store the ids of the images that need to be loaded
+	   for(int i=0; i < cursorImages.getCount(); i++)
+	   {
+		   cursorImages.moveToNext();
+		   unloadedImages.add(cursorImages.getInt(0));
 	   }
 	   
-	   for(int i=0;i<cursor2.getCount();i++)
-	   {
-		   cursor2.moveToNext();
-		   returnValues[arrayCounter][0]=cursor2.getInt(0);
-		   returnValues[arrayCounter][1]=1;
-		   arrayCounter++;
-	   }
+	   cursorArticles.close();
+	   cursorThumbnails.close();
+	   cursorArticles.close();
 	   
-	   for(int i=0;i<cursor3.getCount();i++)
-	   {
-		   cursor3.moveToNext();
-		   returnValues[arrayCounter][0]=cursor3.getInt(0);
-		   returnValues[arrayCounter][1]=2;
-		   arrayCounter++;
-	   }
-	   
-	   cursor1.close();
-	   cursor2.close();
-	   cursor3.close();
-	   
-	   return returnValues;
+	   Integer[][] values = new Integer[3][];
+	   values[0] = unloadedArticles.toArray(new Integer[unloadedArticles.size()]);
+	   values[1] = unloadedArticles.toArray(new Integer[unloadedArticles.size()]);
+	   values[2] = unloadedArticles.toArray(new Integer[unloadedArticles.size()]);
+	   return values;
    }
    /**
     * Adds all the start categories from the XML

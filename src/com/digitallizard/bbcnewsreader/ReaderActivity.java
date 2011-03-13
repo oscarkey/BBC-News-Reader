@@ -354,7 +354,6 @@ public class ReaderActivity extends Activity {
     				ImageView imageView = (ImageView)physicalItems[category][i].findViewById(R.id.imageNewsItem);
     				//try and get an image for this item
     				byte[] imageBytes = database.getThumbnail(Integer.parseInt(ids[i]));
-    				Log.v("reader", "bytes: "+imageBytes);
     				//check if any image data was returned
     				if(imageBytes != null){
     					//try to construct an image out of the bytes given by the database

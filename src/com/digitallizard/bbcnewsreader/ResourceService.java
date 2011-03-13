@@ -70,6 +70,7 @@ public class ResourceService extends Service implements ResourceInterface {
 				loadData(); //start of the loading of data
 				break;
 			case MSG_LOAD_ARTICLE:
+				Log.v("service", "specific load requested");
 				loadArticle(msg.getData().getInt("itemId"));
 				break;
 			case MSG_LOAD_THUMB:
@@ -213,29 +214,25 @@ public class ResourceService extends Service implements ResourceInterface {
 		sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
 		//as the rss load has completed we can begin loading articles etc
 		//TODO the age of downloading should be user specified
-		int[][] items = database.getUndownloaded(1); //find stuff up to 1 day old
-		for(int i = 0; i < items.length; i++){
-			//find out what type the item is
-			if(items[i][1] == 0){
-				//it's html, load the url from the database
-				String url = database.getItem(items[i][0])[2];
-				webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, items[i][0]);
-				//FIXME inefficiencies with converting uri -> string and back
-			}
-			//image loading not supported
-			/*else if(items[i][1] == 1){
-				String url = "http://www.conferenceroomsleeds.co.uk/images/icons/google.gif";
-				webManager.addToQueue(url, WebManager.ITEM_TYPE_IMAGE, items[i][0]);
-			}*/
-			else if(items[i][1] == 2){
-				String url = "http://www.kmsolutions.co.uk/images/Google-icon.jpg";
-				webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, items[i][0]);
-			}
-			
-			//TODO Make this actually get the real URLs
+		Integer[][] items = database.getUndownloaded(1); //find stuff up to 1 day old
+		Log.v("service", "items.length = "+items.length);
+		//loop through and add articles to the queue
+		for(int i = 0; i < items[0].length; i++){
+			String url = database.getItem(items[0][i])[2];
+			webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, items[0][i]);
+			//FIXME inefficiencies with converting uri -> string and back
+		}
+		//loop through and add thumbnails to the queue
+		for(int i = 0; i < items[1].length; i++){
+			String url = "http://www.kmsolutions.co.uk/images/Google-icon.jpg";
+			webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, items[1][i]);
+		}
+		//loop through and add images to the queue
+		for(int i = 0; i < items[2].length; i++){
+			//TODO support image loading
 		}
 		//if we didn't have to add anything, report the load as fully complete
-		if(items.length == 0){
+		if(items[0].length == 0 && items[1].length == 0){
 			fullLoadComplete();
 		}
 	}
@@ -271,7 +268,7 @@ public class ResourceService extends Service implements ResourceInterface {
 			//report that a specifically requested item has been loaded
 			Bundle bundle = new Bundle();
 			bundle.putInt("item", itemId);
-			sendMsgToAll(type, null); //tell every client about the load
+			sendMsgToAll(MSG_ARTICLE_LOADED, bundle); //tell every client about the load
 		}
 	}
 	
