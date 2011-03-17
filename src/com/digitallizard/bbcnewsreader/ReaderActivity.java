@@ -447,11 +447,15 @@ public class ReaderActivity extends Activity {
     }
     
     public void itemClicked(View item){
-    	//create an intent to launch the next activity
-    	Intent intent = new Intent(this, ArticleActivity.class);
+    	//retrieve the title of this activity
     	TextView titleText = (TextView)item.findViewById(R.id.textNewsItemTitle);
-    	intent.putExtra("id", (int)itemIds.get(titleText.getText()));
-    	startActivity(intent);
+    	//check there is an item at this view
+    	if(!titleText.getText().equals("No Title")){
+    		//launch article view activity
+    		Intent intent = new Intent(this, ArticleActivity.class);
+	    	intent.putExtra("id", (int)itemIds.get(titleText.getText()));
+	    	startActivity(intent);
+    	}
     }
     
     public void categoryClicked(View view){
