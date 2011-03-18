@@ -21,6 +21,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -55,6 +56,7 @@ public class ReaderActivity extends Activity {
 	static final int CATEGORY_ROW_LENGTH = 4;
 	static final int DIALOG_ERROR = 0;
 	static final int NEWS_ITEM_DP_WIDTH = 70; //FIXME item width shouldn't be predefined
+	static final String PREFS_FILE_NAME = "newsreader_main_prefs";
 	
 	/* variables */
 	ScrollView scroller;
@@ -162,9 +164,18 @@ public class ReaderActivity extends Activity {
     }
     
     void setLastLoadTime(long time){
-    	lastLoadTime = time;
+    	//check if we need to store a new time
+    	if(time != lastLoadTime){
+    		Log.v("readeractivity", "storing to preferences file");
+    		lastLoadTime = time;
+    		//store the new time in the preferences file
+    		Editor editor = settings.edit();
+    		editor.putLong("lastLoadTime", time);
+    		editor.apply();
+    	}
+    	//now display the new time to the user
     	//check if the time is set
-    	if(lastLoadTime != 0){
+    	if(lastLoadTime == 0){
     		//say we have never loaded
     		statusText.setText("Last updated never");
     	}
@@ -173,17 +184,24 @@ public class ReaderActivity extends Activity {
     		String status = "Last updated ";
     		//find out time since last load in milliseconds
     		long difference = System.currentTimeMillis() - (time * 1000); //the time since the last load
-    		Log.v("activity", "difference:"+difference);
     		//if within 1 hour, display minutes
     		if(difference < (1000 * 60 * 60)){
     			int minutesAgo = (int)Math.floor((difference / 1000) / 60);
-    			status += minutesAgo + " minutes ago";
+    			if(minutesAgo == 0)
+    				status += "just now";
+    			else if(minutesAgo == 1)
+    				status += minutesAgo + " minute ago";
+    			else
+    				status += minutesAgo + " minutes ago";
     		}
     		else{
     			//if we are within 24 hours, display hours
     			if(difference < (1000 * 60 * 60 * 24)){
         			int hoursAgo = (int)Math.floor(((difference / 1000) / 60) / 60);
-        			status += hoursAgo + " hours ago";
+        			if(hoursAgo == 1)
+        				status += hoursAgo + " hour ago";
+        			else
+        				status += hoursAgo + " hours ago";
         		}
     			else{
     				//if we are within 2 days, display yesterday
@@ -197,8 +215,6 @@ public class ReaderActivity extends Activity {
     				}
     			}
     		}
-    		//SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, HH:mm dd MMM");
-			//String date = dateFormat.format(101010);
 			statusText.setText(status);
     	}
     }
@@ -314,12 +330,19 @@ public class ReaderActivity extends Activity {
         createNewsDisplay();
 
         //load the preferences system
-        settings = getPreferences(MODE_WORLD_WRITEABLE); //load settings in read/write form
+        settings = getSharedPreferences(PREFS_FILE_NAME, MODE_PRIVATE); //load settings in read/write form
         loadSettings(); //load in the settings
         
         //start the service
         doBindService(); //loads the service
         //TODO start a refresh if we haven't refreshed recently
+    }
+    
+    public void onResume(){
+    	super.onResume(); //call the super class method
+    	//update the last loaded display
+    	setLastLoadTime(lastLoadTime);
+    	//TODO update display more often?
     }
     
     void loadSettings(){
