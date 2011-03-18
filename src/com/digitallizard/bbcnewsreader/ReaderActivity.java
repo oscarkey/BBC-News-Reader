@@ -7,7 +7,9 @@
 package com.digitallizard.bbcnewsreader;
 
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import android.app.Activity;
@@ -18,6 +20,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -60,7 +63,8 @@ public class ReaderActivity extends Activity {
 	boolean resourceServiceBound;
 	boolean loadInProgress;
 	private DatabaseHandler database;
-	LayoutInflater inflater; //used to create objects from the XML
+	private LayoutInflater inflater; //used to create objects from the XML
+	private SharedPreferences settings; //used to save and load preferences
 	ImageButton refreshButton;
 	TextView statusText;
 	String[] categoryNames;
@@ -70,31 +74,7 @@ public class ReaderActivity extends Activity {
 	Dialog errorDialog;
 	boolean errorWasFatal;
 	HashMap<String, Integer> itemIds;
-	String[] itemNames = {"lorem", "ipsum", "dolor", "sit", "amet",
-			"consectetuer", "adipiscing", "elit", "morbi", "vel",
-			"ligula", "vitae", "arcu", "aliquet", "mollis",
-			"etiam", "vel", "erat", "placerat", "ante",
-			"porttitor", "sodales", "pellentesque", "augue",
-			"purus", "lorem", "ipsum", "dolor", "sit", "amet",
-			"consectetuer", "adipiscing", "elit", "morbi", "vel",
-			"ligula", "vitae", "arcu", "aliquet", "mollis",
-			"etiam", "vel", "erat", "placerat", "ante",
-			"porttitor", "sodales", "pellentesque", "augue",
-			"purus", "lorem", "ipsum", "dolor", "sit", "amet",
-			"consectetuer", "adipiscing", "elit", "morbi", "vel",
-			"ligula", "vitae", "arcu", "aliquet", "mollis",
-			"etiam", "vel", "erat", "placerat", "ante",
-			"porttitor", "sodales", "pellentesque", "augue",
-			"purus","ligula", "vitae", "arcu", "aliquet", "mollis",
-			"etiam", "vel", "erat", "placerat", "ante",
-			"porttitor", "sodales", "pellentesque", "augue",
-			"purus", "lorem", "ipsum", "dolor", "sit", "amet",
-			"consectetuer", "adipiscing", "elit", "morbi", "vel",
-			"ligula", "vitae", "arcu", "aliquet", "mollis",
-			"etiam", "vel", "erat", "placerat", "ante",
-			"porttitor", "sodales", "pellentesque", "augue",
-			"purus"};
-	
+	long lastLoadTime;
 
 	/* service configuration */
 	//the handler class to process new messages
@@ -181,6 +161,48 @@ public class ReaderActivity extends Activity {
     	}
     }
     
+    void setLastLoadTime(long time){
+    	lastLoadTime = time;
+    	//check if the time is set
+    	if(lastLoadTime != 0){
+    		//say we have never loaded
+    		statusText.setText("Last updated never");
+    	}
+    	else{
+    		//set the text to show date and time
+    		String status = "Last updated ";
+    		//find out time since last load in milliseconds
+    		long difference = System.currentTimeMillis() - (time * 1000); //the time since the last load
+    		Log.v("activity", "difference:"+difference);
+    		//if within 1 hour, display minutes
+    		if(difference < (1000 * 60 * 60)){
+    			int minutesAgo = (int)Math.floor((difference / 1000) / 60);
+    			status += minutesAgo + " minutes ago";
+    		}
+    		else{
+    			//if we are within 24 hours, display hours
+    			if(difference < (1000 * 60 * 60 * 24)){
+        			int hoursAgo = (int)Math.floor(((difference / 1000) / 60) / 60);
+        			status += hoursAgo + " hours ago";
+        		}
+    			else{
+    				//if we are within 2 days, display yesterday
+    				if(difference < (1000 * 60 * 60 * 48)){
+            			status += "yesterday";
+            		}
+    				else{
+    					//we have not updated recently
+    					status += "ages ago";
+    					//TODO more formal message?
+    				}
+    			}
+    		}
+    		//SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, HH:mm dd MMM");
+			//String date = dateFormat.format(101010);
+			statusText.setText(status);
+    	}
+    }
+    
     void loadData(){
     	//check we aren't currently loading news
     	if(!loadInProgress){
@@ -210,7 +232,7 @@ public class ReaderActivity extends Activity {
 	    	//display the reloading image on the button
 	    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh));
 	    	//report the loaded status
-	    	statusText.setText("Last updated ???");
+	    	setLastLoadTime((int)Math.floor(System.currentTimeMillis()/1000)); //set the time as unix time
 	    	//tell the database to delete old items
 	    	database.clearOld();
     	}
@@ -273,6 +295,7 @@ public class ReaderActivity extends Activity {
         setContentView(R.layout.main);
         
         loadInProgress = false;
+        lastLoadTime = 0;
         
         //load the database
         database = new DatabaseHandler(this);
@@ -290,10 +313,21 @@ public class ReaderActivity extends Activity {
         
         createNewsDisplay();
 
+        //load the preferences system
+        settings = getPreferences(MODE_WORLD_WRITEABLE); //load settings in read/write form
+        loadSettings(); //load in the settings
         
         //start the service
         doBindService(); //loads the service
         //TODO start a refresh if we haven't refreshed recently
+    }
+    
+    void loadSettings(){
+    	//check the settings file exists
+    	if(settings != null){
+	    	//load values from the settings
+	    	setLastLoadTime(settings.getLong("lastLoadTime", 0)); //sets to zero if not in preferences
+    	}
     }
     
     void createNewsDisplay(){
