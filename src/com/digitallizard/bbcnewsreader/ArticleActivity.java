@@ -26,13 +26,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.webkit.WebView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class ArticleActivity extends Activity {
 	DatabaseHandler database;
 	Messenger resourceMessenger;
 	boolean resourceServiceBound;
 	int id; //the article id
+	LinearLayout layout;
 	WebView webView;
+	TextView textLoadingView;
 	boolean loadNeeded; //true when we need to load something
 	
 	/* service configuration */
@@ -131,6 +135,8 @@ public class ArticleActivity extends Activity {
     
     void displayArticle(String html){
     	webView.loadDataWithBaseURL(null, html, "text/html", "utf-8",null);
+    	layout.removeView(textLoadingView);
+		layout.addView(webView);
     }
     
     public boolean onOptionsItemSelected(MenuItem item){
@@ -166,8 +172,10 @@ public class ArticleActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.article);
 		loadNeeded = false;
-		//create a web view to display the article
-		webView = (WebView)findViewById(R.id.articleWebView);
+		//create references to views
+		layout = (LinearLayout)findViewById(R.id.articleLayout);
+		textLoadingView = (TextView)findViewById(R.id.articleLoadingText);
+		webView = new WebView(this); //create a web view to display the article
 		//retrieve the article text from the database
 		id = this.getIntent().getIntExtra("id", 0);
 		database = new DatabaseHandler(this);
