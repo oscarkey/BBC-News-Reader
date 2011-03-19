@@ -5,7 +5,8 @@
   Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
   All rights reserved.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.digitallizard.bbcnewsreader.ItemLayout xmlns:android="http://schemas.android.com/apk/res/android"
+class="com.digitallizard.bbcnewsreader.ItemLayout"
 android:id="@+id/rootNewsItem"
 android:orientation="vertical"
 android:layout_width="wrap_content"
@@ -25,4 +26,4 @@ android:onClick="itemClicked">
 	android:layout_height="wrap_content"
 	android:gravity="center_horizontal"
     android:textSize="10sp"/>
-</LinearLayout>
+</com.digitallizard.bbcnewsreader.ItemLayout>
