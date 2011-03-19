@@ -105,10 +105,11 @@ public class WebManager implements Runnable {
 	
 	private void itemQueued(){
 		//check if we need to start the download thread
-		if(isQueueEmpty() && !downloadThread.isAlive()){
+		if(isQueueEmpty() && !shouldKeepDownloading()){
 			//start the download thread
 			setQueueEmpty(false);
 			setKeepDownloading(true);
+			downloadThread = new Thread(this);
 			downloadThread.start();
 		}
 	}
@@ -190,6 +191,5 @@ public class WebManager implements Runnable {
 		this.handler = handler;
 		setQueueEmpty(true);
 		downloadQueue = new PriorityQueue<QueueItem>();
-		downloadThread = new Thread(this);
 	}
 }

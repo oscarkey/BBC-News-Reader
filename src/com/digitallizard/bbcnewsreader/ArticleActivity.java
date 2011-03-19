@@ -22,6 +22,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -135,7 +136,8 @@ public class ArticleActivity extends Activity {
     
     void displayArticle(String html){
     	webView.loadDataWithBaseURL(null, html, "text/html", "utf-8",null);
-    	layout.removeView(textLoadingView);
+    	layout.removeAllViews();
+    	layout.setGravity(Gravity.FILL); //make the webview fill the screen
 		layout.addView(webView);
     }
     
@@ -143,6 +145,10 @@ public class ArticleActivity extends Activity {
     	if(item.getTitle().equals("Reload Article")){
     		//reload the article
     		if(resourceServiceBound){
+    			//display the load screen
+    			layout.removeAllViews();
+    			layout.setGravity(Gravity.CENTER);
+    			layout.addView(textLoadingView);
     			loadData(); //trigger loading
     		}
     		else{
