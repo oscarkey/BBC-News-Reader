@@ -7,9 +7,7 @@
 package com.digitallizard.bbcnewsreader;
 
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 import android.app.Activity;
@@ -166,7 +164,6 @@ public class ReaderActivity extends Activity {
     void setLastLoadTime(long time){
     	//check if we need to store a new time
     	if(time != lastLoadTime){
-    		Log.v("readeractivity", "storing to preferences file");
     		lastLoadTime = time;
     		//store the new time in the preferences file
     		Editor editor = settings.edit();
@@ -175,47 +172,49 @@ public class ReaderActivity extends Activity {
     	}
     	//now display the new time to the user
     	//check if the time is set
-    	if(lastLoadTime == 0){
-    		//say we have never loaded
-    		statusText.setText("Last updated never");
-    	}
-    	else{
-    		//set the text to show date and time
-    		String status = "Last updated ";
-    		//find out time since last load in milliseconds
-    		long difference = System.currentTimeMillis() - (time * 1000); //the time since the last load
-    		//if within 1 hour, display minutes
-    		if(difference < (1000 * 60 * 60)){
-    			int minutesAgo = (int)Math.floor((difference / 1000) / 60);
-    			if(minutesAgo == 0)
-    				status += "just now";
-    			else if(minutesAgo == 1)
-    				status += minutesAgo + " minute ago";
-    			else
-    				status += minutesAgo + " minutes ago";
-    		}
-    		else{
-    			//if we are within 24 hours, display hours
-    			if(difference < (1000 * 60 * 60 * 24)){
-        			int hoursAgo = (int)Math.floor(((difference / 1000) / 60) / 60);
-        			if(hoursAgo == 1)
-        				status += hoursAgo + " hour ago";
-        			else
-        				status += hoursAgo + " hours ago";
-        		}
-    			else{
-    				//if we are within 2 days, display yesterday
-    				if(difference < (1000 * 60 * 60 * 48)){
-            			status += "yesterday";
-            		}
-    				else{
-    					//we have not updated recently
-    					status += "ages ago";
-    					//TODO more formal message?
-    				}
-    			}
-    		}
-			statusText.setText(status);
+    	if(!loadInProgress){
+	    	if(lastLoadTime == 0){
+	    		//say we have never loaded
+	    		statusText.setText("Last updated never");
+	    	}
+	    	else{
+	    		//set the text to show date and time
+	    		String status = "Last updated ";
+	    		//find out time since last load in milliseconds
+	    		long difference = System.currentTimeMillis() - (time * 1000); //the time since the last load
+	    		//if within 1 hour, display minutes
+	    		if(difference < (1000 * 60 * 60)){
+	    			int minutesAgo = (int)Math.floor((difference / 1000) / 60);
+	    			if(minutesAgo == 0)
+	    				status += "just now";
+	    			else if(minutesAgo == 1)
+	    				status += minutesAgo + " minute ago";
+	    			else
+	    				status += minutesAgo + " minutes ago";
+	    		}
+	    		else{
+	    			//if we are within 24 hours, display hours
+	    			if(difference < (1000 * 60 * 60 * 24)){
+	        			int hoursAgo = (int)Math.floor(((difference / 1000) / 60) / 60);
+	        			if(hoursAgo == 1)
+	        				status += hoursAgo + " hour ago";
+	        			else
+	        				status += hoursAgo + " hours ago";
+	        		}
+	    			else{
+	    				//if we are within 2 days, display yesterday
+	    				if(difference < (1000 * 60 * 60 * 48)){
+	            			status += "yesterday";
+	            		}
+	    				else{
+	    					//we have not updated recently
+	    					status += "ages ago";
+	    					//TODO more formal message?
+	    				}
+	    			}
+	    		}
+				statusText.setText(status);
+	    	}
     	}
     }
     
