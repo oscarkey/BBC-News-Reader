@@ -21,6 +21,7 @@
 <activity android:name="CategoryChooserActivity" android:label="BBC News Reader"></activity>
 <service android:name="ResourceService" android:process=":bbcnewsreaderresourceservice"></service>
 <activity android:name="CategoryActivity" android:label="@string/app_name"></activity>
+<activity android:name="SettingsActivity"></activity>
 </application>
 
 

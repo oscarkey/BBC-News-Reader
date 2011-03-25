@@ -164,6 +164,7 @@ public class ReaderActivity extends Activity {
     void setLastLoadTime(long time){
     	//check if we need to store a new time
     	if(time != lastLoadTime){
+    		Log.v("reader activity", "updating time: "+time);
     		lastLoadTime = time;
     		//store the new time in the preferences file
     		Editor editor = settings.edit();
@@ -464,9 +465,9 @@ public class ReaderActivity extends Activity {
         	startActivityForResult(intent, ACTIVITY_CHOOSE_CATEGORIES);
     	}
     	if(item.getTitle().equals("Settings")){
-    		showErrorDialog("Not implemented.");
-    		//TODO add code to show the settings menu
-    		//TODO add a settings menu
+    		//show the settings menu
+    		Intent intent = new Intent(this, SettingsActivity.class);
+    		startActivity(intent);
     	}
     	if(item.getTitle().equals("Reset")){
     		//clear the database tables and then crash out
