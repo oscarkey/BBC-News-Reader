@@ -6,12 +6,9 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader.data;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.sql.Blob;
-import java.text.SimpleDateFormat;
-
-import com.digitallizard.bbcnewsreader.R;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -19,6 +16,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import com.digitallizard.bbcnewsreader.R;
 
 public class DatabaseHandler {
 
@@ -46,8 +45,10 @@ public class DatabaseHandler {
 									          "itemId INT)";
    private Context context;
    private SQLiteDatabase db;
-   public DatabaseHandler(Context context) {
+   private long clearOutAgeMilliSecs; //the number of days to keep news items
+   public DatabaseHandler(Context context, int clearOutAgeDays) {
       this.context = context;
+      this.clearOutAgeMilliSecs = (long)(clearOutAgeDays * 24 * 60 * 60 * 1000);
       OpenHelper openHelper = new OpenHelper(this.context);
       this.db = openHelper.getWritableDatabase();
    }
@@ -74,10 +75,9 @@ public class DatabaseHandler {
 	   {
 		   //Log.v("ERROR",e.toString());
 	   }
-	   //FIXME Change time to a variable.
 	   Boolean recent=false;
 	   Date now=new Date();
-	   if(timestamp>(now.getTime()-2629743000L))
+	   if(timestamp>(now.getTime()-clearOutAgeMilliSecs))
 		{
 		   recent=true;
 		}
@@ -178,6 +178,7 @@ public class DatabaseHandler {
     * 			type is either 0, 1 or 2 for html, thumbnail or image respectively.
     */
    public Integer[][] getUndownloaded(int days) {
+	   Log.v("database", "days: "+days);
 	   Date now = new Date();
 	   long curTime = now.getTime();
 	   long timeComparison = curTime-86400000L*days;
@@ -465,12 +466,12 @@ public class DatabaseHandler {
    public void clearOld()
    {
 	   
-	   //FIXME Add parameter, customize the date it wipes from. Optimise?
+	   //FIXME Optimise?
 	   //Creates a java.util date object with current time
 	   //Subtracts one month in milliseconds and deletes all
 	   //items with a pubdate less than that value.
 	   Date now=new Date();
-	   long oldTime=(now.getTime()-2629743000L);
+	   long oldTime=(now.getTime()-clearOutAgeMilliSecs);
 	   Cursor cursor=db.query(ITEM_TABLE,new String[]{"item_Id"},"pubdate<?",new String[]{Long.toString(oldTime)},null,null,null);
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {

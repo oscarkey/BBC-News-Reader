@@ -14,6 +14,7 @@ import com.digitallizard.bbcnewsreader.resource.web.WebManager;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,6 +35,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	DatabaseHandler database; //the database
 	RSSManager rssManager;
 	WebManager webManager;
+	SharedPreferences settings;
 	
 	/* command definitions */
 	static final int MSG_REGISTER_CLIENT = 1;
@@ -213,8 +215,7 @@ public class ResourceService extends Service implements ResourceInterface {
 		//tell the gui
 		sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
 		//as the rss load has completed we can begin loading articles etc
-		//TODO the age of downloading should be user specified
-		Integer[][] items = database.getUndownloaded(1); //find stuff up to 1 day old
+		Integer[][] items = database.getUndownloaded(settings.getInt("loadToDays", ReaderActivity.DEFAULT_LOAD_TO_DAYS)); //find stuff up to 1 day old
 		Log.v("service", "items.length = "+items.length);
 		//loop through and add articles to the queue
 		for(int i = 0; i < items[0].length; i++){
@@ -276,10 +277,15 @@ public class ResourceService extends Service implements ResourceInterface {
 	public void onCreate(){
 		//init the loading flag
 		loadInProgress = false;
-		//create the database if needed
+		
+		//load various key components
+		if(settings == null){
+			//load in the settings
+			settings = getSharedPreferences(ReaderActivity.PREFS_FILE_NAME, MODE_PRIVATE); //load settings in read/write form
+		}
 		if(database == null){
 			//load the database
-			setDatabase(new DatabaseHandler(this));
+			setDatabase(new DatabaseHandler(this, settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE)));
 			//create tables in the database if needed
 			if(!getDatabase().isCreated()){
 				getDatabase().createTables();

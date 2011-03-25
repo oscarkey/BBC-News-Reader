@@ -54,7 +54,9 @@ public class ReaderActivity extends Activity {
 	static final int CATEGORY_ROW_LENGTH = 4;
 	static final int DIALOG_ERROR = 0;
 	static final int NEWS_ITEM_DP_WIDTH = 70; //FIXME item width shouldn't be predefined
-	static final String PREFS_FILE_NAME = "newsreader_main_prefs";
+	static final String PREFS_FILE_NAME = "com.digitallizard.bbcnewsreader_preferences";
+	static final int DEFAULT_LOAD_TO_DAYS = 1;
+	static final int DEFAULT_CLEAR_OUT_AGE = 7;
 	
 	/* variables */
 	ScrollView scroller;
@@ -107,7 +109,6 @@ public class ReaderActivity extends Activity {
 	
 	private ServiceConnection resourceServiceConnection = new ServiceConnection() {
 	    public void onServiceConnected(ComponentName className, IBinder service) {
-	    	Log.v(getLocalClassName(), "Service connected");
 	        //this runs when the service connects
 	    	resourceServiceBound = true; //flag the service as bound
 	    	//save a pointer to the service to a local variable
@@ -164,7 +165,6 @@ public class ReaderActivity extends Activity {
     void setLastLoadTime(long time){
     	//check if we need to store a new time
     	if(time != lastLoadTime){
-    		Log.v("reader activity", "updating time: "+time);
     		lastLoadTime = time;
     		//store the new time in the preferences file
     		Editor editor = settings.edit();
@@ -313,13 +313,6 @@ public class ReaderActivity extends Activity {
         loadInProgress = false;
         lastLoadTime = 0;
         
-        //load the database
-        database = new DatabaseHandler(this);
-        if(!database.isCreated()){
-        	database.createTables();
-        	database.addCategories();
-        }
-        
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
@@ -327,11 +320,18 @@ public class ReaderActivity extends Activity {
         refreshButton = (ImageButton) findViewById(R.id.refreshButton);
         statusText = (TextView) findViewById(R.id.statusText);
         
-        createNewsDisplay();
-
         //load the preferences system
         settings = getSharedPreferences(PREFS_FILE_NAME, MODE_PRIVATE); //load settings in read/write form
         loadSettings(); //load in the settings
+        
+        //load the database
+        database = new DatabaseHandler(this, settings.getInt("clearOutAge", DEFAULT_CLEAR_OUT_AGE));
+        if(!database.isCreated()){
+        	database.createTables();
+        	database.addCategories();
+        }
+        
+        createNewsDisplay();
         
         //start the service
         doBindService(); //loads the service

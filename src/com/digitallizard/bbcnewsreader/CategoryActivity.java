@@ -44,7 +44,7 @@ public class CategoryActivity extends Activity {
 		LinearLayout scroller = (LinearLayout)findViewById(R.id.categoryScroller);
 		
 		//load in the news items from the database
-		DatabaseHandler database = new DatabaseHandler(this);
+		DatabaseHandler database = new DatabaseHandler(this, 0); //we don't need to bother with the clear old date
 		String[][] items = database.getItems(title);
 		//check if the database was empty
 		if(items != null){
