@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory
+	android:title="Preferences">
+	    <com.hlidskialf.android.preference.SeekBarPreference
+	    android:key="clearOutAge"
+        android:title="Max news age"
+        android:summary="The number of days to keep news"
+        android:dialogMessage="Reduce this to save space"
+        android:defaultValue="3"
+        android:text=" days"
+        android:max="20"/>
+        <com.hlidskialf.android.preference.SeekBarPreference
+	    android:key="loadToDays"
+        android:title="Load articles upto"
+        android:summary="The number of days ago to load new upto"
+        android:dialogMessage="Reduce this to shorten load times"
+        android:defaultValue="1"
+        android:text=" days"
+        android:max="7"/>
+    </PreferenceCategory>
+</PreferenceScreen>
