@@ -8,7 +8,7 @@
         android:summary="The number of days to keep news"
         android:dialogMessage="Reduce this to save space"
         android:defaultValue="7"
-        android:text="days"
+        android:text=" days"
         android:max="30"/>
         <com.hlidskialf.android.preference.SeekBarPreference
 	    android:key="loadToDays"
@@ -16,7 +16,7 @@
         android:summary="The number of days ago to load new upto"
         android:dialogMessage="Reduce this to shorten load times"
         android:defaultValue="1"
-        android:text="days"
+        android:text=" days ago"
         android:max="7"/>
     </PreferenceCategory>
 </PreferenceScreen>
