@@ -29,7 +29,6 @@ public class WebManager implements Runnable {
 
 	synchronized void setQueueEmpty(boolean queueEmpty) {
 		this.queueEmpty = queueEmpty;
-		Log.v("web manager", "queueEmpty set to: "+queueEmpty);
 	}
 
 	synchronized boolean shouldKeepDownloading() {
@@ -38,7 +37,6 @@ public class WebManager implements Runnable {
 
 	synchronized void setKeepDownloading(boolean keepDownloading) {
 		this.keepDownloading = keepDownloading;
-		Log.v("web manager", "keepDownloading set to: "+keepDownloading);
 	}
 	
 	synchronized void setQueue(PriorityQueue<QueueItem> queue){
@@ -126,7 +124,6 @@ public class WebManager implements Runnable {
 	}
 	
 	public void loadNow(String url, int type, int itemId){
-		Log.v("web manager", "loading now:");
 		boolean itemExists = false; //set to true if the item was actually in the queue
 		//loop through the queue to find the item we want
 		//FIXME looping efficient? probably doesn't matter as only on user command
@@ -142,7 +139,6 @@ public class WebManager implements Runnable {
 		}
 		//if the item wasn't found, create it and set its priority high
 		if(!itemExists){
-			Log.v("web manager", "adding to queue");
 			addToQueue(url, type, itemId, QueueItem.PRIORITY_DOWNLOAD_NOW);
 		}
 	}
@@ -165,7 +161,6 @@ public class WebManager implements Runnable {
 	}
 	
 	public void run(){
-		Log.v("webmanager", "thread starting");
 		//check this hasn't been called in error
 		if(getQueue().size() > 0){
 			//keep downloading if we should
@@ -184,7 +179,6 @@ public class WebManager implements Runnable {
 			//as the queue was empty, we should flag it
 			setQueueEmpty(true);
 		}
-		Log.v("webmanager", "thread finishing");
 	}
 	
 	public WebManager(ResourceInterface handler){

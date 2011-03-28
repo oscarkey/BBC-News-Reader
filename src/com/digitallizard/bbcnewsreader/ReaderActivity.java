@@ -18,6 +18,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -52,6 +54,9 @@ public class ReaderActivity extends Activity {
 	static final int CATEGORY_ROW_LENGTH = 4;
 	static final int DIALOG_ERROR = 0;
 	static final int NEWS_ITEM_DP_WIDTH = 70; //FIXME item width shouldn't be predefined
+	static final String PREFS_FILE_NAME = "com.digitallizard.bbcnewsreader_preferences";
+	static final int DEFAULT_LOAD_TO_DAYS = 1;
+	static final int DEFAULT_CLEAR_OUT_AGE = 7;
 	
 	/* variables */
 	ScrollView scroller;
@@ -60,7 +65,8 @@ public class ReaderActivity extends Activity {
 	boolean resourceServiceBound;
 	boolean loadInProgress;
 	private DatabaseHandler database;
-	LayoutInflater inflater; //used to create objects from the XML
+	private LayoutInflater inflater; //used to create objects from the XML
+	private SharedPreferences settings; //used to save and load preferences
 	ImageButton refreshButton;
 	TextView statusText;
 	String[] categoryNames;
@@ -70,7 +76,7 @@ public class ReaderActivity extends Activity {
 	Dialog errorDialog;
 	boolean errorWasFatal;
 	HashMap<String, Integer> itemIds;
-	
+	long lastLoadTime;
 
 	/* service configuration */
 	//the handler class to process new messages
@@ -103,7 +109,6 @@ public class ReaderActivity extends Activity {
 	
 	private ServiceConnection resourceServiceConnection = new ServiceConnection() {
 	    public void onServiceConnected(ComponentName className, IBinder service) {
-	    	Log.v(getLocalClassName(), "Service connected");
 	        //this runs when the service connects
 	    	resourceServiceBound = true; //flag the service as bound
 	    	//save a pointer to the service to a local variable
@@ -157,6 +162,63 @@ public class ReaderActivity extends Activity {
     	}
     }
     
+    void setLastLoadTime(long time){
+    	//check if we need to store a new time
+    	if(time != lastLoadTime){
+    		lastLoadTime = time;
+    		//store the new time in the preferences file
+    		Editor editor = settings.edit();
+    		editor.putLong("lastLoadTime", time);
+    		editor.apply();
+    	}
+    	//now display the new time to the user
+    	//check if the time is set
+    	if(!loadInProgress){
+	    	if(lastLoadTime == 0){
+	    		//say we have never loaded
+	    		statusText.setText("Last updated never");
+	    	}
+	    	else{
+	    		//set the text to show date and time
+	    		String status = "Last updated ";
+	    		//find out time since last load in milliseconds
+	    		long difference = System.currentTimeMillis() - (time * 1000); //the time since the last load
+	    		//if within 1 hour, display minutes
+	    		if(difference < (1000 * 60 * 60)){
+	    			int minutesAgo = (int)Math.floor((difference / 1000) / 60);
+	    			if(minutesAgo == 0)
+	    				status += "just now";
+	    			else if(minutesAgo == 1)
+	    				status += minutesAgo + " minute ago";
+	    			else
+	    				status += minutesAgo + " minutes ago";
+	    		}
+	    		else{
+	    			//if we are within 24 hours, display hours
+	    			if(difference < (1000 * 60 * 60 * 24)){
+	        			int hoursAgo = (int)Math.floor(((difference / 1000) / 60) / 60);
+	        			if(hoursAgo == 1)
+	        				status += hoursAgo + " hour ago";
+	        			else
+	        				status += hoursAgo + " hours ago";
+	        		}
+	    			else{
+	    				//if we are within 2 days, display yesterday
+	    				if(difference < (1000 * 60 * 60 * 48)){
+	            			status += "yesterday";
+	            		}
+	    				else{
+	    					//we have not updated recently
+	    					status += "ages ago";
+	    					//TODO more formal message?
+	    				}
+	    			}
+	    		}
+				statusText.setText(status);
+	    	}
+    	}
+    }
+    
     void loadData(){
     	//check we aren't currently loading news
     	if(!loadInProgress){
@@ -186,7 +248,7 @@ public class ReaderActivity extends Activity {
 	    	//display the reloading image on the button
 	    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh));
 	    	//report the loaded status
-	    	statusText.setText("Last updated ???");
+	    	setLastLoadTime((int)Math.floor(System.currentTimeMillis()/1000)); //set the time as unix time
 	    	//tell the database to delete old items
 	    	database.clearOld();
     	}
@@ -249,13 +311,7 @@ public class ReaderActivity extends Activity {
         setContentView(R.layout.main);
         
         loadInProgress = false;
-        
-        //load the database
-        database = new DatabaseHandler(this);
-        if(!database.isCreated()){
-        	database.createTables();
-        	database.addCategories();
-        }
+        lastLoadTime = 0;
         
         //set up the inflater to allow us to construct layouts from the raw XML code
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -264,12 +320,37 @@ public class ReaderActivity extends Activity {
         refreshButton = (ImageButton) findViewById(R.id.refreshButton);
         statusText = (TextView) findViewById(R.id.statusText);
         
+        //load the preferences system
+        settings = getSharedPreferences(PREFS_FILE_NAME, MODE_PRIVATE); //load settings in read/write form
+        loadSettings(); //load in the settings
+        
+        //load the database
+        database = new DatabaseHandler(this, settings.getInt("clearOutAge", DEFAULT_CLEAR_OUT_AGE));
+        if(!database.isCreated()){
+        	database.createTables();
+        	database.addCategories();
+        }
+        
         createNewsDisplay();
-
         
         //start the service
         doBindService(); //loads the service
         //TODO start a refresh if we haven't refreshed recently
+    }
+    
+    public void onResume(){
+    	super.onResume(); //call the super class method
+    	//update the last loaded display
+    	setLastLoadTime(lastLoadTime);
+    	//TODO update display more often?
+    }
+    
+    void loadSettings(){
+    	//check the settings file exists
+    	if(settings != null){
+	    	//load values from the settings
+	    	setLastLoadTime(settings.getLong("lastLoadTime", 0)); //sets to zero if not in preferences
+    	}
     }
     
     void createNewsDisplay(){
@@ -384,9 +465,9 @@ public class ReaderActivity extends Activity {
         	startActivityForResult(intent, ACTIVITY_CHOOSE_CATEGORIES);
     	}
     	if(item.getTitle().equals("Settings")){
-    		showErrorDialog("Not implemented.");
-    		//TODO add code to show the settings menu
-    		//TODO add a settings menu
+    		//show the settings menu
+    		Intent intent = new Intent(this, SettingsActivity.class);
+    		startActivity(intent);
     	}
     	if(item.getTitle().equals("Reset")){
     		//clear the database tables and then crash out

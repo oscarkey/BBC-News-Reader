@@ -14,6 +14,7 @@ import com.digitallizard.bbcnewsreader.resource.web.WebManager;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,7 +35,8 @@ public class ResourceService extends Service implements ResourceInterface {
 	DatabaseHandler database; //the database
 	RSSManager rssManager;
 	WebManager webManager;
-	
+	SharedPreferences settings;
+		
 	/* command definitions */
 	static final int MSG_REGISTER_CLIENT = 1;
 	static final int MSG_UNREGISTER_CLIENT = 2;
@@ -213,8 +215,8 @@ public class ResourceService extends Service implements ResourceInterface {
 		//tell the gui
 		sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
 		//as the rss load has completed we can begin loading articles etc
-		//TODO the age of downloading should be user specified
-		Integer[][] items = database.getUndownloaded(1); //find stuff up to 1 day old
+		int loadToDays = settings.getInt("loadToDays", ReaderActivity.DEFAULT_LOAD_TO_DAYS); //find user preference
+		Integer[][] items = database.getUndownloaded(loadToDays); //find stuff up to x days old
 		Log.v("service", "items.length = "+items.length);
 		//loop through and add articles to the queue
 		for(int i = 0; i < items[0].length; i++){
@@ -274,12 +276,18 @@ public class ResourceService extends Service implements ResourceInterface {
 	
 	@Override
 	public void onCreate(){
-		//init the loading flag
+		//init variables
 		loadInProgress = false;
-		//create the database if needed
+		
+		//load various key components
+		if(settings == null){
+			//load in the settings
+			settings = getSharedPreferences(ReaderActivity.PREFS_FILE_NAME, MODE_PRIVATE); //load settings in read/write form
+		}
 		if(database == null){
 			//load the database
-			setDatabase(new DatabaseHandler(this));
+			int clearOutAge = settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE); //load user preference
+			setDatabase(new DatabaseHandler(this, clearOutAge));
 			//create tables in the database if needed
 			if(!getDatabase().isCreated()){
 				getDatabase().createTables();
@@ -305,11 +313,11 @@ public class ResourceService extends Service implements ResourceInterface {
 	@Override
 	public void onDestroy(){
 		Log.v("ResourceService", "service is shutting down");
+		super.onDestroy();
 	}
 	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return messenger.getBinder();
 	}
-
 }

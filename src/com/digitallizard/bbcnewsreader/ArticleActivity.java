@@ -6,10 +6,6 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader;
 
-import com.digitallizard.bbcnewsreader.R;
-import com.digitallizard.bbcnewsreader.ReaderActivity.IncomingHandler;
-import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
-
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,6 +25,8 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
 public class ArticleActivity extends Activity {
 	DatabaseHandler database;
@@ -184,7 +182,7 @@ public class ArticleActivity extends Activity {
 		webView = new WebView(this); //create a web view to display the article
 		//retrieve the article text from the database
 		id = this.getIntent().getIntExtra("id", 0);
-		database = new DatabaseHandler(this);
+		database = new DatabaseHandler(this, 0); //we don't need to bother with the clear old date
 		String html = database.getHtml(id);
 		//check if any html was returned
 		if(html != null){
