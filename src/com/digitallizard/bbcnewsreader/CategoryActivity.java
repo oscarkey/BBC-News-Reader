@@ -13,9 +13,12 @@ import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -54,6 +57,17 @@ public class CategoryActivity extends Activity {
 				//set the article name
 				((TextView)item.findViewById(R.id.fullNewsItemName)).setText(items[0][i]);
 				((TextView)item.findViewById(R.id.fullNewsItemDescription)).setText(items[1][i]);
+				
+				//try and get an image for this item
+				byte[] imageBytes = database.getThumbnail(Integer.parseInt(items[3][i]));
+				//check if any image data was returned
+				if(imageBytes != null){
+					//try to construct an image out of the bytes given by the database
+					Bitmap imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length); //load the image into a bitmap
+					ImageView imageView = (ImageView)item.findViewById(R.id.fullNewsItemImage);
+					imageView.setImageBitmap(imageBitmap);
+				}
+				
 				scroller.addView(item);
 				//save the id for clicks
 				itemIds.put(items[0][i], Integer.parseInt(items[3][i]));
