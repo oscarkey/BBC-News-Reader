@@ -180,7 +180,6 @@ public class DatabaseHandler {
     * 			type is either 0, 1 or 2 for html, thumbnail or image respectively.
     */
    public Integer[][] getUndownloaded(int days) {
-	   Log.v("database", "days: "+days);
 	   Date now = new Date();
 	   long curTime = now.getTime();
 	   long timeComparison = curTime-86400000L*days;
@@ -376,7 +375,7 @@ public class DatabaseHandler {
     * the items related to it.
     * Returns null if no items exists
     * @param category The Case-sensitive name of the category
-    * @return A String[{title,description,link,item_Id,thumbnailUrl}][{item1,item2}].
+    * @return A String[{title,description,link,item_Id}][{item1,item2}].
     */
    public String[][] getItems(String category)
    {
@@ -397,7 +396,7 @@ public class DatabaseHandler {
 	   //Query the items table to get a the rows with that category
 	   //then fill the String[][] and return it
 	   cursor.close();
-	   cursor=db.query(ITEM_TABLE,new String[]{"title", "description", "link", "item_Id", "thumnailurl"},itemIdQuery,null,null,null,"pubdate desc");
+	   cursor=db.query(ITEM_TABLE,new String[]{"title", "description", "link", "item_Id"},itemIdQuery,null,null,null,"pubdate desc");
 	   String[][] items=new String[5][cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
@@ -406,7 +405,6 @@ public class DatabaseHandler {
 		   items[1][i-1]=cursor.getString(1);
 		   items[2][i-1]=cursor.getString(2);
 		   items[3][i-1]=cursor.getString(3);
-		   items[4][i-1]=cursor.getString(4);
 	   }
 	   cursor.close();
 	   return items;}

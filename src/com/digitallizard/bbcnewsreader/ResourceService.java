@@ -190,7 +190,10 @@ public class ResourceService extends Service implements ResourceInterface {
 			//FIXME stupid conversion and reconversion of date format. The database needs updating.
 			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 			String date = dateFormat.format(items[i].getPubDate());
-			String thumbUrl = items[i].getThumbnails().get(0).toString();
+			//check there are some thumbnails
+			String thumbUrl = null;
+			if(items[i].getThumbnails().size() == 2)
+				thumbUrl = items[i].getThumbnails().get(0).toString();
 			getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category, thumbUrl);
 		}
 		//send a message to the gui to tell it that we have loaded the category
@@ -217,7 +220,6 @@ public class ResourceService extends Service implements ResourceInterface {
 		//as the rss load has completed we can begin loading articles etc
 		int loadToDays = settings.getInt("loadToDays", ReaderActivity.DEFAULT_LOAD_TO_DAYS); //find user preference
 		Integer[][] items = database.getUndownloaded(loadToDays); //find stuff up to x days old
-		Log.v("service", "items.length = "+items.length);
 		//loop through and add articles to the queue
 		for(int i = 0; i < items[0].length; i++){
 			//FIXME should only get url, not whole item
@@ -228,8 +230,10 @@ public class ResourceService extends Service implements ResourceInterface {
 		//loop through and add thumbnails to the queue
 		for(int i = 0; i < items[1].length; i++){
 			//FIXME should only get url, not whole item
-			String url = database.getItem(items[0][i])[3];
-			webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, items[1][i]);
+			String url = database.getItem(items[0][i])[4];
+			//check if there is a thumbnail url, if so load it
+			if(url != null)
+				webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, items[1][i]);
 		}
 		//loop through and add images to the queue
 		for(int i = 0; i < items[2].length; i++){
