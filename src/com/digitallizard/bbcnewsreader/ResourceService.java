@@ -134,7 +134,6 @@ public class ResourceService extends Service implements ResourceInterface {
 	}
 	
 	void loadArticle(int id){
-		Log.v("service", "id: "+id);
 		String url = database.getItem(id)[2]; //get the url of the item
 		webManager.loadNow(url, WebManager.ITEM_TYPE_HTML, id); //tell the webmanager to load this
 	}
@@ -191,7 +190,8 @@ public class ResourceService extends Service implements ResourceInterface {
 			//FIXME stupid conversion and reconversion of date format. The database needs updating.
 			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 			String date = dateFormat.format(items[i].getPubDate());
-			getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category);
+			String thumbUrl = items[i].getThumbnails().get(0).toString();
+			getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category, thumbUrl);
 		}
 		//send a message to the gui to tell it that we have loaded the category
 		Bundle bundle = new Bundle();
@@ -220,13 +220,15 @@ public class ResourceService extends Service implements ResourceInterface {
 		Log.v("service", "items.length = "+items.length);
 		//loop through and add articles to the queue
 		for(int i = 0; i < items[0].length; i++){
+			//FIXME should only get url, not whole item
 			String url = database.getItem(items[0][i])[2];
 			webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, items[0][i]);
 			//FIXME inefficiencies with converting uri -> string and back
 		}
 		//loop through and add thumbnails to the queue
 		for(int i = 0; i < items[1].length; i++){
-			String url = "http://www.kmsolutions.co.uk/images/Google-icon.jpg";
+			//FIXME should only get url, not whole item
+			String url = database.getItem(items[0][i])[3];
 			webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, items[1][i]);
 		}
 		//loop through and add images to the queue

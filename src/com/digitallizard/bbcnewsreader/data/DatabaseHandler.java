@@ -34,7 +34,8 @@ public class DatabaseHandler {
 									          "pubdate int, " +
 									          "html text, " +
 									          "image blob, " +
-									          "thumbnail blob)";
+									          "thumbnail blob," +
+									          "thumbnailurl varchar(255))";
    private static final String TABLE2_CREATE="CREATE TABLE " + CATEGORY_TABLE +
 									          "(category_Id integer PRIMARY KEY," +
 									          "name varchar(255)," +
@@ -61,7 +62,7 @@ public class DatabaseHandler {
     * @param pubdate News item's published data as String
     * @param category News item's category as String
     */
-   public int insertItem(String title, String description, String link, String pubdate, String category)
+   public int insertItem(String title, String description, String link, String pubdate, String category, String thumbnailUrl)
    {
 	   int itemId = -1;
 	   //Formats the date of the item to Date object, then gets the UNIX TIMESTAMP from the Date.
@@ -94,6 +95,7 @@ public class DatabaseHandler {
 			   cv.put("description",description);
 			   cv.put("link",link);
 			   cv.put("pubdate",timestamp);
+			   cv.put("thumbnailurl",thumbnailUrl);
 			   long rowid=db.insert(ITEM_TABLE, null, cv);
 			   cursor.close();
 			   cursor=db.query(false,ITEM_TABLE,new String[]{"item_Id"},"rowid=?",new String[] {Long.toString(rowid)},null,null,null, null);
@@ -374,7 +376,7 @@ public class DatabaseHandler {
     * the items related to it.
     * Returns null if no items exists
     * @param category The Case-sensitive name of the category
-    * @return A String[{title,description,link,item_Id}][{item1,item2}].
+    * @return A String[{title,description,link,item_Id,thumbnailUrl}][{item1,item2}].
     */
    public String[][] getItems(String category)
    {
@@ -395,8 +397,8 @@ public class DatabaseHandler {
 	   //Query the items table to get a the rows with that category
 	   //then fill the String[][] and return it
 	   cursor.close();
-	   cursor=db.query(ITEM_TABLE,new String[]{"title", "description", "link", "item_Id"},itemIdQuery,null,null,null,"pubdate desc");
-	   String[][] items=new String[4][cursor.getCount()];
+	   cursor=db.query(ITEM_TABLE,new String[]{"title", "description", "link", "item_Id", "thumnailurl"},itemIdQuery,null,null,null,"pubdate desc");
+	   String[][] items=new String[5][cursor.getCount()];
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
 		   cursor.moveToNext();
@@ -404,6 +406,7 @@ public class DatabaseHandler {
 		   items[1][i-1]=cursor.getString(1);
 		   items[2][i-1]=cursor.getString(2);
 		   items[3][i-1]=cursor.getString(3);
+		   items[4][i-1]=cursor.getString(4);
 	   }
 	   cursor.close();
 	   return items;}
@@ -420,14 +423,16 @@ public class DatabaseHandler {
 	   String itemIdQuery=new String("item_Id='"+id+"'");
 	   //Query the items table to get a the rows with that id
 	   //then fill the String[] and return it
-	   Cursor cursor=db.query(ITEM_TABLE,new String[]{"title", "description", "link", "item_Id"},itemIdQuery,null,null,null,"pubdate desc");
-	   String[] items=new String[3];
+	   Cursor cursor=db.query(ITEM_TABLE,new String[]{"title", "description", "link", "item_Id", "thumbnailurl"},itemIdQuery,null,null,null,"pubdate desc");
+	   String[] items=new String[5];
 	   for(int i=1;i<=cursor.getCount();i++)
 	   {
 		   cursor.moveToNext();
 		   items[0]=cursor.getString(0);
 		   items[1]=cursor.getString(1);
 		   items[2]=cursor.getString(2);
+		   items[3]=cursor.getString(3);
+		   items[4]=cursor.getString(4);
 	   }
 	   cursor.close();
 	   return items;}
