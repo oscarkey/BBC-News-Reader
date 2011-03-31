@@ -13,6 +13,8 @@ import org.mcsoxford.rss.RSSItem;
 import com.digitallizard.bbcnewsreader.resource.web.WebManager;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
@@ -32,6 +34,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	public boolean loadInProgress; //a flag to tell the activity if there is a load in progress
 	ArrayList<Messenger> clients = new ArrayList<Messenger>(); //holds references to all of our clients
 	final Messenger messenger = new Messenger(new IncomingHandler()); //the messenger used for communication
+	BroadcastReceiver broadcastReceiver;
 	DatabaseHandler database; //the database
 	RSSManager rssManager;
 	WebManager webManager;
@@ -280,6 +283,10 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 	}
 	
+	public void onRecieve(Context context, Intent intent){
+		
+	}
+	
 	@Override
 	public void onCreate(){
 		//init variables
@@ -308,6 +315,8 @@ public class ResourceService extends Service implements ResourceInterface {
 			//load the rss manager
 			rssManager = new RSSManager(this);
 		}
+		
+		
 	}
 	
 	@Override
