@@ -16,6 +16,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Bundle;
@@ -283,10 +284,6 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 	}
 	
-	public void onRecieve(Context context, Intent intent){
-		
-	}
-	
 	@Override
 	public void onCreate(){
 		//init variables
@@ -316,9 +313,18 @@ public class ResourceService extends Service implements ResourceInterface {
 			rssManager = new RSSManager(this);
 		}
 		
-		
+		//register to receive alerts when a load is required
+		broadcastReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				if(intent.getAction().equals("com.digitallizard.bbcnewsreader.action.LOAD_NEWS")){
+					Log.v("service", "load now!!!");
+				}
+			}
+		};
+		this.registerReceiver(broadcastReceiver, new IntentFilter("com.digitallizard.bbcnewsreader.action.LOAD_NEWS"));
 	}
-	
+	 
 	@Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //We want to continue running until it is explicitly stopped, so return sticky.
