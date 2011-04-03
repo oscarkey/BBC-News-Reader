@@ -8,10 +8,14 @@ package com.digitallizard.bbcnewsreader;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import org.mcsoxford.rss.RSSItem;
 import com.digitallizard.bbcnewsreader.resource.web.WebManager;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -53,9 +57,11 @@ public class ResourceService extends Service implements ResourceInterface {
 	static final int MSG_CATEOGRY_LOADED = 6; //sent when a category has loaded
 	static final int MSG_ARTICLE_LOADED = 15; //article loaded
 	static final int MSG_THUMB_LOADED = 14; //thumbnail loaded
+	static final int MSG_NOW_LOADING = 16;
 	static final int MSG_FULL_LOAD_COMPLETE = 8; //sent when all the data has been loaded
 	static final int MSG_RSS_LOAD_COMPLETE = 10;
 	static final int MSG_ERROR = 7; //help! An error occurred
+	static final String ACTION_LOAD = "com.digitallizard.bbcnewsreader.action.LOAD_NEWS";
 	
 	//the handler class to process new messages
 	class IncomingHandler extends Handler {
@@ -117,6 +123,8 @@ public class ResourceService extends Service implements ResourceInterface {
 	}
 	
 	void loadData(){
+		//report to the gui that a load has been activated
+		sendMsgToAll(MSG_NOW_LOADING, null);
 		//set the flag saying that we are loading
 		loadInProgress = true;
 		//retrieve the active category urls
@@ -318,11 +326,28 @@ public class ResourceService extends Service implements ResourceInterface {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				if(intent.getAction().equals("com.digitallizard.bbcnewsreader.action.LOAD_NEWS")){
-					Log.v("service", "load now!!!");
+					Log.v("BBC News Reader Service", "News load requested.");
+					loadData(); //load the news
 				}
 			}
 		};
-		this.registerReceiver(broadcastReceiver, new IntentFilter("com.digitallizard.bbcnewsreader.action.LOAD_NEWS"));
+		this.registerReceiver(broadcastReceiver, new IntentFilter(ACTION_LOAD));
+		
+		//check the preferences in terms of background loading
+		if(settings.getBoolean("loadInBackground", ReaderActivity.DEFAULT_LOAD_IN_BACKGROUND)){
+			//register an alarm to go off and start loads
+			Calendar calendar = Calendar.getInstance();
+			calendar.add(Calendar.MINUTE, 30); //move the calendar to 30 minutes in the future
+			Intent intent = new Intent(ACTION_LOAD);
+			PendingIntent sender = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+			//check if rtc wakeup is on or not (load when phone is in standby)
+			//TODO allow the user selection of a load interval
+			if(settings.getBoolean("rtcWakeup", ReaderActivity.DEFAULT_RTC_WAKEUP))
+				alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR, sender);
+			else
+				alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR, sender);
+		}
 	}
 	 
 	@Override

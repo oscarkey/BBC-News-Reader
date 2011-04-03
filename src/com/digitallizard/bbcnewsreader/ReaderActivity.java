@@ -57,6 +57,8 @@ public class ReaderActivity extends Activity {
 	static final String PREFS_FILE_NAME = "com.digitallizard.bbcnewsreader_preferences";
 	static final int DEFAULT_LOAD_TO_DAYS = 1;
 	static final int DEFAULT_CLEAR_OUT_AGE = 7;
+	static final boolean DEFAULT_LOAD_IN_BACKGROUND = true;
+	static final boolean DEFAULT_RTC_WAKEUP = true;
 	
 	/* variables */
 	ScrollView scroller;
@@ -86,6 +88,12 @@ public class ReaderActivity extends Activity {
 			//decide what to do with the message
 			switch(msg.what){
 			case ResourceService.MSG_CLIENT_REGISTERED:
+		        //start a load if we haven't loaded within half an hour
+		        //TODO make the load time configurable
+				long difference = System.currentTimeMillis() - (lastLoadTime * 1000); //the time since the last load
+				if(lastLoadTime == 0 || difference > (30 * 60 * 1000)){
+					loadData(); //trigger a load
+				}
 				break;
 			case ResourceService.MSG_ERROR:
 				Bundle bundle = msg.getData(); //retrieve the data
@@ -93,6 +101,9 @@ public class ReaderActivity extends Activity {
 				break;
 			case ResourceService.MSG_CATEOGRY_LOADED:
 				categoryLoadFinished(msg.getData().getString("category"));
+				break;
+			case ResourceService.MSG_NOW_LOADING:
+				loadBegun();
 				break;
 			case ResourceService.MSG_FULL_LOAD_COMPLETE:
 				fullLoadComplete();
@@ -219,15 +230,18 @@ public class ReaderActivity extends Activity {
     	}
     }
     
+    void loadBegun(){
+    	loadInProgress = true; //flag the data as being loaded
+    	//show the loading image on the button
+    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.stop));
+    	//tell the user what is going on
+    	statusText.setText("Loading feeds...");
+    }
+    
     void loadData(){
     	//check we aren't currently loading news
     	if(!loadInProgress){
 	    	//TODO display old news as old
-	    	loadInProgress = true; //flag the data as being loaded
-	    	//show the loading image on the button
-	    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.stop));
-	    	//tell the user what is going on
-	    	statusText.setText("Loading feeds...");
 	    	//tell the service to load the data
 	    	sendMessageToService(ResourceService.MSG_LOAD_DATA);
     	}
@@ -335,7 +349,6 @@ public class ReaderActivity extends Activity {
         
         //start the service
         doBindService(); //loads the service
-        //TODO start a refresh if we haven't refreshed recently
     }
     
     public void onResume(){
