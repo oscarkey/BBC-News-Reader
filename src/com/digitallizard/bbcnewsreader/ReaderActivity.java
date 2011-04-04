@@ -73,7 +73,7 @@ public class ReaderActivity extends Activity {
 	TextView statusText;
 	String[] categoryNames;
 	ArrayList<TableLayout> physicalCategories;
-	LinearLayout[][] physicalItems;
+	ItemLayout[][] physicalItems;
 	int categoryRowLength; //the number of items to show per row
 	Dialog errorDialog;
 	boolean errorWasFatal;
@@ -379,8 +379,8 @@ public class ReaderActivity extends Activity {
         //create the categories
         categoryNames = database.getEnabledCategories()[1]; //string array with category names in it
         physicalCategories = new ArrayList<TableLayout>(categoryNames.length);
-        physicalItems = new LinearLayout[categoryNames.length][CATEGORY_ROW_LENGTH]; //the array to hold the news items
-        physicalItems = new LinearLayout[categoryNames.length][categoryRowLength]; //the array to hold the news items
+        physicalItems = new ItemLayout[categoryNames.length][CATEGORY_ROW_LENGTH]; //the array to hold the news items
+        physicalItems = new ItemLayout[categoryNames.length][categoryRowLength]; //the array to hold the news items
         itemIds = new HashMap<String, Integer>();
         //loop through adding category views
         for(int i = 0; i < categoryNames.length; i++){
@@ -396,7 +396,7 @@ public class ReaderActivity extends Activity {
         	//loop through and add 4 physical news items
         	for(int t = 0; t < categoryRowLength; t++){
         		//add a new item to the display
-        		LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_news_item, null);
+        		ItemLayout item = (ItemLayout)inflater.inflate(R.layout.list_news_item, null);
         		physicalItems[i][t] = item; //store the item for future use
         		newsRow.addView(item); //add the item to the display
         	}
@@ -418,24 +418,21 @@ public class ReaderActivity extends Activity {
     		for(int i = 0; i < categoryRowLength; i++){
     			//check we have not gone out of range of the available news
     			if(i < titles.length){
-    				TextView titleText = (TextView)physicalItems[category][i].findViewById(R.id.textNewsItemTitle);
-    				titleText.setText(titles[i]);
-    				//display an image for the item
-    				ImageView imageView = (ImageView)physicalItems[category][i].findViewById(R.id.imageNewsItem);
+    				physicalItems[category][i].setTitle(titles[i]);
+    				physicalItems[category][i].setId(Integer.parseInt(ids[i]));
+    				
     				//try and get an image for this item
     				byte[] imageBytes = database.getThumbnail(Integer.parseInt(ids[i]));
     				//check if any image data was returned
     				if(imageBytes != null){
     					//try to construct an image out of the bytes given by the database
     					Bitmap imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length); //load the image into a bitmap
-    					imageView.setImageBitmap(imageBitmap);
+    					physicalItems[category][i].setImage(imageBitmap);
     				}
     				else{
     					//set the image to the default "X"
-    					imageView.setImageResource(R.drawable.no_thumb);
+    					physicalItems[category][i].setImage(R.drawable.no_thumb);
     				}
-    				//save the ids for when an item is selected
-    				itemIds.put((String)titleText.getText(), Integer.parseInt(ids[i]));
     			}
     		}
     	}
@@ -516,14 +513,15 @@ public class ReaderActivity extends Activity {
     		stopDataLoad();
     }
     
-    public void itemClicked(View item){
+    public void itemClicked(View view){
     	//retrieve the title of this activity
-    	TextView titleText = (TextView)item.findViewById(R.id.textNewsItemTitle);
+    	ItemLayout item = (ItemLayout)view; //cast the view to a an itemlayout
+
     	//check there is an item at this view
-    	if(!titleText.getText().equals("No Title")){
+    	if(item.isItem()){
     		//launch article view activity
     		Intent intent = new Intent(this, ArticleActivity.class);
-	    	intent.putExtra("id", (int)itemIds.get(titleText.getText()));
+	    	intent.putExtra("id", item.getId());
 	    	startActivity(intent);
     	}
     }
