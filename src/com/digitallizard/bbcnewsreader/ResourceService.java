@@ -310,7 +310,10 @@ public class ResourceService extends Service implements ResourceInterface {
 		if(type == WebManager.ITEM_TYPE_IMAGE){
 			byte[] image = (byte[])download;
 			database.addImage(itemId, image);
-			
+			//report that this thumbnail has been loading to the ui
+			Bundle bundle = new Bundle();
+			bundle.putInt("id", itemId);
+			sendMsgToAll(MSG_THUMB_LOADED, bundle);
 		}
 		if(type == WebManager.ITEM_TYPE_THUMB){
 			byte[] thumb = (byte[])download;

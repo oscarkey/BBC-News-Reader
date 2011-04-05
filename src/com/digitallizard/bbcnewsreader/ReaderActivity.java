@@ -113,6 +113,9 @@ public class ReaderActivity extends Activity {
 			case ResourceService.MSG_RSS_LOAD_COMPLETE:
 				rssLoadComplete();
 				break;
+			case ResourceService.MSG_THUMB_LOADED:
+				thumbLoadComplete(msg.getData().getInt("id", 0));
+				break;
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
 			}
@@ -269,6 +272,28 @@ public class ReaderActivity extends Activity {
     	if(loadInProgress){
     		//tell the user what is going on
     		statusText.setText("Loading article texts...");
+    	}
+    }
+    
+    void thumbLoadComplete(int id){
+    	//loop through categories
+    	for(int i = 0; i < physicalItems.length; i++){
+    		for(int t = 0; t < physicalItems[i].length; t++){
+    			if(physicalItems[i][t].getId() == id){
+    				//try and get an image for this item
+    				byte[] imageBytes = database.getThumbnail(id);
+    				//check if any image data was returned
+    				if(imageBytes != null){
+    					//try to construct an image out of the bytes given by the database
+    					Bitmap imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length); //load the image into a bitmap
+    					physicalItems[i][t].setImage(imageBitmap);
+    				}
+    				else{
+    					//set the image to the default "X"
+    					physicalItems[i][t].setImage(R.drawable.no_thumb);
+    				}
+    			}
+    		}
     	}
     }
     
