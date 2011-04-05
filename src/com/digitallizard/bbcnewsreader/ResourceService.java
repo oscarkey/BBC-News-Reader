@@ -11,17 +11,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import org.mcsoxford.rss.RSSItem;
-import com.digitallizard.bbcnewsreader.resource.web.WebManager;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.PendingIntent.CanceledException;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
@@ -33,8 +32,8 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
+import com.digitallizard.bbcnewsreader.resource.web.WebManager;
 
 public class ResourceService extends Service implements ResourceInterface {
 	/* variables */
@@ -250,40 +249,54 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 	}
 	
-	public synchronized void rssLoadComplete(){
-		//tell the gui
-		sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
-		//as the rss load has completed we can begin loading articles etc
-		int loadToDays = settings.getInt("loadToDays", ReaderActivity.DEFAULT_LOAD_TO_DAYS); //find user preference
-		Integer[][] items = database.getUndownloaded(loadToDays); //find stuff up to x days old
-		//loop through and add articles to the queue
-		for(int i = 0; i < items[0].length; i++){
-			//FIXME should only get url, not whole item
-			String url = database.getItem(items[0][i])[2];
-			webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, items[0][i]);
-			//FIXME inefficiencies with converting uri -> string and back
+	public synchronized void rssLoadComplete(boolean successful){
+		//check if the load was successful before continuing
+		if(successful){
+			//tell the gui
+			sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
+			//as the rss load has completed we can begin loading articles etc
+			int loadToDays = settings.getInt("loadToDays", ReaderActivity.DEFAULT_LOAD_TO_DAYS); //find user preference
+			Integer[][] items = database.getUndownloaded(loadToDays); //find stuff up to x days old
+			//loop through and add articles to the queue
+			for(int i = 0; i < items[0].length; i++){
+				//FIXME should only get url, not whole item
+				String url = database.getItem(items[0][i])[2];
+				webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, items[0][i]);
+				//FIXME inefficiencies with converting uri -> string and back
+			}
+			//loop through and add thumbnails to the queue
+			for(int i = 0; i < items[1].length; i++){
+				//FIXME should only get url, not whole item
+				String url = database.getItem(items[0][i])[4];
+				//check if there is a thumbnail url, if so load it
+				if(url != null)
+					webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, items[1][i]);
+			}
+			//loop through and add images to the queue
+			for(int i = 0; i < items[2].length; i++){
+				//TODO support image loading
+			}
+			//if we didn't have to add anything, report the load as fully complete
+			if(items[0].length == 0 && items[1].length == 0){
+				fullLoadComplete(true);
+			}
 		}
-		//loop through and add thumbnails to the queue
-		for(int i = 0; i < items[1].length; i++){
-			//FIXME should only get url, not whole item
-			String url = database.getItem(items[0][i])[4];
-			//check if there is a thumbnail url, if so load it
-			if(url != null)
-				webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, items[1][i]);
-		}
-		//loop through and add images to the queue
-		for(int i = 0; i < items[2].length; i++){
-			//TODO support image loading
-		}
-		//if we didn't have to add anything, report the load as fully complete
-		if(items[0].length == 0 && items[1].length == 0){
-			fullLoadComplete();
+		else{
+			fullLoadComplete(false); //end the load here, it was not successful
 		}
 	}
 	
-	public synchronized void fullLoadComplete(){
+	public synchronized void fullLoadComplete(boolean successful){
 		//set the flag to false
 		loadInProgress = false;
+		//check if the load was successful
+		if(successful){
+			//store the new time in the preferences file
+			Editor editor = settings.edit();
+			long time = (long)Math.floor(System.currentTimeMillis() / 1000); //unix time of now
+			editor.putLong("lastLoadTime", time);
+			editor.apply();
+		}
 		//send a message saying that we have loaded
 		sendMsgToAll(MSG_FULL_LOAD_COMPLETE, null);
 	}

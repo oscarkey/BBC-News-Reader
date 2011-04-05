@@ -9,13 +9,9 @@ package com.digitallizard.bbcnewsreader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mcsoxford.rss.RSSFault;
 import org.mcsoxford.rss.RSSFeed;
 import org.mcsoxford.rss.RSSItem;
 import org.mcsoxford.rss.RSSReader;
-import org.mcsoxford.rss.RSSReaderException;
-
-
 
 public class RSSManager implements Runnable {
 	/* constants */
@@ -29,6 +25,7 @@ public class RSSManager implements Runnable {
 	ArrayList<RSSFeed> feeds;
 	RSSReader reader;
 	boolean isLoading;
+	volatile boolean noError;
 	
 	synchronized void setIsLoading(boolean keepLoading){
 		this.isLoading = keepLoading;
@@ -50,11 +47,13 @@ public class RSSManager implements Runnable {
 			feeds = new ArrayList<RSSFeed>();
 			thread = new Thread(this);
 			setIsLoading(true);
+			noError = true;
 			thread.start();
 		}
 	}
 	
 	public void stopLoading(){
+		noError = false;
 		setIsLoading(false);
 	}
 	
@@ -76,12 +75,12 @@ public class RSSManager implements Runnable {
 					//report the error to the resource service
 					resourceInterface.reportError(false, "The rss feed could not be read.", e.toString());
 					//give up loading
-					setIsLoading(false);
+					stopLoading();
 				}
 			}
 		}
 		//report that the load is complete
-		resourceInterface.rssLoadComplete();
+		resourceInterface.rssLoadComplete(noError);
 		setIsLoading(false); //we are not longer loading
 	}
 }

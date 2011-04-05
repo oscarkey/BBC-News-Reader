@@ -7,10 +7,6 @@ import java.util.PriorityQueue;
 
 import com.digitallizard.bbcnewsreader.ResourceInterface;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.util.Log;
-
 public class WebManager implements Runnable {
 	/* constants */
 	public static final int ITEM_TYPE_HTML = 2;
@@ -23,6 +19,7 @@ public class WebManager implements Runnable {
 	private boolean queueEmpty;
 	private boolean keepDownloading;
 	Thread downloadThread;
+	private volatile boolean noError;
 
 	synchronized boolean isQueueEmpty() {
 		return queueEmpty;
@@ -74,7 +71,7 @@ public class WebManager implements Runnable {
 		}
 		catch(Exception e){
 			handler.reportError(false, "There was an error retrieving an article.", e.toString());
-			setKeepDownloading(false); //give up loading
+			stopDownload(); //give up loading
 		}
 	}
 	
@@ -86,7 +83,7 @@ public class WebManager implements Runnable {
 		}
 		catch(Exception e){
 			handler.reportError(false, "There was an error retrieving a thumbnail.", e.toString());
-			setKeepDownloading(false); //give up loading
+			stopDownload(); //give up loading
 		}
 	}
 	
@@ -108,6 +105,7 @@ public class WebManager implements Runnable {
 			//start the download thread
 			setQueueEmpty(false);
 			setKeepDownloading(true);
+			noError = true;
 			downloadThread = new Thread(this);
 			downloadThread.start();
 		}
@@ -153,11 +151,12 @@ public class WebManager implements Runnable {
 		//check if the download is going
 		if(shouldKeepDownloading()){
 			//try and stop the download
+			noError = false;
 			setKeepDownloading(false); //this will stop it after the current file
 		}
 		else{
 			//as a load isn't in progress we can report that we have finished
-			handler.fullLoadComplete();
+			handler.fullLoadComplete(false);
 		}
 	}
 	
@@ -174,7 +173,7 @@ public class WebManager implements Runnable {
 					setKeepDownloading(false); //stop the loop
 				}
 			}
-			handler.fullLoadComplete(); //report that the load is complete
+			handler.fullLoadComplete(noError); //report that the load is complete
 		}
 		else{
 			//as the queue was empty, we should flag it

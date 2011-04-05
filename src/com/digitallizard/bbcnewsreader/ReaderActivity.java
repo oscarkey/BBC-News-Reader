@@ -19,7 +19,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -36,7 +35,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -179,15 +177,8 @@ public class ReaderActivity extends Activity {
     }
     
     void setLastLoadTime(long time){
-    	//check if we need to store a new time
-    	if(time != lastLoadTime){
-    		lastLoadTime = time;
-    		//store the new time in the preferences file
-    		Editor editor = settings.edit();
-    		editor.putLong("lastLoadTime", time);
-    		editor.apply();
-    	}
-    	//now display the new time to the user
+		lastLoadTime = time; //store the time
+    	//display the new time to the user
     	//check if the time is set
     	if(!loadInProgress){
 	    	if(lastLoadTime == 0){
@@ -267,7 +258,7 @@ public class ReaderActivity extends Activity {
 	    	//display the reloading image on the button
 	    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh));
 	    	//report the loaded status
-	    	setLastLoadTime((int)Math.floor(System.currentTimeMillis()/1000)); //set the time as unix time
+	    	setLastLoadTime(settings.getLong("lastLoadTime", 0)); //set the time as unix time
 	    	//tell the database to delete old items
 	    	database.clearOld();
     	}
