@@ -359,6 +359,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	@Override
 	public void onDestroy(){
 		Log.v("ResourceService", "service is shutting down");
+		this.unregisterReceiver(broadcastReceiver);
 		super.onDestroy();
 	}
 	
