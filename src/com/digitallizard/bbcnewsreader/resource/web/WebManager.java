@@ -7,6 +7,8 @@ import java.util.PriorityQueue;
 
 import com.digitallizard.bbcnewsreader.ResourceInterface;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.util.Log;
 
 public class WebManager implements Runnable {
@@ -21,7 +23,6 @@ public class WebManager implements Runnable {
 	private boolean queueEmpty;
 	private boolean keepDownloading;
 	Thread downloadThread;
-	
 
 	synchronized boolean isQueueEmpty() {
 		return queueEmpty;
@@ -72,8 +73,8 @@ public class WebManager implements Runnable {
 				handler.itemDownloadComplete(false, item.getItemId(), item.getType(), html);
 		}
 		catch(Exception e){
-			handler.reportError(false, "There was an error retrieving the article.", e.toString());
-			e.printStackTrace();
+			handler.reportError(false, "There was an error retrieving an article.", e.toString());
+			setKeepDownloading(false); //give up loading
 		}
 	}
 	
@@ -84,8 +85,8 @@ public class WebManager implements Runnable {
 			handler.itemDownloadComplete(false, item.getItemId(), item.getType(), thumb);
 		}
 		catch(Exception e){
-			handler.reportError(false, "There was an error retrieving the thumbnail.", e.toString());
-			e.printStackTrace();
+			handler.reportError(false, "There was an error retrieving a thumbnail.", e.toString());
+			setKeepDownloading(false); //give up loading
 		}
 	}
 	

@@ -99,6 +99,10 @@ public class ReaderActivity extends Activity {
 				Bundle bundle = msg.getData(); //retrieve the data
 				errorOccured(bundle.getBoolean("fatal"), bundle.getString("msg"), bundle.getString("error"));
 				break;
+			case ResourceService.MSG_NO_INTERNET:
+				//tell the user that there is no internet connection
+				showErrorDialog("There is no internet connection.\nThe news cannot be updated.");
+				break;
 			case ResourceService.MSG_CATEOGRY_LOADED:
 				categoryLoadFinished(msg.getData().getString("category"));
 				break;
@@ -141,12 +145,13 @@ public class ReaderActivity extends Activity {
     	//do we need to crash or not
     	if(fatal){
     		showErrorDialog("Fatal error:\n"+msg+"\nPlease try resetting the app.");
-    		Log.e("BBC News Reader", "Error: "+msg);
+    		Log.e("BBC News Reader", "Fatal error: "+msg);
+    		Log.e("BBC News Reader", error);
     	}
     	else{
-    		showErrorDialog("Error: "+msg);
-    		Log.e("BBC News Reader", "Error:\n"+msg);
-        	Log.e("BBC News Reader", "Oops something broke. Lets keep going.");
+    		showErrorDialog("Error:\n"+msg);
+    		Log.e("BBC News Reader", "Error: "+msg);
+        	Log.e("BBC News Reader", error);
     	}
     }
     

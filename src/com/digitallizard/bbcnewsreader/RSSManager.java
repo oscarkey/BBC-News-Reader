@@ -9,6 +9,7 @@ package com.digitallizard.bbcnewsreader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mcsoxford.rss.RSSFault;
 import org.mcsoxford.rss.RSSFeed;
 import org.mcsoxford.rss.RSSItem;
 import org.mcsoxford.rss.RSSReader;
@@ -71,8 +72,11 @@ public class RSSManager implements Runnable {
 					List<RSSItem> items = (List<RSSItem>) feed.getItems();
 					//loop through the items and send them to the parent service
 					resourceInterface.categoryRssLoaded((RSSItem[])items.toArray(new RSSItem[items.size()]), names[i]);
-				} catch (RSSReaderException e) {
-					resourceInterface.reportError(true, "There was a problem reading the rss.", e.getMessage()); //report a fatal error
+				} catch (Exception e) {
+					//report the error to the resource service
+					resourceInterface.reportError(false, "The rss feed could not be read.", e.toString());
+					//give up loading
+					setIsLoading(false);
 				}
 			}
 		}

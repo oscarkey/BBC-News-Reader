@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,6 +63,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	static final int MSG_FULL_LOAD_COMPLETE = 8; //sent when all the data has been loaded
 	static final int MSG_RSS_LOAD_COMPLETE = 10;
 	static final int MSG_ERROR = 7; //help! An error occurred
+	static final int MSG_NO_INTERNET = 17; //sent when the internet has failed
 	static final String ACTION_LOAD = "com.digitallizard.bbcnewsreader.action.LOAD_NEWS";
 	
 	//the handler class to process new messages
@@ -123,26 +126,33 @@ public class ResourceService extends Service implements ResourceInterface {
 	}
 	
 	void loadData(){
-		//report to the gui that a load has been activated
-		sendMsgToAll(MSG_NOW_LOADING, null);
-		//set the flag saying that we are loading
-		loadInProgress = true;
-		//retrieve the active category urls
-		String[] urls = getDatabase().getEnabledCategories()[0];
-		//work out the names
-		String[] names = new String[urls.length];
-		String[] allNames = getResources().getStringArray(R.array.category_names);
-		String[] allUrls = getResources().getStringArray(R.array.catergory_rss_urls);
-		//FIXME very inefficient, should be done by database
-		for(int i = 0; i < allUrls.length; i++){
-			for(int j = 0; j < urls.length; j++){
-				if(allUrls[i].equals(urls[j])){
-					names[j] = allNames[i];
+		//check if the device is online
+		if(isOnline()){
+			//report to the gui that a load has been activated
+			sendMsgToAll(MSG_NOW_LOADING, null);
+			//set the flag saying that we are loading
+			loadInProgress = true;
+			//retrieve the active category urls
+			String[] urls = getDatabase().getEnabledCategories()[0];
+			//work out the names
+			String[] names = new String[urls.length];
+			String[] allNames = getResources().getStringArray(R.array.category_names);
+			String[] allUrls = getResources().getStringArray(R.array.catergory_rss_urls);
+			//FIXME very inefficient, should be done by database
+			for(int i = 0; i < allUrls.length; i++){
+				for(int j = 0; j < urls.length; j++){
+					if(allUrls[i].equals(urls[j])){
+						names[j] = allNames[i];
+					}
 				}
 			}
+			//start the RSS Manager
+			rssManager.load(names, urls);
 		}
-		//start the RSS Manager
-		rssManager.load(names, urls);
+		else{
+			//report that there is no internet connection
+			sendMsgToAll(MSG_NO_INTERNET, null);
+		}
 	}
 	
 	void loadArticle(int id){
@@ -192,6 +202,18 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 	}
 	
+	boolean isOnline(){
+		ConnectivityManager manager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo info = manager.getActiveNetworkInfo();
+		//check that there is an active network
+		if(info != null){
+			return info.isConnected();
+		}
+		else{
+			return false;
+		}
+	}
+	
 	/**
 	 * Called when an RSS feed has loaded
 	 * @param item The item that has been loaded */
@@ -222,8 +244,10 @@ public class ResourceService extends Service implements ResourceInterface {
 		bundle.putString("msg", msg);
 		bundle.putString("error", error);
 		sendMsgToAll(MSG_ERROR, bundle);
-		//print out the error for debuggers
-		Log.e("ResourceService", "Error - fatal:"+fatal+" msg:"+msg+" error:"+error);
+		if(!isOnline()){
+			//if we are not online, this may be the cause of the error
+			sendMsgToAll(MSG_NO_INTERNET, null);
+		}
 	}
 	
 	public synchronized void rssLoadComplete(){
