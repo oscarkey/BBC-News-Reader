@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
+import android.util.Log;
+
 import com.digitallizard.bbcnewsreader.ResourceInterface;
 
 public class WebManager implements Runnable {

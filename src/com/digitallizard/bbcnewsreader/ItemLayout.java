@@ -42,13 +42,22 @@ public class ItemLayout extends LinearLayout {
 		}
 	}
 	
+	void initImage(){
+		//create a reference to the image view
+		image = (ImageView)this.findViewById(R.id.imageNewsItem);
+	}
+	
 	public void setImage(Bitmap bitmap){
+		if(image == null)
+			initImage();
 		if(image != null){
 			image.setImageBitmap(bitmap);
 		}
 	}
 	
 	public void setImage(int drawable){
+		if(image == null)
+			initImage();
 		if(image != null){
 			image.setImageResource(drawable);
 		}

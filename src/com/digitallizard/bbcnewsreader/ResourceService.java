@@ -174,6 +174,14 @@ public class ResourceService extends Service implements ResourceInterface {
 		//the stopping of loading will be reported by the managers...
 	}
 	
+	void updateLastLoadTime(){
+		//store the new time in the preferences file
+		Editor editor = settings.edit();
+		long time = (long)Math.floor(System.currentTimeMillis() / 1000); //unix time of now
+		editor.putLong("lastLoadTime", time);
+		editor.apply();
+	}
+	
 	void sendMsg(Messenger client, int what, Bundle bundle){
 		try{
 			//create a message according to parameters
@@ -252,6 +260,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	public synchronized void rssLoadComplete(boolean successful){
 		//check if the load was successful before continuing
 		if(successful){
+			updateLastLoadTime(); //save last load time
 			//tell the gui
 			sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
 			//as the rss load has completed we can begin loading articles etc
@@ -291,11 +300,7 @@ public class ResourceService extends Service implements ResourceInterface {
 		loadInProgress = false;
 		//check if the load was successful
 		if(successful){
-			//store the new time in the preferences file
-			Editor editor = settings.edit();
-			long time = (long)Math.floor(System.currentTimeMillis() / 1000); //unix time of now
-			editor.putLong("lastLoadTime", time);
-			editor.apply();
+			updateLastLoadTime(); //save last load time
 		}
 		//send a message saying that we have loaded
 		sendMsgToAll(MSG_FULL_LOAD_COMPLETE, null);

@@ -66,8 +66,6 @@ public class ArticleActivity extends Activity {
 	
 	private ServiceConnection resourceServiceConnection = new ServiceConnection() {
 	    public void onServiceConnected(ComponentName className, IBinder service) {
-	    	Log.v("article", "bound");
-	    	Log.v(getLocalClassName(), "Service connected");
 	        //this runs when the service connects
 	    	resourceServiceBound = true; //flag the service as bound
 	    	//save a pointer to the service to a local variable
