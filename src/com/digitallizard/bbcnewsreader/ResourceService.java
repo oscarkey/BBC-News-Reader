@@ -234,7 +234,7 @@ public class ResourceService extends Service implements ResourceInterface {
 			//check there are some thumbnails
 			String thumbUrl = null;
 			if(items[i].getThumbnails().size() == 2)
-				thumbUrl = items[i].getThumbnails().get(0).toString();
+				thumbUrl = items[i].getThumbnails().get(1).toString();
 			getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category, thumbUrl);
 		}
 		//send a message to the gui to tell it that we have loaded the category

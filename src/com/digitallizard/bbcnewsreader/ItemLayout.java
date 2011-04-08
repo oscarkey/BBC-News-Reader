@@ -4,10 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class ItemLayout extends LinearLayout {
+public class ItemLayout extends RelativeLayout {
 	private int id;
 	private TextView title;
 	private ImageView image;

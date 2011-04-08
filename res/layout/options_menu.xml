@@ -8,5 +8,4 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<item android:title="Choose Categories" android:icon="@drawable/tick"/>
 	<item android:title="Settings" android:icon="@drawable/settings"/>
-	<item android:title="Reset" android:icon="@drawable/stop"/>
 </menu>

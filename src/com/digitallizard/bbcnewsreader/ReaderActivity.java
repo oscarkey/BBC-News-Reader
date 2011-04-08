@@ -34,7 +34,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -51,7 +51,7 @@ public class ReaderActivity extends Activity {
 	static final int ACTIVITY_CHOOSE_CATEGORIES = 1;
 	static final int CATEGORY_ROW_LENGTH = 4;
 	static final int DIALOG_ERROR = 0;
-	static final int NEWS_ITEM_DP_WIDTH = 70; //FIXME item width shouldn't be predefined
+	static final int NEWS_ITEM_DP_WIDTH = 100; //FIXME item width shouldn't be predefined
 	static final String PREFS_FILE_NAME = "com.digitallizard.bbcnewsreader_preferences";
 	static final int DEFAULT_LOAD_TO_DAYS = 1;
 	static final int DEFAULT_CLEAR_OUT_AGE = 7;
@@ -67,7 +67,7 @@ public class ReaderActivity extends Activity {
 	private DatabaseHandler database;
 	private LayoutInflater inflater; //used to create objects from the XML
 	private SharedPreferences settings; //used to save and load preferences
-	ImageButton refreshButton;
+	Button refreshButton;
 	TextView statusText;
 	String[] categoryNames;
 	ArrayList<TableLayout> physicalCategories;
@@ -232,7 +232,7 @@ public class ReaderActivity extends Activity {
     void loadBegun(){
     	loadInProgress = true; //flag the data as being loaded
     	//show the loading image on the button
-    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.stop));
+    	refreshButton.setText("stop");
     	//tell the user what is going on
     	statusText.setText("Loading feeds...");
     }
@@ -259,7 +259,7 @@ public class ReaderActivity extends Activity {
     	if(loadInProgress){
 	    	loadInProgress = false;
 	    	//display the reloading image on the button
-	    	refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh));
+	    	refreshButton.setText("reload");
 	    	//report the loaded status
 	    	setLastLoadTime(settings.getLong("lastLoadTime", 0)); //set the time as unix time
 	    	//tell the database to delete old items
@@ -352,7 +352,7 @@ public class ReaderActivity extends Activity {
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
         //make references to ui items
-        refreshButton = (ImageButton) findViewById(R.id.refreshButton);
+        refreshButton = (Button) findViewById(R.id.refreshButton);
         statusText = (TextView) findViewById(R.id.statusText);
         
         //load the preferences system

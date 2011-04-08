@@ -6,59 +6,44 @@
   All rights reserved.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-android:orientation="horizontal"
+android:orientation="vertical"
 android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:background="#660000">
+android:layout_height="match_parent">
+	<LinearLayout
+	android:orientation="horizontal"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:gravity="center_vertical"
+	android:background="@drawable/top_bar_gradient"
+	android:paddingTop="5dp"
+	android:paddingLeft="5dp"
+	android:paddingRight="5dp">
+		<TextView android:id="@+id/statusText"
+		android:text="Last updated ???"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:padding="2dp"
+		android:textSize="17sp"/>
+		<RelativeLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="right">
+			<Button android:id="@+id/refreshButton"
+			android:layout_width="100dp"
+			android:layout_height="40dp"
+			android:textSize="17sp"
+			android:onClick="refreshClicked"
+			android:text="reload"/>
+		</RelativeLayout>
+	</LinearLayout>
 	<ScrollView android:id="@+id/newsScroller"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
-		<LinearLayout
+		<LinearLayout android:id="@+id/newsScrollerContent"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
 		android:orientation="vertical"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:gravity="center_horizontal">
-			<LinearLayout
-			android:orientation="horizontal"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:paddingTop="5dp"
-			android:paddingLeft="10dp"
-			android:paddingRight="10dp">
-				<LinearLayout
-				android:orientation="vertical"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content">
-					<TextView
-					android:text="@string/title"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:paddingBottom="2dp"
-					android:textSize="24sp"/>
-					<TextView android:id="@+id/statusText"
-					android:text="Last updated ???"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:padding="2dp"
-					android:textSize="15sp"/>
-				</LinearLayout>
-				<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:orientation="vertical"
-				android:gravity="right">
-					<ImageButton android:id="@+id/refreshButton"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:src="@drawable/refresh"
-					android:onClick="refreshClicked"/>
-				</LinearLayout>
-			</LinearLayout>
-			<LinearLayout android:id="@+id/newsScrollerContent"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:orientation="vertical">
-			</LinearLayout>
+		android:background="#303030">
 		</LinearLayout>
 	</ScrollView>
 </LinearLayout>
