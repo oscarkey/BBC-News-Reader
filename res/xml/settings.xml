@@ -24,6 +24,7 @@
     	<CheckBoxPreference
     	android:key="loadInBackground"
     	android:title="Load in the background"
+    	android:summary="Load every hour automatically"
     	android:defaultValue="true"/>
     	<CheckBoxPreference
     	android:key="rtcWakeup"

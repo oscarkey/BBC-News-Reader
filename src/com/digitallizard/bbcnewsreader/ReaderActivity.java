@@ -90,7 +90,7 @@ public class ReaderActivity extends Activity {
 		        //start a load if we haven't loaded within half an hour
 		        //TODO make the load time configurable
 				long difference = System.currentTimeMillis() - (lastLoadTime * 1000); //the time since the last load
-				if(lastLoadTime == 0 || difference > (30 * 60 * 1000)){
+				if(lastLoadTime == 0 || difference > (60 * 60 * 1000)){
 					loadData(); //trigger a load
 				}
 				break;

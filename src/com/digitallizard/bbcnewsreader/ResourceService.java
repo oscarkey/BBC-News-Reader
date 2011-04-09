@@ -378,14 +378,14 @@ public class ResourceService extends Service implements ResourceInterface {
 		if(settings.getBoolean("loadInBackground", ReaderActivity.DEFAULT_LOAD_IN_BACKGROUND)){
 			//register an alarm to go off and start loads
 			Calendar calendar = Calendar.getInstance();
-			calendar.add(Calendar.MINUTE, 30); //move the calendar to 30 minutes in the future
+			calendar.add(Calendar.HOUR, 1); //move the calendar to 30 minutes in the future
 			Intent intent = new Intent(ACTION_LOAD);
 			PendingIntent sender = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
 			//check if rtc wakeup is on or not (load when phone is in standby)
 			//TODO allow the user selection of a load interval
 			if(settings.getBoolean("rtcWakeup", ReaderActivity.DEFAULT_RTC_WAKEUP))
-				alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR, sender);
+				alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, sender);
 			else
 				alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR, sender);
 		}
