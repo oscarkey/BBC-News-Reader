@@ -298,10 +298,6 @@ public class ResourceService extends Service implements ResourceInterface {
 	public synchronized void fullLoadComplete(boolean successful){
 		//set the flag to false
 		loadInProgress = false;
-		//check if the load was successful
-		if(successful){
-			updateLastLoadTime(); //save last load time
-		}
 		//send a message saying that we have loaded
 		sendMsgToAll(MSG_FULL_LOAD_COMPLETE, null);
 	}
