@@ -7,7 +7,7 @@
         android:title="Max news age"
         android:summary="The number of days to keep news"
         android:dialogMessage="Reduce this to save space"
-        android:defaultValue="7"
+        android:defaultValue="4"
         android:text=" days"
         android:max="30"/>
         <com.hlidskialf.android.preference.SeekBarPreference

@@ -39,6 +39,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
@@ -54,7 +55,7 @@ public class ReaderActivity extends Activity {
 	static final int NEWS_ITEM_DP_WIDTH = 100; //FIXME item width shouldn't be predefined
 	static final String PREFS_FILE_NAME = "com.digitallizard.bbcnewsreader_preferences";
 	static final int DEFAULT_LOAD_TO_DAYS = 1;
-	static final int DEFAULT_CLEAR_OUT_AGE = 7;
+	static final int DEFAULT_CLEAR_OUT_AGE = 4;
 	static final boolean DEFAULT_LOAD_IN_BACKGROUND = true;
 	static final boolean DEFAULT_RTC_WAKEUP = true;
 	
@@ -410,11 +411,14 @@ public class ReaderActivity extends Activity {
         	//change the name
         	TextView name = (TextView)category.findViewById(R.id.textCategoryName);
         	name.setText(categoryNames[i]);
+        	//set the column span of the name to fit the width of the table
+        	LayoutParams layout = (LayoutParams) name.getLayoutParams();
+        	layout.span = categoryRowLength - 1;
         	//retrieve the row for the news items
         	TableRow newsRow = (TableRow)category.findViewById(R.id.rowNewsItem);
         	
         	//add some items to each category display
-        	//loop through and add 4 physical news items
+        	//loop through and add x physical news items
         	for(int t = 0; t < categoryRowLength; t++){
         		//add a new item to the display
         		ItemLayout item = (ItemLayout)inflater.inflate(R.layout.list_news_item, null);
@@ -499,13 +503,6 @@ public class ReaderActivity extends Activity {
     		//show the settings menu
     		Intent intent = new Intent(this, SettingsActivity.class);
     		startActivity(intent);
-    	}
-    	if(item.getTitle().equals("Reset")){
-    		//clear the database tables and then crash out
-    		//FIXME shouldn't crash on a table clear...
-    		database.dropTables();
-    		Log.w(this.getLocalClassName(), "Tables dropped. The app will now crash...");
-    		System.exit(0);
     	}
     	return true; //we have received the press so we can report true
     }

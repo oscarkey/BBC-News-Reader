@@ -16,11 +16,17 @@ android:padding="4sp">
 	android:onClick="categoryClicked">
 		<TextView android:id="@+id/textCategoryName"
 		android:text="No Title"
-		android:layout_span="4"
+		android:layout_span="2"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:padding="2dp"
 		android:textSize="17sp"/>
+		<TextView
+		android:text="more..."
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:gravity="right"
+		android:textSize="15sp"/>
 	</TableRow>
 	<TableRow android:id="@+id/rowNewsItem"
 	android:orientation="horizontal"
