@@ -53,6 +53,12 @@ public class DatabaseHandler {
       OpenHelper openHelper = new OpenHelper(this.context);
       this.db = openHelper.getWritableDatabase();
    }
+   
+   public void onDestroy(){
+	   //close the database
+	   db.close();
+   }
+   
    /**
     * Inserts an RSSItem into the items table, then creates an entry in the relationship
     * table between it and its category, ONLY if it is more recent than a month.

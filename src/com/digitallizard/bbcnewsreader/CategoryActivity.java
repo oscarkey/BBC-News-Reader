@@ -73,5 +73,6 @@ public class CategoryActivity extends Activity {
 				itemIds.put(items[0][i], Integer.parseInt(items[3][i]));
 			}
 		}
+		database.onDestroy(); //shutdown database
 	}
 }

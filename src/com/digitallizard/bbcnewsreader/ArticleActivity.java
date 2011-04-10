@@ -167,6 +167,7 @@ public class ArticleActivity extends Activity {
     protected void onDestroy(){
     	//disconnect the service
     	doUnbindService();
+    	database.onDestroy(); //shutdown the database
     	super.onDestroy(); //pass the destroy command to the super
     }
 	
