@@ -179,7 +179,7 @@ public class ResourceService extends Service implements ResourceInterface {
 		Editor editor = settings.edit();
 		long time = (long)Math.floor(System.currentTimeMillis() / 1000); //unix time of now
 		editor.putLong("lastLoadTime", time);
-		editor.apply();
+		editor.commit();
 	}
 	
 	void sendMsg(Messenger client, int what, Bundle bundle){

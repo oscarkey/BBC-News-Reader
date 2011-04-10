@@ -215,7 +215,7 @@ public class DatabaseHandler {
 	   
 	   cursorArticles.close();
 	   cursorThumbnails.close();
-	   cursorArticles.close();
+	   cursorImages.close();
 	   
 	   Integer[][] values = new Integer[3][];
 	   values[0] = unloadedArticles.toArray(new Integer[unloadedArticles.size()]);

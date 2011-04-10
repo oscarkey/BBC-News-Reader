@@ -14,6 +14,7 @@ public class WebManager implements Runnable {
 	public static final int ITEM_TYPE_HTML = 2;
 	public static final int ITEM_TYPE_THUMB = 1;
 	public static final int ITEM_TYPE_IMAGE = 0;
+	public static final int ERROR_FAIL_THRESHOLD = 4;
 	
 	/* variables */
 	PriorityQueue<QueueItem> downloadQueue;
@@ -22,6 +23,7 @@ public class WebManager implements Runnable {
 	private boolean keepDownloading;
 	Thread downloadThread;
 	private volatile boolean noError;
+	private volatile int numErrors;
 
 	synchronized boolean isQueueEmpty() {
 		return queueEmpty;
@@ -72,8 +74,12 @@ public class WebManager implements Runnable {
 				handler.itemDownloadComplete(false, item.getItemId(), item.getType(), html);
 		}
 		catch(Exception e){
-			handler.reportError(false, "There was an error retrieving an article.", e.toString());
-			stopDownload(); //give up loading
+			numErrors ++; //increment the number of errors
+			if(numErrors > ERROR_FAIL_THRESHOLD){
+				//report the error
+				handler.reportError(false, "There was an error retrieving articles.", e.toString());
+				stopDownload(); //give up loading
+			}
 		}
 	}
 	
@@ -84,8 +90,12 @@ public class WebManager implements Runnable {
 			handler.itemDownloadComplete(false, item.getItemId(), item.getType(), thumb);
 		}
 		catch(Exception e){
-			handler.reportError(false, "There was an error retrieving a thumbnail.", e.toString());
-			stopDownload(); //give up loading
+			numErrors ++; //increment the number of errors
+			if(numErrors > ERROR_FAIL_THRESHOLD){
+				//report the error
+				handler.reportError(false, "There was an error retrieving thumbnails.", e.toString());
+				stopDownload(); //give up loading
+			}
 		}
 	}
 	
@@ -96,14 +106,18 @@ public class WebManager implements Runnable {
 			handler.itemDownloadComplete(false, item.getItemId(), item.getType(), image);
 		}
 		catch(Exception e){
-			handler.reportError(false, "There was an error retrieving the image.", e.toString());
-			e.printStackTrace();
+			numErrors ++; //increment the number of errors
+			if(numErrors > ERROR_FAIL_THRESHOLD){
+				//report the error
+				handler.reportError(false, "There was an error retrieving images.", e.toString());
+				e.printStackTrace();
+			}
 		}
 	}
 	
 	private void itemQueued(){
 		//check if we need to start the download thread
-		if(isQueueEmpty() && !shouldKeepDownloading()){
+		if(!shouldKeepDownloading()){
 			//start the download thread
 			setQueueEmpty(false);
 			setKeepDownloading(true);
@@ -187,5 +201,6 @@ public class WebManager implements Runnable {
 		this.handler = handler;
 		setQueueEmpty(true);
 		downloadQueue = new PriorityQueue<QueueItem>();
+		numErrors = 0; //no errors yet
 	}
 }
