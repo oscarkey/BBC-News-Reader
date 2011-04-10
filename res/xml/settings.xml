@@ -30,5 +30,12 @@
     	android:key="rtcWakeup"
     	android:title="Load when device asleep"
     	android:defaultValue="true"/>
+    	<ListPreference
+    	android:key="loadInterval"
+    	android:title="Load interval"
+    	android:summary="How long to wait between loads"
+    	android:defaultValue="2"
+    	android:entries="@array/loadIntervalEntries"
+    	android:entryValues="@array/loadIntervalValues"/>
     </PreferenceCategory>
 </PreferenceScreen>

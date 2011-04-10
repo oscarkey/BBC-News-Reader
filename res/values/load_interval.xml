@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="loadIntervalEntries">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>half day</item>
+    </string-array>
+    <string-array name="loadIntervalValues">
+        <item>15_mins</item>
+        <item>30_mins</item>
+        <item>1_hour</item>
+        <item>half_day</item>
+    </string-array>
+</resources>

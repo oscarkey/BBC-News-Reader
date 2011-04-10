@@ -376,6 +376,19 @@ public class ResourceService extends Service implements ResourceInterface {
 		
 		//check the preferences in terms of background loading
 		if(settings.getBoolean("loadInBackground", ReaderActivity.DEFAULT_LOAD_IN_BACKGROUND)){
+			//get the load interval
+			String loadIntervalString = settings.getString("loadInterval", ReaderActivity.DEFAULT_LOAD_INTERVAL);
+			long loadInterval;
+			if(loadIntervalString.equals("15_minutes"))
+				loadInterval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
+			else if(loadIntervalString.equals("30_minutes"))
+				loadInterval = AlarmManager.INTERVAL_HALF_HOUR;
+			else if(loadIntervalString.equals("1_hour"))
+				loadInterval = AlarmManager.INTERVAL_HOUR;
+			else if(loadIntervalString.equals("half_day"))
+				loadInterval = AlarmManager.INTERVAL_HALF_DAY;
+			else
+				loadInterval = AlarmManager.INTERVAL_HOUR;
 			//register an alarm to go off and start loads
 			Calendar calendar = Calendar.getInstance();
 			calendar.add(Calendar.HOUR, 1); //move the calendar to 30 minutes in the future
@@ -383,11 +396,10 @@ public class ResourceService extends Service implements ResourceInterface {
 			PendingIntent sender = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
 			//check if rtc wakeup is on or not (load when phone is in standby)
-			//TODO allow the user selection of a load interval
 			if(settings.getBoolean("rtcWakeup", ReaderActivity.DEFAULT_RTC_WAKEUP))
-				alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, sender);
+				alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), loadInterval, sender);
 			else
-				alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR, sender);
+				alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), loadInterval, sender);
 		}
 	}
 	 

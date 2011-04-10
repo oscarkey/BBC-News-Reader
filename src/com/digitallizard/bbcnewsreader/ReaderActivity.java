@@ -58,6 +58,7 @@ public class ReaderActivity extends Activity {
 	static final int DEFAULT_CLEAR_OUT_AGE = 4;
 	static final boolean DEFAULT_LOAD_IN_BACKGROUND = true;
 	static final boolean DEFAULT_RTC_WAKEUP = true;
+	static final String DEFAULT_LOAD_INTERVAL = "1_hour";
 	
 	/* variables */
 	ScrollView scroller;
