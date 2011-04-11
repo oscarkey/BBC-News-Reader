@@ -6,7 +6,6 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -155,7 +154,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	}
 	
 	void loadArticle(int id){
-		String url = database.getItem(id)[2]; //get the url of the item
+		String url = database.getUrl(id); //get the url of the item
 		webManager.loadNow(url, WebManager.ITEM_TYPE_HTML, id); //tell the webmanager to load this
 	}
 	
@@ -227,15 +226,11 @@ public class ResourceService extends Service implements ResourceInterface {
 	public synchronized void categoryRssLoaded(RSSItem[] items, String category){
 		//insert the items into the database
 		for(int i = 0; i < items.length; i++){
-			//FIXME no description given
-			//FIXME stupid conversion and reconversion of date format. The database needs updating.
-			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
-			String date = dateFormat.format(items[i].getPubDate());
 			//check there are some thumbnails
 			String thumbUrl = null;
 			if(items[i].getThumbnails().size() == 2)
 				thumbUrl = items[i].getThumbnails().get(1).toString();
-			getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), date, category, thumbUrl);
+			getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), items[i].getPubDate(), category, thumbUrl);
 		}
 		//send a message to the gui to tell it that we have loaded the category
 		Bundle bundle = new Bundle();
@@ -269,14 +264,14 @@ public class ResourceService extends Service implements ResourceInterface {
 			//loop through and add articles to the queue
 			for(int i = 0; i < items[0].length; i++){
 				//FIXME should only get url, not whole item
-				String url = database.getItem(items[0][i])[2];
+				String url = database.getUrl(items[0][i]);
 				webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, items[0][i]);
 				//FIXME inefficiencies with converting uri -> string and back
 			}
 			//loop through and add thumbnails to the queue
 			for(int i = 0; i < items[1].length; i++){
 				//FIXME should only get url, not whole item
-				String url = database.getItem(items[0][i])[4];
+				String url = database.getThumbnailUrl(items[1][i]);
 				//check if there is a thumbnail url, if so load it
 				if(url != null)
 					webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, items[1][i]);
@@ -350,7 +345,7 @@ public class ResourceService extends Service implements ResourceInterface {
 			//create tables in the database if needed
 			if(!getDatabase().isCreated()){
 				getDatabase().createTables();
-				getDatabase().addCategories();
+				getDatabase().addCategoriesFromXml();
 	        }
 		}
 		if(getWebManager() == null){

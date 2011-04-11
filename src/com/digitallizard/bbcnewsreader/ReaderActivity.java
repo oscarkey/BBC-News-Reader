@@ -365,7 +365,7 @@ public class ReaderActivity extends Activity {
         database = new DatabaseHandler(this, settings.getInt("clearOutAge", DEFAULT_CLEAR_OUT_AGE));
         if(!database.isCreated()){
         	database.createTables();
-        	database.addCategories();
+        	database.addCategoriesFromXml();
         }
         
         createNewsDisplay();
