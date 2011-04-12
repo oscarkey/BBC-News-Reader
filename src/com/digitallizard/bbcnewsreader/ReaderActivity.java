@@ -59,6 +59,7 @@ public class ReaderActivity extends Activity {
 	static final boolean DEFAULT_LOAD_IN_BACKGROUND = true;
 	static final boolean DEFAULT_RTC_WAKEUP = true;
 	static final String DEFAULT_LOAD_INTERVAL = "1_hour";
+	static final boolean DEFAULT_DISPLAY_FULL_ERROR = false;
 	
 	/* variables */
 	ScrollView scroller;
@@ -145,16 +146,22 @@ public class ReaderActivity extends Activity {
     
     void errorOccured(boolean fatal, String msg, String error){
     	errorWasFatal = fatal; //so we know if we need to crash or not
-    	//do we need to crash or not
-    	if(fatal){
-    		showErrorDialog("Fatal error:\n"+msg+"\nPlease try resetting the app.");
-    		Log.e("BBC News Reader", "Fatal error: "+msg);
-    		Log.e("BBC News Reader", error);
+    	//show a user friendly message or just the error
+    	if(settings.getBoolean("displayFullError", DEFAULT_DISPLAY_FULL_ERROR)){
+    		showErrorDialog("Error: "+error);
     	}
     	else{
-    		showErrorDialog("Error:\n"+msg);
-    		Log.e("BBC News Reader", "Error: "+msg);
-        	Log.e("BBC News Reader", error);
+    		//display a user friendly message
+    		if(fatal){
+        		showErrorDialog("Fatal error:\n"+msg+"\nPlease try resetting the app.");
+        		Log.e("BBC News Reader", "Fatal error: "+msg);
+        		Log.e("BBC News Reader", error);
+        	}
+        	else{
+        		showErrorDialog("Error:\n"+msg);
+        		Log.e("BBC News Reader", "Error: "+msg);
+            	Log.e("BBC News Reader", error);
+        	}
     	}
     }
     
