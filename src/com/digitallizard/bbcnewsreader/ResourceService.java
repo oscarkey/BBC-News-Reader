@@ -75,7 +75,6 @@ public class ResourceService extends Service implements ResourceInterface {
 				sendMsg(msg.replyTo, MSG_CLIENT_REGISTERED, null);
 				break;
 			case MSG_UNREGISTER_CLIENT:
-				Log.v("ResourceService", "unregister request recieved");
 				clients.remove(msg.replyTo); //remove our reference to the client
 				//FIXME when should the service shutdown?
 				break;
@@ -83,7 +82,6 @@ public class ResourceService extends Service implements ResourceInterface {
 				loadData(); //start of the loading of data
 				break;
 			case MSG_LOAD_ARTICLE:
-				Log.v("service", "specific load requested");
 				loadArticle(msg.getData().getInt("itemId"));
 				break;
 			case MSG_LOAD_THUMB:

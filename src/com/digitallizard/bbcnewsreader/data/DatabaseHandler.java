@@ -223,16 +223,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   //build a query to find the items
 	   SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 	   queryBuilder.setDistinct(true);
-	   queryBuilder.setTables("items join categories_items on items.item_Id=categories_items.itemId");
+	   queryBuilder.setTables("items JOIN categories_items ON items.item_Id=categories_items.itemId");
 	   String[] selectionArgs = new String[]{"title", "description", "link", "item_Id"};
 	   String whereStatement = "categories_items.categoryName=?";
 	   String[] whereArgs = new String[]{category};
-	   Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "pubdate desc");
+	   Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "pubdate DESC", null);
 	   
 	   //load these items into an array
 	   String[][] items = new String[5][cursor.getCount()];
-	   for(int i = 1;i <= cursor.getCount(); i++)
-	   {
+	   for(int i = 1;i <= cursor.getCount(); i++){
 		   cursor.moveToNext();
 		   items[0][i-1] = cursor.getString(0); //title
 		   items[1][i-1] = cursor.getString(1); //description

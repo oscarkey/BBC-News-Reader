@@ -1,5 +1,6 @@
 package com.digitallizard.bbcnewsreader.resource.web;
 
+
 public class QueueItem implements Comparable<QueueItem> {
 	public static final int PRIORITY_DOWNLOAD_NOW = 5; //the priority if instant download is needed
 	private String url;
@@ -16,13 +17,12 @@ public class QueueItem implements Comparable<QueueItem> {
 	}
 	
 	public int compareTo(QueueItem item){
-		if(this.priority > item.priority)
+		if(this.priority < item.getPriority())
 			return 1;
-		if(this.priority < item.priority)
+		else if(this.priority > item.getPriority())
 			return -1;
-		if(this.priority == item.priority)
+		else
 			return 0;
-		return 0; //FIXME this is unneeded
 	}
 	
 	public int getType()
@@ -47,6 +47,10 @@ public class QueueItem implements Comparable<QueueItem> {
 		else{
 			return false;
 		}
+	}
+	
+	public int getPriority(){
+		return this.priority;
 	}
 	
 	public void setPriority(int priority){

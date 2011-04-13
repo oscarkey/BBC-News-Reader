@@ -5,8 +5,6 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
-import android.util.Log;
-
 import com.digitallizard.bbcnewsreader.ResourceInterface;
 
 public class WebManager implements Runnable {
@@ -139,27 +137,38 @@ public class WebManager implements Runnable {
 	}
 	
 	public void loadNow(String url, int type, int itemId){
-		boolean itemExists = false; //set to true if the item was actually in the queue
-		//loop through the queue to find the item we want
-		//FIXME looping efficient? probably doesn't matter as only on user command
-		Iterator<QueueItem> iterator = getQueue().iterator();
-		while(iterator.hasNext()){
-			//check the id of this item
-			QueueItem item = iterator.next();
-			if(item.getItemId() == itemId){
-				//boost the priority of this item
-				item.setPriority(QueueItem.PRIORITY_DOWNLOAD_NOW);
-				itemExists = true; //we found the item
+		//check if a load is in progress
+		if(shouldKeepDownloading()){
+			//loop through the queue to find the item we want, then boost its priority
+			boolean itemExists = false; //set to true if the item was actually in the queue
+			//FIXME looping efficient? probably doesn't matter as only on user command
+			Iterator<QueueItem> iterator = getQueue().iterator();
+			while(iterator.hasNext()){
+				//check the id of this item
+				QueueItem item = iterator.next();
+				if(item.getItemId() == itemId){
+					//boost the priority of this item
+					item.setPriority(QueueItem.PRIORITY_DOWNLOAD_NOW);
+					itemExists = true; //we found the item
+				}
+			}
+			//if the item wasn't found, create it and set its priority high
+			if(!itemExists){
+				addToQueue(url, type, itemId, QueueItem.PRIORITY_DOWNLOAD_NOW);
 			}
 		}
-		//if the item wasn't found, create it and set its priority high
-		if(!itemExists){
+		else{
+			//clear the queue, just in case
+			emptyQueue();
+			//add the item to the queue, this will automatically start the download
 			addToQueue(url, type, itemId, QueueItem.PRIORITY_DOWNLOAD_NOW);
 		}
 	}
 	
 	public void emptyQueue(){
-		stopDownload(); //first stop downloading
+		//check if a download is in progress
+		if(shouldKeepDownloading())
+			stopDownload(); //first stop downloading
 		getQueue().clear(); //empty the queue
 	}
 	
@@ -169,6 +178,7 @@ public class WebManager implements Runnable {
 			//try and stop the download
 			noError = false;
 			setKeepDownloading(false); //this will stop it after the current file
+			emptyQueue(); //empty the queue
 		}
 		else{
 			//as a load isn't in progress we can report that we have finished
