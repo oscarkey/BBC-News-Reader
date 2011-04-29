@@ -10,8 +10,9 @@ However, it should probably work on any version.
 The app is fairly screen independent and should scale the amount of news displayed to suit any screen size or orientation.
 
 We use a lightweight Java rss library: jrss (https://github.com/ahorn/jrss) to read the news feeds. Feel free fix and/or improve it.
+We also use Matthew Wiggins' SeekBarPreference class (http://android.hlidskialf.com/blog/code/android-seekbar-preference).
 
-Although this app uses BBC content we are in no way affiliated with the BBC. Their content entirely belongs to them and this app simply improves the viewing experience from an Android phone.
+Although this app uses BBC content we are in no way affiliated with the BBC. Their content belongs entirely to them. This app simply improves the viewing experience from an Android phone.
 
 
 
