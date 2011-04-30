@@ -10,7 +10,8 @@ android:id="@+id/rootCategoryItem"
 android:layout_width="match_parent"
 android:layout_height="wrap_content"
 android:stretchColumns="1"
-android:padding="4sp">
+android:paddingTop="1sp"
+android:paddingBottom="1sp">
 	<TableRow
 	android:background="#3D3D3D"
 	android:onClick="categoryClicked">
