@@ -23,7 +23,7 @@ public class WebManager implements Runnable {
 	private volatile boolean noError;
 	private volatile int numErrors;
 
-	synchronized boolean isQueueEmpty() {
+	public synchronized boolean isQueueEmpty() {
 		return queueEmpty;
 	}
 

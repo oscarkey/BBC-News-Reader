@@ -54,7 +54,7 @@ public class ReaderActivity extends Activity {
 	static final int DIALOG_ERROR = 0;
 	static final int NEWS_ITEM_DP_WIDTH = 100; //FIXME item width shouldn't be predefined
 	static final String PREFS_FILE_NAME = "com.digitallizard.bbcnewsreader_preferences";
-	static final int DEFAULT_LOAD_TO_DAYS = 1;
+	static final int DEFAULT_ITEM_LOAD_LIMIT = 4;
 	static final int DEFAULT_CLEAR_OUT_AGE = 4;
 	static final boolean DEFAULT_LOAD_IN_BACKGROUND = true;
 	static final boolean DEFAULT_RTC_WAKEUP = true;

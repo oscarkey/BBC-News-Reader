@@ -256,30 +256,28 @@ public class ResourceService extends Service implements ResourceInterface {
 			updateLastLoadTime(); //save last load time
 			//tell the gui
 			sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
-			//as the rss load has completed we can begin loading articles etc
-			int loadToDays = settings.getInt("loadToDays", ReaderActivity.DEFAULT_LOAD_TO_DAYS); //find user preference
-			Integer[][] items = database.getUndownloaded(loadToDays); //find stuff up to x days old
-			//loop through and add articles to the queue
-			for(int i = 0; i < items[0].length; i++){
-				//FIXME should only get url, not whole item
-				String url = database.getUrl(items[0][i]);
-				webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, items[0][i]);
-				//FIXME inefficiencies with converting uri -> string and back
+			int itemLoadLimit = settings.getInt("itemLoadLimit", ReaderActivity.DEFAULT_ITEM_LOAD_LIMIT); //the limit for the number of items to load
+			//find out which categories are enabled
+			String[] categories = database.getEnabledCategories()[1];
+			for(int i = 0; i < categories.length; i++){
+				//load the unloaded html for this category
+				Integer[] htmlIds = database.getUndownloaded(categories[i], DatabaseHandler.COLUMN_HTML, itemLoadLimit);
+				for(int t = 0; t < htmlIds.length; t++){
+					String url = database.getUrl(htmlIds[t]);
+					webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, htmlIds[t]);
+				}
+				//load the unloaded thumbnails for this category
+				Integer[] thumbIds = database.getUndownloaded(categories[i], DatabaseHandler.COLUMN_THUMBNAIL, itemLoadLimit);
+				for(int t = 0; t < thumbIds.length; t++){
+					String url = database.getThumbnailUrl(thumbIds[t]);
+					//check if there is a thumbnail url, if so load it
+					if(url != null)
+						webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, htmlIds[t]);
+				}
 			}
-			//loop through and add thumbnails to the queue
-			for(int i = 0; i < items[1].length; i++){
-				//FIXME should only get url, not whole item
-				String url = database.getThumbnailUrl(items[1][i]);
-				//check if there is a thumbnail url, if so load it
-				if(url != null)
-					webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, items[1][i]);
-			}
-			//loop through and add images to the queue
-			for(int i = 0; i < items[2].length; i++){
-				//TODO support image loading
-			}
+			
 			//if we didn't have to add anything, report the load as fully complete
-			if(items[0].length == 0 && items[1].length == 0){
+			if(webManager.isQueueEmpty()){
 				fullLoadComplete(true);
 			}
 		}

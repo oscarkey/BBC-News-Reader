@@ -11,13 +11,13 @@
         android:text=" days"
         android:max="30"/>
         <com.hlidskialf.android.preference.SeekBarPreference
-	    android:key="loadToDays"
-        android:title="Load articles upto"
-        android:summary="The number of days ago to load new upto"
+	    android:key="itemLoadLimit"
+        android:title="Items to Preload"
+        android:summary="The number of items to preload"
         android:dialogMessage="Reduce this to shorten load times"
-        android:defaultValue="1"
-        android:text=" days ago"
-        android:max="7"/>
+        android:defaultValue="4"
+        android:text=" items"
+        android:max="15"/>
     </PreferenceCategory>
     <PreferenceCategory
     android:title="Background Loading">

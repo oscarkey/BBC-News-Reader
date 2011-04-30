@@ -44,6 +44,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    private static final String CREATE_RELATIONSHIP_TABLE = "CREATE TABLE " + ITEM_CATEGORY_TABLE +
 									          "(categoryName varchar(255), " +
 									          "itemId INT)";
+   public static final String COLUMN_HTML = "html";
+   public static final String COLUMN_THUMBNAIL = "thumbnail";
+   public static final String COLUMN_IMAGE = "image";
    private Context context;
    private SQLiteDatabase db;
    private long clearOutAgeMilliSecs; //the number of days to keep news items
@@ -198,6 +201,36 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   return values;
    }
 
+   /**
+    * Fetches all the undownloaded items from the last "days" days. Returns an array containing the item Ids of all these items
+    * 
+    * @param category The category to retrieve undownloaded items from
+    * @param days Number of days into the past to return undownloaded items for (Using timestamp from entry)
+    * @return A 2d int[3][n], where 3 is the type of item and n is the number of undownloaded items of that type.
+    * 			type is either 0, 1 or 2 for html, thumbnail or image respectively.
+    */
+   public Integer[] getUndownloaded(String category, String column, int numItems) {
+	   SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+	   queryBuilder.setDistinct(true);
+	   queryBuilder.setTables("items JOIN categories_items ON items.item_Id=categories_items.itemId");
+	   String[] selectionArgs = new String[]{"title", "description", "link", "item_Id"};
+	   String whereStatement = "categories_items.categoryName=? AND ? IS NULL";
+	   String[] whereArgs = new String[]{category, column};
+	   Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "pubdate DESC", Integer.toString(numItems));
+	   
+	   ArrayList<Integer> unloadedItems = new ArrayList<Integer>();
+	   
+	   //loop through and store the ids of the articles that need to be loaded
+	   for(int i=0; i < cursor.getCount(); i++){
+		   cursor.moveToNext();
+		   unloadedItems.add(cursor.getInt(0));
+	   }
+	   
+	   cursor.close();
+	   
+	   return unloadedItems.toArray(new Integer[unloadedItems.size()]);
+   }
+   
    /**
     * Inserts a category into the category table.
     * @param name Name of the category as String
