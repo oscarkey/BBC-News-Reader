@@ -4,15 +4,15 @@
 	android:title="General">
 	    <com.hlidskialf.android.preference.SeekBarPreference
 	    android:key="clearOutAge"
-        android:title="Max news age"
-        android:summary="The number of days to keep news"
+        android:title="Old news"
+        android:summary="How long to keep old news"
         android:dialogMessage="Reduce this to save space"
         android:defaultValue="4"
         android:text=" days"
         android:max="30"/>
         <com.hlidskialf.android.preference.SeekBarPreference
 	    android:key="itemLoadLimit"
-        android:title="Items to Preload"
+        android:title="Preloaded items"
         android:summary="The number of items to preload"
         android:dialogMessage="Reduce this to shorten load times"
         android:defaultValue="4"
@@ -23,20 +23,21 @@
     android:title="Background Loading">
     	<CheckBoxPreference
     	android:key="loadInBackground"
-    	android:title="Load in the background"
-    	android:summary="Load every hour automatically"
+    	android:title="Background loading"
+    	android:summary="Update news automatically"
     	android:defaultValue="true"/>
     	<CheckBoxPreference
     	android:key="rtcWakeup"
-    	android:title="Load when device asleep"
-    	android:defaultValue="true"/>
+    	android:title="Load when locked"
+    	android:summary="Update when phone on standby"
+    	android:defaultValue="true" android:dependency="loadInBackground"/>
     	<ListPreference
     	android:key="loadInterval"
     	android:title="Load interval"
     	android:summary="How long to wait between loads"
     	android:defaultValue="2"
     	android:entries="@array/loadIntervalEntries"
-    	android:entryValues="@array/loadIntervalValues"/>
+    	android:entryValues="@array/loadIntervalValues" android:dependency="loadInBackground"/>
     </PreferenceCategory>
     <PreferenceCategory
     android:title="Debugging">

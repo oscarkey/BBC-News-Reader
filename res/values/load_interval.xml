@@ -4,7 +4,7 @@
         <item>15 minutes</item>
         <item>30 minutes</item>
         <item>1 hour</item>
-        <item>half day</item>
+        <item>12 hours</item>
     </string-array>
     <string-array name="loadIntervalValues">
         <item>15_mins</item>
