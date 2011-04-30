@@ -27,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
+import com.digitallizard.bbcnewsreader.resource.web.HtmlParser;
 
 public class ArticleActivity extends Activity {
 	DatabaseHandler database;
@@ -131,7 +132,9 @@ public class ArticleActivity extends Activity {
     }
     
     void displayArticle(String html){
-    	webView.loadDataWithBaseURL(null, html, "text/html", "utf-8",null);
+    	//parse the html to get the bit we want
+    	String parsedHtml = HtmlParser.parsePage(html);
+    	webView.loadDataWithBaseURL(null, parsedHtml, "text/html", "utf-8",null);
     	layout.removeAllViews();
     	layout.setGravity(Gravity.FILL); //make the webview fill the screen
 		layout.addView(webView);

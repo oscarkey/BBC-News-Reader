@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -19,9 +18,9 @@ public class HtmlParser {
 	 * @throws IOException 
 	 * @throws ClientProtocolException 
 	 */
-	public static String getPage(URI uri) throws Exception {
+	public static String getPage(String uri) throws Exception {
 		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet(uri.toString());
+		HttpGet request = new HttpGet(uri);
 		HttpResponse response = client.execute(request);
 
 		String html = "";
@@ -35,6 +34,10 @@ public class HtmlParser {
 		}
 		in.close();
 		html = str.toString();
+		return html;
+	}
+	
+	public static String parsePage(String html){
 		String parsed;
 		parsed = html.split("<div class=\"storybody\">")[1];
 		parsed = parsed.split("</div>")[0];

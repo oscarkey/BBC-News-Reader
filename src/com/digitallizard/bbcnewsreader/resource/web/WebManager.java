@@ -1,6 +1,5 @@
 package com.digitallizard.bbcnewsreader.resource.web;
 
-import java.net.URI;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.PriorityQueue;
@@ -63,8 +62,7 @@ public class WebManager implements Runnable {
 	
 	private void downloadHtml(QueueItem item){
 		try{
-			URI url = new URI(item.getUrl());
-			String html = HtmlParser.getPage(url); //load the page
+			String html = HtmlParser.getPage(item.getUrl()); //load the page
 			//before we report this download, check if it was a specific request
 			if(item.wasSpecificallyRequested())
 				handler.itemDownloadComplete(true, item.getItemId(), item.getType(), html);
