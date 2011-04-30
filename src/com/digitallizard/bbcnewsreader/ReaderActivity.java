@@ -104,7 +104,7 @@ public class ReaderActivity extends Activity {
 				//tell the user that there is no internet connection
 				showErrorDialog("There is no internet connection.\nThe news cannot be updated.");
 				break;
-			case ResourceService.MSG_CATEOGRY_LOADED:
+			case ResourceService.MSG_CATEGORY_LOADED:
 				categoryLoadFinished(msg.getData().getString("category"));
 				break;
 			case ResourceService.MSG_NOW_LOADING:
@@ -117,7 +117,12 @@ public class ReaderActivity extends Activity {
 				rssLoadComplete();
 				break;
 			case ResourceService.MSG_THUMB_LOADED:
-				thumbLoadComplete(msg.getData().getInt("id", 0));
+				thumbLoadComplete(msg.getData().getInt("id"));
+				break;
+			case ResourceService.MSG_UPDATE_LOAD_PROGRESS:
+				int totalItems = msg.getData().getInt("totalItems");
+				int itemsLoaded = msg.getData().getInt("itemsDownloaded");
+				updateLoadProgress(totalItems, itemsLoaded);
 				break;
 			default:
 				super.handleMessage(msg); //we don't know what to do, lets hope that the super class knows
@@ -186,6 +191,10 @@ public class ReaderActivity extends Activity {
     		Log.e("BBC News Reader", "Oops something broke. We'll crash now.");
         	System.exit(1); //closes the app with an error code
     	}
+    }
+    
+    void updateLoadProgress(int totalItems, int itemsLoaded){
+    	statusText.setText("Preloading "+itemsLoaded+" of "+totalItems+" items");
     }
     
     void setLastLoadTime(long time){
@@ -280,7 +289,7 @@ public class ReaderActivity extends Activity {
     	//check we are actually loading news
     	if(loadInProgress){
     		//tell the user what is going on
-    		statusText.setText("Loading article texts...");
+    		statusText.setText("Loading items...");
     	}
     }
     

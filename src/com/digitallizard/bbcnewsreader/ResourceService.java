@@ -44,6 +44,8 @@ public class ResourceService extends Service implements ResourceInterface {
 	RSSManager rssManager;
 	WebManager webManager;
 	SharedPreferences settings;
+	int totalItemsToDownload;
+	int itemsDownloaded;
 		
 	/* command definitions */
 	static final int MSG_REGISTER_CLIENT = 1;
@@ -54,12 +56,13 @@ public class ResourceService extends Service implements ResourceInterface {
 	static final int MSG_LOAD_THUMB = 12;
 	static final int MSG_LOAD_IMAGE = 13;
 	static final int MSG_STOP_DATA_LOAD = 9; //sent to stop data loading
-	static final int MSG_CATEOGRY_LOADED = 6; //sent when a category has loaded
+	static final int MSG_CATEGORY_LOADED = 6; //sent when a category has loaded
 	static final int MSG_ARTICLE_LOADED = 15; //article loaded
 	static final int MSG_THUMB_LOADED = 14; //thumbnail loaded
 	static final int MSG_NOW_LOADING = 16;
 	static final int MSG_FULL_LOAD_COMPLETE = 8; //sent when all the data has been loaded
 	static final int MSG_RSS_LOAD_COMPLETE = 10;
+	static final int MSG_UPDATE_LOAD_PROGRESS = 18;
 	static final int MSG_ERROR = 7; //help! An error occurred
 	static final int MSG_NO_INTERNET = 17; //sent when the internet has failed
 	static final String ACTION_LOAD = "com.digitallizard.bbcnewsreader.action.LOAD_NEWS";
@@ -233,7 +236,7 @@ public class ResourceService extends Service implements ResourceInterface {
 		//send a message to the gui to tell it that we have loaded the category
 		Bundle bundle = new Bundle();
 		bundle.putString("category", category);
-		sendMsgToAll(MSG_CATEOGRY_LOADED, bundle);
+		sendMsgToAll(MSG_CATEGORY_LOADED, bundle);
 	}
 	
 	public synchronized void reportError(boolean fatal, String msg, String error){
@@ -256,6 +259,10 @@ public class ResourceService extends Service implements ResourceInterface {
 			updateLastLoadTime(); //save last load time
 			//tell the gui
 			sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
+			
+			//add unloaded items to the download queue
+			totalItemsToDownload = 0;
+			itemsDownloaded = 0;
 			int itemLoadLimit = settings.getInt("itemLoadLimit", ReaderActivity.DEFAULT_ITEM_LOAD_LIMIT); //the limit for the number of items to load
 			//find out which categories are enabled
 			String[] categories = database.getEnabledCategories()[1];
@@ -274,7 +281,12 @@ public class ResourceService extends Service implements ResourceInterface {
 					if(url != null)
 						webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, htmlIds[t]);
 				}
+				
+				//increment the number of items to download
+				totalItemsToDownload += htmlIds.length + thumbIds.length;
 			}
+			
+			reportItemsToDownload();
 			
 			//if we didn't have to add anything, report the load as fully complete
 			if(webManager.isQueueEmpty()){
@@ -322,6 +334,25 @@ public class ResourceService extends Service implements ResourceInterface {
 			bundle.putInt("item", itemId);
 			sendMsgToAll(MSG_ARTICLE_LOADED, bundle); //tell every client about the load
 		}
+		else{
+			//increment the number of items that have been loaded
+			incrementItemsToDownload();
+		}
+	}
+	
+	void reportItemsToDownload(){
+		//check if a load is in progress before sending this signal
+		if(loadInProgress){
+			Bundle bundle = new Bundle();
+			bundle.putInt("totalItems", totalItemsToDownload);
+			bundle.putInt("itemsDownloaded", itemsDownloaded);
+			sendMsgToAll(MSG_UPDATE_LOAD_PROGRESS, bundle);
+		}
+	}
+	
+	void incrementItemsToDownload(){
+		itemsDownloaded ++;
+		reportItemsToDownload();
 	}
 	
 	@Override
