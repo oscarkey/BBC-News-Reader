@@ -292,8 +292,6 @@ public class ResourceService extends Service implements ResourceInterface {
 			if(webManager.isQueueEmpty()){
 				fullLoadComplete(true);
 			}
-			
-			Log.v("service", "total items: "+totalItemsToDownload);
 		}
 		else{
 			fullLoadComplete(false); //end the load here, it was not successful

@@ -212,8 +212,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 	   queryBuilder.setDistinct(true);
 	   queryBuilder.setTables("items JOIN categories_items ON items.item_Id=categories_items.itemId");
-	   String[] selectionArgs = new String[]{"item_Id"};
-	   String whereStatement = "categories_items.categoryName=? AND items."+column+" IS NULL";
+	   String[] selectionArgs = new String[]{"item_Id", "items."+column};
+	   String whereStatement = "categories_items.categoryName=?";
 	   String[] whereArgs = new String[]{category};
 	   Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "pubdate DESC", Integer.toString(numItems));
 	   //Log.v("database", "query: "+queryBuilder.buildQuery(selectionArgs, whereStatement, whereArgs, null, null, "pubdate DESC", Integer.toString(numItems)));
@@ -223,7 +223,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   //loop through and store the ids of the articles that need to be loaded
 	   for(int i=0; i < cursor.getCount(); i++){
 		   cursor.moveToNext();
-		   unloadedItems.add(cursor.getInt(0));
+		   //check if we need to download this
+		   if(cursor.isNull(1))
+			   unloadedItems.add(cursor.getInt(0));
 	   }
 	   
 	   cursor.close();
