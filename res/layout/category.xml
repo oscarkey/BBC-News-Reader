@@ -9,10 +9,10 @@
 android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:background="#660000">
-	<ScrollView
+	<ScrollView android:id="@+id/categoryScroller"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
-		<LinearLayout android:id="@+id/categoryScroller"
+		<LinearLayout android:id="@+id/categoryScrollerContent"
 		android:orientation="vertical"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"

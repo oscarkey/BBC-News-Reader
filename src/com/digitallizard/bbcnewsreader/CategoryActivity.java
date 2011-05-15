@@ -8,8 +8,6 @@ package com.digitallizard.bbcnewsreader;
 
 import java.util.HashMap;
 
-import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +19,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
 public class CategoryActivity extends Activity {
 	HashMap<String, Integer> itemIds;
@@ -44,7 +44,7 @@ public class CategoryActivity extends Activity {
 		((TextView)findViewById(R.id.categoryTitle)).setText(title);
 		//create an inflater to build the ui
 		LayoutInflater inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		LinearLayout scroller = (LinearLayout)findViewById(R.id.categoryScroller);
+		LinearLayout scrollerContent = (LinearLayout)findViewById(R.id.categoryScrollerContent);
 		
 		//load in the news items from the database
 		DatabaseHandler database = new DatabaseHandler(this, 0); //we don't need to bother with the clear old date
@@ -68,7 +68,7 @@ public class CategoryActivity extends Activity {
 					imageView.setImageBitmap(imageBitmap);
 				}
 				
-				scroller.addView(item);
+				scrollerContent.addView(item);
 				//save the id for clicks
 				itemIds.put(items[0][i], Integer.parseInt(items[3][i]));
 			}

@@ -29,7 +29,7 @@
     	<CheckBoxPreference
     	android:key="rtcWakeup"
     	android:title="Load when locked"
-    	android:summary="Update when phone on standby"
+    	android:summary="Update when phone in standby"
     	android:defaultValue="true" android:dependency="loadInBackground"/>
     	<ListPreference
     	android:key="loadInterval"
