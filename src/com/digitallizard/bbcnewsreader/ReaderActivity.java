@@ -452,19 +452,17 @@ public class ReaderActivity extends Activity {
     
     void displayCategoryItems(int category){
     	//load from the database, if there's anything in it
-    	String[][] items = database.getItems(categoryNames[category]);
+    	NewsItem[] items = database.getItems(categoryNames[category], categoryRowLength);
     	if(items != null){
-    		String[] titles = items[0];
-    		String[] ids = items[3];
     		//change the physical items to match this
     		for(int i = 0; i < categoryRowLength; i++){
     			//check we have not gone out of range of the available news
-    			if(i < titles.length){
-    				physicalItems[category][i].setTitle(titles[i]);
-    				physicalItems[category][i].setId(Integer.parseInt(ids[i]));
+    			if(i < items.length){
+    				physicalItems[category][i].setTitle(items[i].getTitle());
+    				physicalItems[category][i].setId(items[i].getId());
     				
     				//try and get an image for this item
-    				byte[] imageBytes = database.getThumbnail(Integer.parseInt(ids[i]));
+    				byte[] imageBytes = database.getThumbnail(items[i].getId());
     				//check if any image data was returned
     				if(imageBytes != null){
     					//try to construct an image out of the bytes given by the database

@@ -48,18 +48,18 @@ public class CategoryActivity extends Activity {
 		
 		//load in the news items from the database
 		DatabaseHandler database = new DatabaseHandler(this, 0); //we don't need to bother with the clear old date
-		String[][] items = database.getItems(title);
+		NewsItem[] items = database.getItems(title, 50); //specify a high limit
 		//check if the database was empty
 		if(items != null){
 			//display them
-			for(int i = 0; i < items[0].length; i++){
+			for(int i = 0; i < items.length; i++){
 				LinearLayout item = (LinearLayout)inflater.inflate(R.layout.list_full_news_item, null);
 				//set the article name
-				((TextView)item.findViewById(R.id.fullNewsItemName)).setText(items[0][i]);
-				((TextView)item.findViewById(R.id.fullNewsItemDescription)).setText(items[1][i]);
+				((TextView)item.findViewById(R.id.fullNewsItemName)).setText(items[i].getTitle());
+				((TextView)item.findViewById(R.id.fullNewsItemDescription)).setText(items[i].getDescription());
 				
 				//try and get an image for this item
-				byte[] imageBytes = database.getThumbnail(Integer.parseInt(items[3][i]));
+				byte[] imageBytes = database.getThumbnail(items[i].getId());
 				//check if any image data was returned
 				if(imageBytes != null){
 					//try to construct an image out of the bytes given by the database
@@ -70,7 +70,7 @@ public class CategoryActivity extends Activity {
 				
 				scrollerContent.addView(item);
 				//save the id for clicks
-				itemIds.put(items[0][i], Integer.parseInt(items[3][i]));
+				itemIds.put(items[i].getTitle(), items[i].getId());
 			}
 		}
 		database.onDestroy(); //shutdown database

@@ -17,6 +17,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.util.Log;
 
+import com.digitallizard.bbcnewsreader.NewsItem;
 import com.digitallizard.bbcnewsreader.R;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
@@ -252,9 +253,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     * the items related to it.
     * Returns null if no items exists
     * @param category The Case-sensitive name of the category
-    * @return A String[{title,description,link,item_Id}][{item1,item2}].
+    * @param limit for the number of items to return
+    * @return NewsItem[]
     */
-   public String[][] getItems(String category){
+   public NewsItem[] getItems(String category, int limit){
 	   //build a query to find the items
 	   SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 	   queryBuilder.setDistinct(true);
@@ -262,16 +264,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   String[] selectionArgs = new String[]{"title", "description", "link", "item_Id"};
 	   String whereStatement = "categories_items.categoryName=?";
 	   String[] whereArgs = new String[]{category};
-	   Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "pubdate DESC", null);
+	   Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "pubdate DESC", Integer.toString(limit));
 	   
 	   //load these items into an array
-	   String[][] items = new String[5][cursor.getCount()];
-	   for(int i = 1;i <= cursor.getCount(); i++){
+	   NewsItem[] items = new NewsItem[cursor.getCount()];
+	   for(int i = 0; i < cursor.getCount(); i++){
 		   cursor.moveToNext();
-		   items[0][i-1] = cursor.getString(0); //title
-		   items[1][i-1] = cursor.getString(1); //description
-		   items[2][i-1] = cursor.getString(2); //link
-		   items[3][i-1] = cursor.getString(3); //id
+		   //create a new news item object
+		   items[i] = new NewsItem(Integer.parseInt(cursor.getString(3)), cursor.getString(0), cursor.getString(1), cursor.getString(2));
 	   }
 	   cursor.close();
 	   return items;
