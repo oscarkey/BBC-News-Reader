@@ -261,7 +261,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 	   queryBuilder.setDistinct(true);
 	   queryBuilder.setTables("items JOIN categories_items ON items.item_Id=categories_items.itemId");
-	   String[] selectionArgs = new String[]{"title", "description", "link", "item_Id"};
+	   String[] selectionArgs = new String[]{"title", "description", "link", "item_Id", "thumbnail"};
 	   String whereStatement = "categories_items.categoryName=?";
 	   String[] whereArgs = new String[]{category};
 	   Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "pubdate DESC", Integer.toString(limit));
@@ -271,7 +271,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   for(int i = 0; i < cursor.getCount(); i++){
 		   cursor.moveToNext();
 		   //create a new news item object
-		   items[i] = new NewsItem(Integer.parseInt(cursor.getString(3)), cursor.getString(0), cursor.getString(1), cursor.getString(2));
+		   items[i] = new NewsItem(Integer.parseInt(cursor.getString(3)), cursor.getString(0), cursor.getString(1), cursor.getString(2),
+				   cursor.getBlob(4));
 	   }
 	   cursor.close();
 	   return items;

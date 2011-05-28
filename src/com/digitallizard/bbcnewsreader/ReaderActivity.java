@@ -461,12 +461,12 @@ public class ReaderActivity extends Activity {
     				physicalItems[category][i].setTitle(items[i].getTitle());
     				physicalItems[category][i].setId(items[i].getId());
     				
-    				//try and get an image for this item
-    				byte[] imageBytes = database.getThumbnail(items[i].getId());
+    				//try and get an thumbnail for this item
+    				byte[] thumbBytes = items[i].getThumbnailBytes();
     				//check if any image data was returned
-    				if(imageBytes != null){
+    				if(thumbBytes != null){
     					//try to construct an image out of the bytes given by the database
-    					Bitmap imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length); //load the image into a bitmap
+    					Bitmap imageBitmap = BitmapFactory.decodeByteArray(thumbBytes, 0, thumbBytes.length); //load the image into a bitmap
     					physicalItems[category][i].setImage(imageBitmap);
     				}
     				else{

@@ -12,10 +12,13 @@ import java.util.Arrays;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
@@ -60,6 +63,29 @@ public class CategoryActivity extends Activity {
 				Intent intent = new Intent(parent.getContext(), ArticleActivity.class);
 		    	intent.putExtra("id", item.getId());
 		    	startActivity(intent);
+			}
+		});
+		
+		//add a listener to detect scrolls
+		listView.setOnScrollListener(new OnScrollListener() {
+			public void onScrollStateChanged(AbsListView list, int state) {
+				//check to see if the user has stopped scrolling
+				if(state == this.SCROLL_STATE_IDLE){
+					//check to see if all the visible items have images
+					int firstVisible = list.getFirstVisiblePosition();
+					int lastVisible = list.getLastVisiblePosition();
+					for(int i = firstVisible; i <= lastVisible; i++){
+						NewsItem item = (NewsItem)list.getAdapter().getItem(i);
+						//if this item doesn't have a thumbnail
+						if(item.getThumbnailBytes() == null){
+							//load the thumbnail
+						}
+					}
+				}
+			}
+			
+			public void onScroll(AbsListView list, int firstVisible, int visibleItems, int totalItems) {
+				//do nothing
 			}
 		});
 	}

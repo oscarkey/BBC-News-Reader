@@ -12,13 +12,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
-
 public class ItemAdapter extends ArrayAdapter<NewsItem> {
 	private ArrayList<NewsItem> items;
 	private int layout;
 	private LayoutInflater inflater;
-	private DatabaseHandler database;
 	
 	public View getView(int position, View convertView, ViewGroup parent){
 		View view = convertView;
@@ -33,17 +30,17 @@ public class ItemAdapter extends ArrayAdapter<NewsItem> {
 		title.setText(items.get(position).getTitle());
 		desc.setText(items.get(position).getDescription());
 		
-		//try to load in an image
-		byte[] imageBytes = database.getThumbnail(items.get(position).getId());
-		//check if any image data was returned
-		if(imageBytes != null){
+		//try to load in an thumbnail
+		byte[] thumbnailBytes = items.get(position).getThumbnailBytes();
+		//check if any data was returned
+		if(thumbnailBytes != null){
 			//try to construct an image out of the bytes given by the database
-			Bitmap imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length); //load the image into a bitmap
+			Bitmap imageBitmap = BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length); //load the image into a bitmap
 			ImageView imageView = (ImageView)view.findViewById(R.id.categoryItemImage);
 			imageView.setImageBitmap(imageBitmap);
 		}
 		else{
-			//set the image to the default image
+			//set the image to the default thumbnail
 			ImageView imageView = (ImageView)view.findViewById(R.id.categoryItemImage);
 			imageView.setImageResource(R.drawable.no_thumb);
 		}
@@ -52,16 +49,13 @@ public class ItemAdapter extends ArrayAdapter<NewsItem> {
 	}
 	
 	public void finish(){
-		//shutdown the database
-		database.finish();
+		//do nothing
 	}
 	
 	public ItemAdapter(Context context, int layout, ArrayList<NewsItem> items){
 		super(context, layout, items);
-		
 		this.items = items;
 		this.layout = layout;
 		inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		database = new DatabaseHandler(context, 0); //don't bother with clear old date
 	}
 }

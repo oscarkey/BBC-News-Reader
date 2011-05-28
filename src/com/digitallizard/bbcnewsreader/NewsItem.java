@@ -5,6 +5,7 @@ public class NewsItem {
 	private String description;
 	private String link;
 	private int id;
+	private byte[] thumbnailBytes;
 	
 	/**
 	 * @return the title
@@ -54,11 +55,25 @@ public class NewsItem {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public NewsItem(int id, String title, String description, String link) {
+	/**
+	 * @return the thumbnailBytes
+	 */
+	public byte[] getThumbnailBytes() {
+		return thumbnailBytes;
+	}
+	/**
+	 * @param thumbnailBytes the thumbnailBytes to set
+	 */
+	public void setThumbnailBytes(byte[] imageBytes) {
+		this.thumbnailBytes = imageBytes;
+	}
+	
+	public NewsItem(int id, String title, String description, String link, byte[] imageBytes) {
 		super();
 		this.title = title;
 		this.description = description;
 		this.link = link;
 		this.id = id;
+		this.thumbnailBytes = imageBytes;
 	}
 }
