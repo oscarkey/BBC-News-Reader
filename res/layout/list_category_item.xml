@@ -10,10 +10,10 @@ android:id="@+id/rootCategoryItem"
 android:layout_width="match_parent"
 android:layout_height="wrap_content"
 android:stretchColumns="1"
-android:paddingTop="1sp"
-android:paddingBottom="1sp">
+android:paddingTop="0.5sp"
+android:paddingBottom="0.5sp">
 	<TableRow
-	android:background="#3D3D3D"
+	android:background="@drawable/list_item_color"
 	android:onClick="categoryClicked">
 		<TextView android:id="@+id/textCategoryName"
 		android:text="No Title"

@@ -1,31 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  BBC News Reader
-  Released under the BSD License. See README or LICENSE.
-  Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
-  All rights reserved.
--->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical"
 android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:background="#660000">
-	<ScrollView android:id="@+id/categoryScroller"
+android:layout_height="match_parent">
+	<LinearLayout
+	android:orientation="horizontal"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent">
-		<LinearLayout android:id="@+id/categoryScrollerContent"
-		android:orientation="vertical"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:paddingTop="5dp"
-		android:paddingLeft="10dp"
-		android:paddingRight="10dp"
-		android:gravity="left">
-			<TextView android:id="@+id/categoryTitle"
-			android:text="No Title"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:paddingBottom="2dp"
-			android:textSize="24sp"/>
-		</LinearLayout>
-	</ScrollView>
+	android:layout_height="50sp"
+	android:gravity="center_vertical"
+	android:background="@drawable/top_bar_gradient"
+	android:paddingTop="5dp"
+	android:paddingLeft="5dp"
+	android:paddingRight="5dp">
+		<TextView android:id="@+id/categoryTitle"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:padding="2dp"
+		android:textSize="17sp"
+		android:text="No Title"/>
+	</LinearLayout>
+	<ListView android:id="@+id/categoryListView"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:divider="#303030"
+    android:dividerHeight="2sp">
+	</ListView>
 </LinearLayout>

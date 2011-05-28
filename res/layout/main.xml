@@ -12,7 +12,7 @@ android:layout_height="match_parent">
 	<LinearLayout
 	android:orientation="horizontal"
 	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
+	android:layout_height="50sp"
 	android:gravity="center_vertical"
 	android:background="@drawable/top_bar_gradient"
 	android:paddingTop="5dp"
