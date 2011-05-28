@@ -432,9 +432,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   createTables();
    }
    
-   public void onDestroy(){
+   public void finish(){
 	   //close the database
 	   db.close();
+	   db = null;
+   }
+   
+   protected void finalize() throws Throwable {
+	   //use try-catch to make sure we do not break super
+	   try{
+		   //make sure the database has been shutdown
+		   if(db != null){
+			   db.close();
+			   db = null;
+		   }
+	   } finally {
+		   super.finalize();
+	   }
    }
    
    public DatabaseHandler(Context context, int clearOutAgeDays){

@@ -51,6 +51,11 @@ public class ItemAdapter extends ArrayAdapter<NewsItem> {
 		return view;
 	}
 	
+	public void finish(){
+		//shutdown the database
+		database.finish();
+	}
+	
 	public ItemAdapter(Context context, int layout, ArrayList<NewsItem> items){
 		super(context, layout, items);
 		

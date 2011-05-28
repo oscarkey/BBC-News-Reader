@@ -28,7 +28,9 @@ public class CategoryActivity extends Activity {
 	
 	public void onDestroy(){
 		//shutdown the database
-		database.onDestroy();
+		database.finish();
+		//shutdown the list adapter
+		((ItemAdapter)listView.getAdapter()).finish();
 		
 		super.onDestroy();
 	}

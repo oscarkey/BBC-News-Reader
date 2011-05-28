@@ -435,7 +435,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	public void onDestroy(){
 		Log.v("ResourceService", "service is shutting down");
 		this.unregisterReceiver(broadcastReceiver);
-		database.onDestroy(); //shutdown the database
+		database.finish(); //shutdown the database
 		super.onDestroy();
 	}
 	
