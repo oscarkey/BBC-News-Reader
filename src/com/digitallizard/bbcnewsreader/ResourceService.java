@@ -279,7 +279,7 @@ public class ResourceService extends Service implements ResourceInterface {
 					String url = database.getThumbnailUrl(thumbIds[t]);
 					//check if there is a thumbnail url, if so load it
 					if(url != null)
-						webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, htmlIds[t]);
+						webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, thumbIds[t]);
 				}
 				
 				//increment the number of items to download
