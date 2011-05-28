@@ -88,7 +88,7 @@ public class ResourceService extends Service implements ResourceInterface {
 				loadArticle(msg.getData().getInt("itemId"));
 				break;
 			case MSG_LOAD_THUMB:
-				//TODO load specific thumb
+				loadThumbnail(msg.getData().getInt("itemId"));
 				break;
 			case MSG_LOAD_IMAGE:
 				//TODO load specific image
@@ -159,8 +159,9 @@ public class ResourceService extends Service implements ResourceInterface {
 		webManager.loadNow(url, WebManager.ITEM_TYPE_HTML, id); //tell the webmanager to load this
 	}
 	
-	void loadThumb(int id){
-		//TODO add specific thumbnail loading
+	void loadThumbnail(int id){
+		String url = database.getThumbnailUrl(id); //get the url of the item
+		webManager.loadNow(url, WebManager.ITEM_TYPE_THUMB, id); //tell the webmanager to load this
 	}
 	
 	void loadImage(int id){
@@ -310,6 +311,12 @@ public class ResourceService extends Service implements ResourceInterface {
 		if(type == WebManager.ITEM_TYPE_HTML){
 			String html = (String)download;
 			database.addHtml(itemId, html);
+			//if this item was specifically requested we need to report that it has been loaded
+			if(specific){
+				Bundle bundle = new Bundle();
+				bundle.putInt("item", itemId);
+				sendMsgToAll(MSG_ARTICLE_LOADED, bundle); //tell every client about the load
+			}
 		}
 		if(type == WebManager.ITEM_TYPE_IMAGE){
 			byte[] image = (byte[])download;
@@ -327,14 +334,8 @@ public class ResourceService extends Service implements ResourceInterface {
 			bundle.putInt("id", itemId);
 			sendMsgToAll(MSG_THUMB_LOADED, bundle);
 		}
-		//if this item was specifically requested we need to report that it has been loaded
-		if(specific){
-			//report that a specifically requested item has been loaded
-			Bundle bundle = new Bundle();
-			bundle.putInt("item", itemId);
-			sendMsgToAll(MSG_ARTICLE_LOADED, bundle); //tell every client about the load
-		}
-		else{
+		
+		if(!specific){
 			//increment the number of items that have been loaded
 			incrementItemsToDownload();
 		}

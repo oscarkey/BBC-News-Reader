@@ -64,8 +64,8 @@ public class NewsItem {
 	/**
 	 * @param thumbnailBytes the thumbnailBytes to set
 	 */
-	public void setThumbnailBytes(byte[] imageBytes) {
-		this.thumbnailBytes = imageBytes;
+	public void setThumbnailBytes(byte[] thumbnailBytes) {
+		this.thumbnailBytes = thumbnailBytes;
 	}
 	
 	public NewsItem(int id, String title, String description, String link, byte[] imageBytes) {
