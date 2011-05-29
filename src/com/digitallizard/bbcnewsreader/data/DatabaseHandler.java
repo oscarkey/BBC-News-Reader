@@ -29,9 +29,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    private static final String ITEM_CATEGORY_TABLE = "categories_items";
    private static final String CREATE_ITEM_TABLE = "CREATE TABLE " + ITEM_TABLE + 
    											  "(item_Id integer PRIMARY KEY," +
-									          "title varchar(255) UNIQUE, " +
+									          "title varchar(255), " +
 									          "description varchar(255), " +
-									          "link varchar(255), " +
+									          "link varchar(255) UNIQUE, " +
 									          "pubdate int, " +
 									          "html text, " +
 									          "image blob, " +
@@ -44,7 +44,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 									          "url varchar(255))";
    private static final String CREATE_RELATIONSHIP_TABLE = "CREATE TABLE " + ITEM_CATEGORY_TABLE +
 									          "(categoryName varchar(255), " +
-									          "itemId INT)";
+									          "itemId INT," +
+									          "antiDuplicate varchar(255) UNIQUE)";
    public static final String COLUMN_HTML = "html";
    public static final String COLUMN_THUMBNAIL = "thumbnail";
    public static final String COLUMN_IMAGE = "image";
@@ -67,21 +68,41 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   
 	   //check if the news is old or not
 	   if(timestamp > (now.getTime() - clearOutAgeMilliSecs)){
-		   //insert the item into the items table
-		   ContentValues values = new ContentValues(4);
-		   values.put("title", title);
-		   values.put("description", description);
-		   values.put("link", link);
-		   values.put("pubdate", timestamp);
-		   values.put("thumbnailurl", thumbnailUrl);
-		   //perform the insert operation telling sql to ignore any present items with the same title
-		   long id = db.insertWithOnConflict(ITEM_TABLE, null, values, SQLiteDatabase.CONFLICT_IGNORE); //this outputs the new primary key
+		   //check to see if this item is already in the database
+		   Cursor cursor = db.query(ITEM_TABLE, new String[] {"item_Id", "title"}, "link=?", new String[] {link}, null, null, null);
+		   //check if this item is not in the database
+		   long id = -1; //holds the id of the item
+		   if(cursor.getCount() == 0){
+			   //insert the item
+			   ContentValues values = new ContentValues(4);
+			   values.put("title", title);
+			   values.put("description", description);
+			   values.put("link", link);
+			   values.put("pubdate", timestamp);
+			   values.put("thumbnailurl", thumbnailUrl);
+			   id = db.insert(ITEM_TABLE, null, values); //this outputs the new primary key
+		   }
+		   else if(cursor.getCount() == 1){
+			   //this item must already exist
+			   cursor.moveToNext();
+			   id = (long)cursor.getInt(0); //save the id
+			   //test to see if the title has changed
+			   if(!cursor.getString(1).equals(title)){
+				   //update the title and clear the html and thumbnail
+				   ContentValues values = new ContentValues(3);
+				   values.put("title", title);
+				   values.putNull("html");
+				   values.putNull("thumbnail");
+				   db.update(ITEM_TABLE, values, "item_Id=?", new String[] {Long.toString(id)});
+			   }
+		   }
 		   
 		   //associate the item with its category
-		   values = new ContentValues(2);
+		   ContentValues values = new ContentValues(3);
 		   values.put("categoryName", category);
 		   values.put("itemId", id);
-		   db.insert(ITEM_CATEGORY_TABLE, null, values);
+		   values.put("antiDuplicate", category + Long.toString(id)); //prevents duplicates
+		   db.insertWithOnConflict(ITEM_CATEGORY_TABLE, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 	   }
    }
    
