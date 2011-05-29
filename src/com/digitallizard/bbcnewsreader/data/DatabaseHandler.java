@@ -99,19 +99,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		   }
 		   
 		   //associate the item with its category
-		   ContentValues values = new ContentValues(3);
+		   ContentValues values = new ContentValues(4);
 		   values.put("categoryName", category);
 		   values.put("itemId", id);
 		   values.put("antiDuplicate", category + Long.toString(id)); //prevents duplicates
 		   values.put("priority", priority);
-		   long result = db.insertWithOnConflict(ITEM_CATEGORY_TABLE, null, values, SQLiteDatabase.CONFLICT_FAIL);
-		   
-		   if(result == -1){
-			   //update the priority
-			   values = new ContentValues(1);
-			   values.put("priority", priority);
-			   db.update(ITEM_TABLE, values, "categoryName=? AND itemId=?", new String[] {category, Long.toString(id)});
-		   }
+		   db.insertWithOnConflict(ITEM_CATEGORY_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
 	   }
    }
    
