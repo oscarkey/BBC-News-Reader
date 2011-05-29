@@ -263,11 +263,11 @@ public class ReaderActivity extends Activity {
     	if(!loadInProgress){
 	    	if(lastLoadTime == 0){
 	    		//say we have never loaded
-	    		statusText.setText("Last updated never");
+	    		statusText.setText("Never updated.");
 	    	}
 	    	else{
 	    		//set the text to show date and time
-	    		String status = "Last updated ";
+	    		String status = "Updated ";
 	    		//find out time since last load in milliseconds
 	    		long difference = System.currentTimeMillis() - (time * 1000); //the time since the last load
 	    		//if within 1 hour, display minutes
