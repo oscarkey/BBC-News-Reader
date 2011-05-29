@@ -45,7 +45,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    private static final String CREATE_RELATIONSHIP_TABLE = "CREATE TABLE " + ITEM_CATEGORY_TABLE +
 									          "(categoryName varchar(255), " +
 									          "itemId INT," +
-									          "antiDuplicate varchar(255) UNIQUE)";
+									          "antiDuplicate varchar(255) UNIQUE," +
+									          "priority int)";
    public static final String COLUMN_HTML = "html";
    public static final String COLUMN_THUMBNAIL = "thumbnail";
    public static final String COLUMN_IMAGE = "image";
@@ -62,7 +63,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     * @param pubdate News item's published data as String
     * @param category News item's category as String
     */
-   public void insertItem(String title, String description, String link, Date pubdate, String category, String thumbnailUrl){
+   public void insertItem(String title, String description, String link, Date pubdate, String category, String thumbnailUrl, int priority){
 	   long timestamp = pubdate.getTime();
 	   Date now = new Date();
 	   
@@ -74,7 +75,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		   long id = -1; //holds the id of the item
 		   if(cursor.getCount() == 0){
 			   //insert the item
-			   ContentValues values = new ContentValues(4);
+			   ContentValues values = new ContentValues(5);
 			   values.put("title", title);
 			   values.put("description", description);
 			   values.put("link", link);
@@ -102,7 +103,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		   values.put("categoryName", category);
 		   values.put("itemId", id);
 		   values.put("antiDuplicate", category + Long.toString(id)); //prevents duplicates
-		   db.insertWithOnConflict(ITEM_CATEGORY_TABLE, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+		   values.put("priority", priority);
+		   long result = db.insertWithOnConflict(ITEM_CATEGORY_TABLE, null, values, SQLiteDatabase.CONFLICT_FAIL);
+		   
+		   if(result == -1){
+			   //update the priority
+			   values = new ContentValues(1);
+			   values.put("priority", priority);
+			   db.update(ITEM_TABLE, values, "categoryName=? AND itemId=?", new String[] {category, Long.toString(id)});
+		   }
 	   }
    }
    
@@ -237,7 +246,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   String[] selectionArgs = new String[]{"item_Id", "items."+column};
 	   String whereStatement = "categories_items.categoryName=?";
 	   String[] whereArgs = new String[]{category};
-	   Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "pubdate DESC", Integer.toString(numItems));
+	   Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "categories_items.priority ASC", Integer.toString(numItems));
 	   //Log.v("database", "query: "+queryBuilder.buildQuery(selectionArgs, whereStatement, whereArgs, null, null, "pubdate DESC", Integer.toString(numItems)));
 	   
 	   ArrayList<Integer> unloadedItems = new ArrayList<Integer>();
@@ -285,7 +294,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   String[] selectionArgs = new String[]{"title", "description", "link", "item_Id", "thumbnail"};
 	   String whereStatement = "categories_items.categoryName=?";
 	   String[] whereArgs = new String[]{category};
-	   Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "pubdate DESC", Integer.toString(limit));
+	   Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "categories_items.priority ASC", Integer.toString(limit));
 	   
 	   //load these items into an array
 	   NewsItem[] items = new NewsItem[cursor.getCount()];
