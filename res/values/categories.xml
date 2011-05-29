@@ -36,4 +36,19 @@
 <item>http://feeds.bbci.co.uk/news/mobile/technology/rss.xml</item>
 <item>http://feeds.bbci.co.uk/news/mobile/entertainment_and_arts/rss.xml</item>
 </string-array>
+<integer-array name="category_default_booleans">
+    <item>1</item>
+    <item>1</item>
+    <item>1</item>
+    <item>0</item>
+    <item>0</item>
+    <item>0</item>
+    <item>0</item>
+    <item>0</item>
+    <item>0</item>
+    <item>0</item>
+    <item>0</item>
+    <item>1</item>
+    <item>0</item>
+</integer-array>
 </resources>

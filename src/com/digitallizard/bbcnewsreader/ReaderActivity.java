@@ -19,6 +19,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -78,6 +79,9 @@ public class ReaderActivity extends Activity {
 	int categoryRowLength; //the number of items to show per row
 	Dialog errorDialog;
 	boolean errorWasFatal;
+	boolean firstRun;
+	Dialog firstRunDialog;
+	Dialog backgroundLoadDialog;
 	HashMap<String, Integer> itemIds;
 	long lastLoadTime;
 
@@ -193,6 +197,61 @@ public class ReaderActivity extends Activity {
     	}
     }
     
+    void showFirstRunDialog(){
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	String message = "Choose the categories you are interested in. \n\n" +
+    			"The fewer categories enabled the lower data usage and the faster loading will be.";
+    	builder.setMessage(message);
+    	builder.setCancelable(false);
+    	builder.setPositiveButton("Choose", new DialogInterface.OnClickListener() {
+           public void onClick(DialogInterface dialog, int id) {
+        	   closeFirstRunDialog();
+        	   //show the category chooser
+        	   showCategoryChooser();
+           }
+    	});
+    	firstRunDialog = builder.create();
+    	firstRunDialog.show();
+    }
+    
+    void closeFirstRunDialog(){
+    	firstRunDialog = null; //destroy the dialog
+    }
+    
+    void showBackgroundLoadDialog(){
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	String message = "Load news in the background? \n\n" +
+    			"This could increase data usage but will reduce load times.";
+    	builder.setMessage(message);
+    	builder.setCancelable(false);
+    	builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+    		public void onClick(DialogInterface dialog, int id) {
+    			closeBackgroundLoadDialog();
+    			firstRun = false; //we have finished the first run
+    			//save the selected option
+    			Editor editor = settings.edit();
+    			editor.putBoolean("loadInBackground", true);
+    			editor.apply();
+    		}
+    	});
+    	builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				closeBackgroundLoadDialog();
+				firstRun = false; //we have finished the first run
+				//save the selected option
+				Editor editor = settings.edit();
+    			editor.putBoolean("loadInBackground", false);
+    			editor.apply();
+			}
+		});
+    	backgroundLoadDialog = builder.create();
+    	backgroundLoadDialog.show();
+    }
+    
+    void closeBackgroundLoadDialog(){
+    	backgroundLoadDialog = null;
+    }
+    
     void updateLoadProgress(int totalItems, int itemsLoaded){
     	statusText.setText("Preloading "+itemsLoaded+" of "+totalItems+" items");
     }
@@ -293,6 +352,15 @@ public class ReaderActivity extends Activity {
     	}
     }
     
+    void showCategoryChooser(){
+		//create an intent to launch the category chooser
+    	Intent intent = new Intent(this, CategoryChooserActivity.class);
+    	//load the boolean array of currently enabled categories
+    	boolean[] categoryBooleans = database.getCategoryBooleans();
+    	intent.putExtra("categorybooleans", categoryBooleans);
+    	startActivityForResult(intent, ACTIVITY_CHOOSE_CATEGORIES);
+    }
+    
     void thumbLoadComplete(int id){
     	//loop through categories
     	for(int i = 0; i < physicalItems.length; i++){
@@ -379,9 +447,12 @@ public class ReaderActivity extends Activity {
         
         //load the database
         database = new DatabaseHandler(this, settings.getInt("clearOutAge", DEFAULT_CLEAR_OUT_AGE));
+        firstRun = false;
         if(!database.isCreated()){
         	database.createTables();
         	database.addCategoriesFromXml();
+        	firstRun = true;
+        	showFirstRunDialog();
         }
         
         createNewsDisplay();
@@ -508,12 +579,7 @@ public class ReaderActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item){
     	if(item.getTitle().equals("Choose Categories")){
     		//launch the category chooser activity
-    		//create an intent to launch the next activity
-        	Intent intent = new Intent(this, CategoryChooserActivity.class);
-        	//load the boolean array of currently enabled categories
-        	boolean[] categoryBooleans = database.getCategoryBooleans();
-        	intent.putExtra("categorybooleans", categoryBooleans);
-        	startActivityForResult(intent, ACTIVITY_CHOOSE_CATEGORIES);
+    		showCategoryChooser();
     	}
     	if(item.getTitle().equals("Settings")){
     		//show the settings menu
@@ -529,10 +595,14 @@ public class ReaderActivity extends Activity {
     	case ACTIVITY_CHOOSE_CATEGORIES:
     		//check the request was a success
     		if(resultCode == RESULT_OK){
-    			//TODO store the data sent back
     			database.setEnabledCategories(data.getBooleanArrayExtra("categorybooleans"));
     			//reload the ui
     			createNewsDisplay();
+    			//check for a first run
+    			if(firstRun){
+    				loadData(); //make sure selected categories are loaded
+    				showBackgroundLoadDialog();
+    			}
     		}
     		break;
     	}

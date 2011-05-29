@@ -402,8 +402,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   try{
 		   String[] categoryNames = context.getResources().getStringArray(R.array.category_names);
 		   String[] categoryUrls = context.getResources().getStringArray(R.array.catergory_rss_urls);
+		   int[] categoryBooleans = context.getResources().getIntArray(R.array.category_default_booleans);
 		   for(int i = 0; i < categoryNames.length; i++){
-			   insertCategory(categoryNames[i], true, categoryUrls[i]);
+			   boolean enabled = true;
+			   if(categoryBooleans[i] == 0){
+				   enabled = false;
+			   }
+			   insertCategory(categoryNames[i], enabled, categoryUrls[i]);
 		   }
 	   }
 	   catch(NullPointerException e){
