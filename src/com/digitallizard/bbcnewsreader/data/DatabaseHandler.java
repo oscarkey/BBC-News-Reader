@@ -359,12 +359,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     */
    public void setEnabledCategories(boolean[] enabled) throws NullPointerException {
 	   ContentValues values = new ContentValues(1);
-	   for(int i = 1; i < enabled.length; i++){
+	   for(int i = 0; i < enabled.length; i++){
 		   if(enabled[i])
 			   values.put("enabled", 1);
 		   else
 			   values.put("enabled", 0);
-		   db.update(CATEGORY_TABLE, values, "category_Id=?", new String[]{Integer.toString(i)});
+		   db.update(CATEGORY_TABLE, values, "category_Id=?", new String[]{Integer.toString(i+1)});
 		   values.clear();
 	   }
    }
