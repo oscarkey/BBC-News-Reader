@@ -9,8 +9,10 @@ It has currently been tested on the following Android versions:
 However, it should probably work on any version.
 The app is fairly screen independent and should scale the amount of news displayed to suit any screen size or orientation.
 
-We use a lightweight Java rss library: jrss (https://github.com/ahorn/jrss) to read the news feeds. Feel free fix and/or improve it.
+We use a lightweight Android rss library: android-rss (https://github.com/ahorn/android-rss) to read the news feeds. Feel free fix and/or improve it.
 We also use Matthew Wiggins' SeekBarPreference class (http://android.hlidskialf.com/blog/code/android-seekbar-preference).
+Finally, we use the Eula class from the Android sample game "Divide and Conquer"
+(http://code.google.com/p/apps-for-android/source/browse/trunk/DivideAndConquer/src/com/google/android/divideandconquer/Eula.java).
 
 Although this app uses BBC content we are in no way affiliated with the BBC. Their content belongs entirely to them. This app simply improves the viewing experience from an Android phone.
 
