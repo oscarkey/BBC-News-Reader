@@ -21,7 +21,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -109,7 +108,7 @@ public class CategoryActivity extends Activity {
 			}
 			catch(RemoteException e){
 				//We are probably shutting down, but report it anyway
-				Log.e("ERROR", "Unable to send message to service: " + e.getMessage());
+				//Log.e("ERROR", "Unable to send message to service: " + e.getMessage());
 			}
     	}
     }
