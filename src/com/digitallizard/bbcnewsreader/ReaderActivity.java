@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -162,13 +163,13 @@ public class ReaderActivity extends Activity {
     		//display a user friendly message
     		if(fatal){
         		showErrorDialog("Fatal error:\n"+msg+"\nPlease try resetting the app.");
-        		//Log.e("BBC News Reader", "Fatal error: "+msg);
-        		//Log.e("BBC News Reader", error);
+        		Log.e("BBC News Reader", "Fatal error: "+msg);
+        		Log.e("BBC News Reader", error);
         	}
         	else{
         		showErrorDialog("Error:\n"+msg);
-        		//Log.e("BBC News Reader", "Error: "+msg);
-            	//Log.e("BBC News Reader", error);
+        		Log.e("BBC News Reader", "Error: "+msg);
+            	Log.e("BBC News Reader", error);
         	}
     	}
     }
