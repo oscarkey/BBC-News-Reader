@@ -15,7 +15,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.util.Log;
 
 import com.digitallizard.bbcnewsreader.NewsItem;
 import com.digitallizard.bbcnewsreader.R;
@@ -412,7 +411,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		   }
 	   }
 	   catch(NullPointerException e){
-		   Log.e("Database", "Categories XML is broken.");
+		   //Log.e("Database", "Categories XML is broken.");
 	   }
    }
    

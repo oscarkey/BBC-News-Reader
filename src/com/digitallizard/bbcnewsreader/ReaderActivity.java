@@ -28,7 +28,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -163,13 +162,13 @@ public class ReaderActivity extends Activity {
     		//display a user friendly message
     		if(fatal){
         		showErrorDialog("Fatal error:\n"+msg+"\nPlease try resetting the app.");
-        		Log.e("BBC News Reader", "Fatal error: "+msg);
-        		Log.e("BBC News Reader", error);
+        		//Log.e("BBC News Reader", "Fatal error: "+msg);
+        		//Log.e("BBC News Reader", error);
         	}
         	else{
         		showErrorDialog("Error:\n"+msg);
-        		Log.e("BBC News Reader", "Error: "+msg);
-            	Log.e("BBC News Reader", error);
+        		//Log.e("BBC News Reader", "Error: "+msg);
+            	//Log.e("BBC News Reader", error);
         	}
     	}
     }
@@ -192,7 +191,7 @@ public class ReaderActivity extends Activity {
     	//see if we need to end the program
     	if(errorWasFatal){
     		//crash out
-    		Log.e("BBC News Reader", "Oops something broke. We'll crash now.");
+    		//Log.e("BBC News Reader", "Oops something broke. We'll crash now.");
         	System.exit(1); //closes the app with an error code
     	}
     }
@@ -231,7 +230,7 @@ public class ReaderActivity extends Activity {
     			//save the selected option
     			Editor editor = settings.edit();
     			editor.putBoolean("loadInBackground", true);
-    			editor.apply();
+    			editor.commit();
     		}
     	});
     	builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -241,7 +240,7 @@ public class ReaderActivity extends Activity {
 				//save the selected option
 				Editor editor = settings.edit();
     			editor.putBoolean("loadInBackground", false);
-    			editor.apply();
+    			editor.commit();
 			}
 		});
     	backgroundLoadDialog = builder.create();
@@ -416,14 +415,14 @@ public class ReaderActivity extends Activity {
 			}
 			catch(RemoteException e){
 				//We are probably shutting down, but report it anyway
-				Log.e("ERROR", "Unable to send message to service: " + e.getMessage());
+				//Log.e("ERROR", "Unable to send message to service: " + e.getMessage());
 			}
     	}
     }
     
     void sendMessageToService(int what){
     	sendMessageToService(what, null);
-    }
+    } 
     
     /** Called when the activity is first created. */
     @Override
@@ -456,6 +455,8 @@ public class ReaderActivity extends Activity {
         }
         
         createNewsDisplay();
+        
+        Eula.show(this); //show the eula
         
         //start the service
         doBindService(); //loads the service
