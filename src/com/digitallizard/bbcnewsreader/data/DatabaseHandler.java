@@ -12,12 +12,15 @@ import java.util.Date;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 
 import com.digitallizard.bbcnewsreader.NewsItem;
 import com.digitallizard.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.WrapBackwards;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
@@ -52,6 +55,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    private Context context;
    private SQLiteDatabase db;
    private long clearOutAgeMilliSecs; //the number of days to keep news items
+   private boolean methodInsertWithConflictExists; //used to determine if the required method exists
    
    /**
     * Inserts an RSSItem into the items table, then creates an entry in the relationship
@@ -103,7 +107,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		   values.put("itemId", id);
 		   values.put("antiDuplicate", category + Long.toString(id)); //prevents duplicates
 		   values.put("priority", priority);
-		   db.insertWithOnConflict(ITEM_CATEGORY_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+		   
+		   //insert this item, if the required method doesn't exist, use the old one
+		   if(methodInsertWithConflictExists){
+			   //FIXME performance: shouldn't replace every time
+			   WrapBackwards.insertWithOnConflict(db, ITEM_CATEGORY_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+		   }
+		   else{
+			   //use an alternative method
+			   try{
+				   db.insertOrThrow(ITEM_CATEGORY_TABLE, null, values);
+			   } catch(SQLiteConstraintException e){
+				   //this item obviously already exists, replace it instead
+				   db.replace(ITEM_CATEGORY_TABLE, null, values);
+			   } catch(SQLException e){
+				   //TODO handle this type of exception
+			   }
+		   }
 	   }
    }
    
@@ -466,6 +486,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   db = null;
    }
    
+   void checkCompatibilty(){
+	   //check if the insertWithOnConflict exists
+	   try {
+		   SQLiteDatabase.class.getMethod("insertWithOnConflict", new Class[] {String.class, String.class, ContentValues.class, Integer.TYPE});
+		   //success, this method exists, set the boolean
+		   methodInsertWithConflictExists = true;
+       } catch (NoSuchMethodException e) {
+           //failure, set the boolean
+    	   methodInsertWithConflictExists = false;
+       }
+   }
+   
    protected void finalize() throws Throwable {
 	   //use try-catch to make sure we do not break super
 	   try{
@@ -484,5 +516,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   this.context = context;
 	   this.clearOutAgeMilliSecs = (long)(clearOutAgeDays * 24 * 60 * 60 * 1000);
 	   this.db = this.getWritableDatabase();
+	   
+	   //check compatibility with this version of Android
+	   checkCompatibilty();
    }
 }

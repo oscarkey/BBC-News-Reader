@@ -390,7 +390,6 @@ public class ResourceService extends Service implements ResourceInterface {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				if(intent.getAction().equals("com.digitallizard.bbcnewsreader.action.LOAD_NEWS")){
-					Log.v("BBC News Reader Service", "News load requested.");
 					loadData(); //load the news
 				}
 			}
@@ -434,7 +433,6 @@ public class ResourceService extends Service implements ResourceInterface {
 	
 	@Override
 	public void onDestroy(){
-		Log.v("ResourceService", "service is shutting down");
 		this.unregisterReceiver(broadcastReceiver);
 		database.finish(); //shutdown the database
 		super.onDestroy();
