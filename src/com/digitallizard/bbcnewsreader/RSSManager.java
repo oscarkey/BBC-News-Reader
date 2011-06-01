@@ -13,8 +13,6 @@ import org.mcsoxford.rss.RSSFeed;
 import org.mcsoxford.rss.RSSItem;
 import org.mcsoxford.rss.RSSReader;
 
-import android.util.Log;
-
 public class RSSManager implements Runnable {
 	/* constants */
 	
@@ -68,11 +66,9 @@ public class RSSManager implements Runnable {
 			if(isLoading()){
 				RSSFeed feed;
 				try {
-					Log.v("rss", "loading feed");
 					feed = reader.load(urls[i]);
 					feeds.add(feed);
 					List<RSSItem> items = (List<RSSItem>) feed.getItems();
-					Log.v("rss", "feed length: "+items.size());
 					//loop through the items and send them to the parent service
 					resourceInterface.categoryRssLoaded((RSSItem[])items.toArray(new RSSItem[items.size()]), names[i]);
 				} catch (Exception e) {
