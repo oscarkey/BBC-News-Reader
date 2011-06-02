@@ -29,7 +29,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Log;
+//import android.util.Log;
 
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.digitallizard.bbcnewsreader.resource.web.WebManager;
@@ -194,7 +194,7 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 		catch(RemoteException e){
 			//We are probably shutting down, but report it anyway
-			Log.e("ERROR", "Unable to send message to client: " + e.getMessage());
+			//Log.e("ERROR", "Unable to send message to client: " + e.getMessage());
 		}
 	}
 	
