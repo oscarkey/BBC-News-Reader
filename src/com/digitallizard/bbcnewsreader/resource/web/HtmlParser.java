@@ -1,15 +1,13 @@
 package com.digitallizard.bbcnewsreader.resource.web;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.ByteArrayBuffer;
 
 public class HtmlParser {
 
@@ -18,27 +16,25 @@ public class HtmlParser {
 	 * @throws IOException 
 	 * @throws ClientProtocolException 
 	 */
-	public static String getPage(String uri) throws Exception {
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet(uri);
-		HttpResponse response = client.execute(request);
-
-		String html = "";
-		InputStream in = response.getEntity().getContent();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in),100000);
-		StringBuilder str = new StringBuilder();
-		String line = null;
-		while((line = reader.readLine()) != null)
-		{
-		    str.append(line);
-		}
-		in.close();
-		html = str.toString();
-		return html;
+	public static byte[] getPage(String stringUrl) throws Exception {
+		URL url = new URL(stringUrl);
+		URLConnection connection = url.openConnection();
+		
+		InputStream stream = connection.getInputStream();
+		BufferedInputStream inputbuffer = new BufferedInputStream(stream);
+		
+		ByteArrayBuffer arraybuffer = new ByteArrayBuffer(50);
+		int current = 0;
+        while ((current = inputbuffer.read()) != -1) {
+                arraybuffer.append((byte) current);
+        }
+        return arraybuffer.toByteArray();
 	}
 	
-	public static String parsePage(String html){
-		if(html != null){
+	public static String parsePage(byte[] bytes){
+		if(bytes != null){
+			//convert the bytes into a string
+			String html = new String(bytes);
 			//parse the page
 			final String[] parsed = html.split("<div class=\"storybody\">", 2);
 			if(parsed.length > 1) {
@@ -48,9 +44,8 @@ public class HtmlParser {
 				return parsed[0];
 			}
 		}
-		else {
-			//just return the entire page
-			return html;
+		else{
+			return "";
 		}
 	}
 }

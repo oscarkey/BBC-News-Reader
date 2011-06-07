@@ -35,7 +35,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 									          "description varchar(255), " +
 									          "link varchar(255) UNIQUE, " +
 									          "pubdate int, " +
-									          "html text, " +
+									          "html blob, " +
 									          "image blob, " +
 									          "thumbnail blob," +
 									          "thumbnailurl varchar(255))";
@@ -47,8 +47,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    private static final String CREATE_RELATIONSHIP_TABLE = "CREATE TABLE " + ITEM_CATEGORY_TABLE +
 									          "(categoryName varchar(255), " +
 									          "itemId INT," +
-									          "priority int)" +
-									          "PRIMARY KEY (categoryName, itemId)";
+									          "priority int," +
+									          "PRIMARY KEY (categoryName, itemId))";
    public static final String COLUMN_HTML = "html";
    public static final String COLUMN_THUMBNAIL = "thumbnail";
    public static final String COLUMN_IMAGE = "image";
@@ -128,18 +128,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   }
    }
    
-   public void addHtml(int itemId, String html){
+   public void addHtml(int itemId, byte[] html){
 	   ContentValues cv = new ContentValues(1);
 	   cv.put("html", html);
 	   db.update(ITEM_TABLE, cv, "item_Id=?", new String[]{Integer.toString(itemId)});
    }
    
-   public String getHtml(int itemId){
+   public byte[] getHtml(int itemId){
 	   //get the html for this item
 	   String itemIdString = Integer.toString(itemId);
 	   Cursor cursor = db.query(ITEM_TABLE, new String[]{"html"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
 	   cursor.moveToNext();
-	   String html = cursor.getString(0);
+	   byte[] html = cursor.getBlob(0);
 	   cursor.close();
 	   return html;
    }

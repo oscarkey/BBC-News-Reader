@@ -62,7 +62,7 @@ public class WebManager implements Runnable {
 	
 	private void downloadHtml(QueueItem item){
 		try{
-			String html = HtmlParser.getPage(item.getUrl()); //load the page
+			byte[] html = HtmlParser.getPage(item.getUrl()); //load the page
 			//before we report this download, check if it was a specific request
 			if(item.wasSpecificallyRequested())
 				handler.itemDownloadComplete(true, item.getItemId(), item.getType(), html);

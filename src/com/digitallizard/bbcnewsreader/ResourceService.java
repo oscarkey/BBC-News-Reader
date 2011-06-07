@@ -309,7 +309,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	public synchronized void itemDownloadComplete(boolean specific, int itemId, int type, Object download){
 		//choose what to do depending on the type of object
 		if(type == WebManager.ITEM_TYPE_HTML){
-			String html = (String)download;
+			byte[] html = (byte[])download;
 			database.addHtml(itemId, html);
 			//if this item was specifically requested we need to report that it has been loaded
 			if(specific){
