@@ -310,7 +310,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	public synchronized void itemDownloadComplete(boolean specific, int itemId, int type, Object download){
 		//choose what to do depending on the type of object
 		if(type == WebManager.ITEM_TYPE_HTML){
-			String html = (String)download;
+			byte[] html = (byte[])download;
 			database.addHtml(itemId, html);
 			//if this item was specifically requested we need to report that it has been loaded
 			if(specific){
@@ -391,7 +391,6 @@ public class ResourceService extends Service implements ResourceInterface {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				if(intent.getAction().equals("com.digitallizard.bbcnewsreader.action.LOAD_NEWS")){
-					Log.v("BBC News Reader Service", "News load requested.");
 					loadData(); //load the news
 				}
 			}
@@ -435,7 +434,6 @@ public class ResourceService extends Service implements ResourceInterface {
 	
 	@Override
 	public void onDestroy(){
-		Log.v("ResourceService", "service is shutting down");
 		this.unregisterReceiver(broadcastReceiver);
 		database.finish(); //shutdown the database
 		super.onDestroy();

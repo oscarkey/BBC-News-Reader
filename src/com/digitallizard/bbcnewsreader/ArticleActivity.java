@@ -54,7 +54,7 @@ public class ArticleActivity extends Activity {
 				break;
 			case ResourceService.MSG_ARTICLE_LOADED:
 				//display the reloaded article
-				String html = database.getHtml(id);
+				byte[] html = database.getHtml(id);
 				displayArticle(html);
 				break;
 			default:
@@ -130,7 +130,7 @@ public class ArticleActivity extends Activity {
     	sendMessageToService(ResourceService.MSG_LOAD_ARTICLE, bundle);
     }
     
-    void displayArticle(String html){
+    void displayArticle(byte[] html){
     	//parse the html to get the bit we want
     	String parsedHtml = HtmlParser.parsePage(html);
     	webView.loadDataWithBaseURL(null, parsedHtml, "text/html", "utf-8",null);
@@ -184,7 +184,7 @@ public class ArticleActivity extends Activity {
 		//retrieve the article text from the database
 		id = this.getIntent().getIntExtra("id", 0);
 		database = new DatabaseHandler(this, 0); //we don't need to bother with the clear old date
-		String html = database.getHtml(id);
+		byte[] html = database.getHtml(id);
 		//check if any html was returned
 		if(html != null){
 			//display the article

@@ -12,17 +12,20 @@ import java.util.Date;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 
 import com.digitallizard.bbcnewsreader.NewsItem;
 import com.digitallizard.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.WrapBackwards;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
    private static final String DATABASE_NAME = "bbcnewsreader.db";
-   private static final int DATABASE_VERSION = 1;
+   private static final int DATABASE_VERSION = 2;
    private static final String ITEM_TABLE = "items";
    private static final String CATEGORY_TABLE = "categories";
    private static final String ITEM_CATEGORY_TABLE = "categories_items";
@@ -32,7 +35,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 									          "description varchar(255), " +
 									          "link varchar(255) UNIQUE, " +
 									          "pubdate int, " +
-									          "html text, " +
+									          "html blob, " +
 									          "image blob, " +
 									          "thumbnail blob," +
 									          "thumbnailurl varchar(255))";
@@ -44,14 +47,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    private static final String CREATE_RELATIONSHIP_TABLE = "CREATE TABLE " + ITEM_CATEGORY_TABLE +
 									          "(categoryName varchar(255), " +
 									          "itemId INT," +
-									          "antiDuplicate varchar(255) UNIQUE," +
-									          "priority int)";
+									          "priority int," +
+									          "PRIMARY KEY (categoryName, itemId))";
    public static final String COLUMN_HTML = "html";
    public static final String COLUMN_THUMBNAIL = "thumbnail";
    public static final String COLUMN_IMAGE = "image";
    private Context context;
    private SQLiteDatabase db;
    private long clearOutAgeMilliSecs; //the number of days to keep news items
+   private boolean methodInsertWithConflictExists; //used to determine if the required method exists
    
    /**
     * Inserts an RSSItem into the items table, then creates an entry in the relationship
@@ -96,29 +100,46 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 				   db.update(ITEM_TABLE, values, "item_Id=?", new String[] {Long.toString(id)});
 			   }
 		   }
+		   //close the cursor
+		   cursor.close();
 		   
 		   //associate the item with its category
-		   ContentValues values = new ContentValues(4);
+		   ContentValues values = new ContentValues(3);
 		   values.put("categoryName", category);
 		   values.put("itemId", id);
-		   values.put("antiDuplicate", category + Long.toString(id)); //prevents duplicates
 		   values.put("priority", priority);
-		   db.insertWithOnConflict(ITEM_CATEGORY_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+		   
+		   //insert this item, if the required method doesn't exist, use the old one
+		   if(methodInsertWithConflictExists){
+			   //FIXME performance: shouldn't replace every time
+			   WrapBackwards.insertWithOnConflict(db, ITEM_CATEGORY_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+		   }
+		   else{
+			   //use an alternative method
+			   try{
+				   db.insertOrThrow(ITEM_CATEGORY_TABLE, null, values);
+			   } catch(SQLiteConstraintException e){
+				   //this item obviously already exists, replace it instead
+				   db.replace(ITEM_CATEGORY_TABLE, null, values);
+			   } catch(SQLException e){
+				   //TODO handle this type of exception
+			   }
+		   }
 	   }
    }
    
-   public void addHtml(int itemId, String html){
+   public void addHtml(int itemId, byte[] html){
 	   ContentValues cv = new ContentValues(1);
 	   cv.put("html", html);
 	   db.update(ITEM_TABLE, cv, "item_Id=?", new String[]{Integer.toString(itemId)});
    }
    
-   public String getHtml(int itemId){
+   public byte[] getHtml(int itemId){
 	   //get the html for this item
 	   String itemIdString = Integer.toString(itemId);
 	   Cursor cursor = db.query(ITEM_TABLE, new String[]{"html"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
 	   cursor.moveToNext();
-	   String html = cursor.getString(0);
+	   byte[] html = cursor.getBlob(0);
 	   cursor.close();
 	   return html;
    }
@@ -454,9 +475,25 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    
    @Override
    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
-	   //drop all the tables
+	   //check what version to version upgrade we are performing
+	   if(oldVersion == 1 && newVersion == 2){
+		   //drop tables
+		   db.execSQL("DROP TABLE "+ITEM_TABLE);
+		   db.execSQL("DROP TABLE "+ITEM_CATEGORY_TABLE);
+		   //create tables
+		   db.execSQL(CREATE_ITEM_TABLE);
+		   db.execSQL(CREATE_RELATIONSHIP_TABLE);
+	   }
+	   else{
+		   //reset everything to be sure
+		   dropTables();
+		   createTables();
+	   }
+   }
+   
+   public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion){
+	   //reset the database
 	   dropTables();
-	   //recreate the tables
 	   createTables();
    }
    
@@ -464,6 +501,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   //close the database
 	   db.close();
 	   db = null;
+   }
+   
+   void checkCompatibilty(){
+	   //check if the insertWithOnConflict exists
+	   try {
+		   SQLiteDatabase.class.getMethod("insertWithOnConflict", new Class[] {String.class, String.class, ContentValues.class, Integer.TYPE});
+		   //success, this method exists, set the boolean
+		   methodInsertWithConflictExists = true;
+       } catch (NoSuchMethodException e) {
+           //failure, set the boolean
+    	   methodInsertWithConflictExists = false;
+       }
    }
    
    protected void finalize() throws Throwable {
@@ -484,5 +533,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	   this.context = context;
 	   this.clearOutAgeMilliSecs = (long)(clearOutAgeDays * 24 * 60 * 60 * 1000);
 	   this.db = this.getWritableDatabase();
+	   
+	   //check compatibility with this version of Android
+	   checkCompatibilty();
    }
 }
