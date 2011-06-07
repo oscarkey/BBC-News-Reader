@@ -161,8 +161,18 @@ public class ResourceService extends Service implements ResourceInterface {
 	
 	void loadThumbnail(int id){
 		String url = database.getThumbnailUrl(id); //get the url of the item
-		if(url != null)
+		if(url == null)
+		{
+			database.addThumbnail(id, ReaderActivity.NO_THUMBNAIL_URL_CODE);//Set thumbnail to no thumbnail
+			//report that the thumbnail has been loaded so it can be displayed
+			Bundle bundle = new Bundle();
+			bundle.putInt("id", id);
+			sendMsgToAll(MSG_THUMB_LOADED, bundle);
+		}
+		else
+		{
 			webManager.loadNow(url, WebManager.ITEM_TYPE_THUMB, id); //tell the webmanager to load this
+		}
 	}
 	
 	void loadImage(int id){
@@ -280,8 +290,18 @@ public class ResourceService extends Service implements ResourceInterface {
 				for(int t = 0; t < thumbIds.length; t++){
 					String url = database.getThumbnailUrl(thumbIds[t]);
 					//check if there is a thumbnail url, if so load it
-					if(url != null)
+					if(url == null)
+					{
+						database.addThumbnail(thumbIds[t], ReaderActivity.NO_THUMBNAIL_URL_CODE);//Set thumbnail to no thumbnail
+						//report that the thumbnail has been loaded so it can be displayed
+						Bundle bundle = new Bundle();
+						bundle.putInt("id", thumbIds[t]);
+						sendMsgToAll(MSG_THUMB_LOADED, bundle);
+					}
+					else
+					{
 						webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, thumbIds[t]);
+					}
 				}
 				
 				//increment the number of items to download

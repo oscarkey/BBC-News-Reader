@@ -8,6 +8,7 @@ package com.digitallizard.bbcnewsreader;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import android.app.Activity;
@@ -61,6 +62,7 @@ public class ReaderActivity extends Activity {
 	static final boolean DEFAULT_RTC_WAKEUP = true;
 	static final String DEFAULT_LOAD_INTERVAL = "1_hour";
 	static final boolean DEFAULT_DISPLAY_FULL_ERROR = false;
+	static final byte[] NO_THUMBNAIL_URL_CODE = new byte[]{127};
 	
 	/* variables */
 	ScrollView scroller;
@@ -369,14 +371,19 @@ public class ReaderActivity extends Activity {
     				//try and get an image for this item
     				byte[] imageBytes = database.getThumbnail(id);
     				//check if any image data was returned
-    				if(imageBytes != null){
+    				if(Arrays.equals(imageBytes,ReaderActivity.NO_THUMBNAIL_URL_CODE))
+    				{
+    					//sets the image to the no thumbnail image
+    					physicalItems[i][t].setImage(R.drawable.no_thumb);
+    				}
+    				else if(imageBytes != null){
     					//try to construct an image out of the bytes given by the database
     					Bitmap imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length); //load the image into a bitmap
     					physicalItems[i][t].setImage(imageBitmap);
     				}
     				else{
-    					//set the image to the default "X"
-    					physicalItems[i][t].setImage(R.drawable.no_thumb);
+    					//set the image to the no thumbnail loaded image
+    					physicalItems[i][t].setImage(R.drawable.no_thumb_grey);
     				}
     			}
     		}
@@ -537,14 +544,19 @@ public class ReaderActivity extends Activity {
     				//try and get an thumbnail for this item
     				byte[] thumbBytes = items[i].getThumbnailBytes();
     				//check if any image data was returned
-    				if(thumbBytes != null){
+    				if(Arrays.equals(thumbBytes,ReaderActivity.NO_THUMBNAIL_URL_CODE))
+    				{
+    					//set the image to the no thumbnail image
+    					physicalItems[category][i].setImage(R.drawable.no_thumb);
+    				}
+    				else if(thumbBytes != null){
     					//try to construct an image out of the bytes given by the database
     					Bitmap imageBitmap = BitmapFactory.decodeByteArray(thumbBytes, 0, thumbBytes.length); //load the image into a bitmap
     					physicalItems[category][i].setImage(imageBitmap);
     				}
     				else{
     					//set the image to the default "X"
-    					physicalItems[category][i].setImage(R.drawable.no_thumb);
+    					physicalItems[category][i].setImage(R.drawable.no_thumb_grey);
     				}
     			}
     		}

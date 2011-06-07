@@ -11,7 +11,7 @@ android:layout_height="wrap_content"
 android:orientation="horizontal"
 android:background="@drawable/list_item_color">
 	<ImageView android:id="@+id/categoryItemImage"
-	android:src="@drawable/no_thumb"
+	android:src="@drawable/no_thumb_grey"
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"/>
 	<LinearLayout 
