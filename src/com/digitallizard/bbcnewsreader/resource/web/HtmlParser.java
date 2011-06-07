@@ -38,9 +38,19 @@ public class HtmlParser {
 	}
 	
 	public static String parsePage(String html){
-		String parsed;
-		parsed = html.split("<div class=\"storybody\">")[1];
-		parsed = parsed.split("</div>")[0];
-		return parsed;
+		if(html != null){
+			//parse the page
+			final String[] parsed = html.split("<div class=\"storybody\">", 2);
+			if(parsed.length > 1) {
+				// assume there are start and stop tags
+				return parsed[1].split("</div>", 2)[0];
+			} else{
+				return parsed[0];
+			}
+		}
+		else {
+			//just return the entire page
+			return html;
+		}
 	}
 }
