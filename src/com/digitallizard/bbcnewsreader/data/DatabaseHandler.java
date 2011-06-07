@@ -100,6 +100,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 				   db.update(ITEM_TABLE, values, "item_Id=?", new String[] {Long.toString(id)});
 			   }
 		   }
+		   //close the cursor
+		   cursor.close();
 		   
 		   //associate the item with its category
 		   ContentValues values = new ContentValues(4);
