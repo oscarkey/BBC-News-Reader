@@ -161,7 +161,8 @@ public class ResourceService extends Service implements ResourceInterface {
 	
 	void loadThumbnail(int id){
 		String url = database.getThumbnailUrl(id); //get the url of the item
-		webManager.loadNow(url, WebManager.ITEM_TYPE_THUMB, id); //tell the webmanager to load this
+		if(url != null)
+			webManager.loadNow(url, WebManager.ITEM_TYPE_THUMB, id); //tell the webmanager to load this
 	}
 	
 	void loadImage(int id){
