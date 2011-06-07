@@ -25,7 +25,7 @@ import com.digitallizard.bbcnewsreader.WrapBackwards;
 public class DatabaseHandler extends SQLiteOpenHelper {
 
    private static final String DATABASE_NAME = "bbcnewsreader.db";
-   private static final int DATABASE_VERSION = 1;
+   private static final int DATABASE_VERSION = 2;
    private static final String ITEM_TABLE = "items";
    private static final String CATEGORY_TABLE = "categories";
    private static final String ITEM_CATEGORY_TABLE = "categories_items";
@@ -47,8 +47,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    private static final String CREATE_RELATIONSHIP_TABLE = "CREATE TABLE " + ITEM_CATEGORY_TABLE +
 									          "(categoryName varchar(255), " +
 									          "itemId INT," +
-									          "antiDuplicate varchar(255) UNIQUE," +
-									          "priority int)";
+									          "priority int)" +
+									          "PRIMARY KEY (categoryName, itemId)";
    public static final String COLUMN_HTML = "html";
    public static final String COLUMN_THUMBNAIL = "thumbnail";
    public static final String COLUMN_IMAGE = "image";
@@ -104,10 +104,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		   cursor.close();
 		   
 		   //associate the item with its category
-		   ContentValues values = new ContentValues(4);
+		   ContentValues values = new ContentValues(3);
 		   values.put("categoryName", category);
 		   values.put("itemId", id);
-		   values.put("antiDuplicate", category + Long.toString(id)); //prevents duplicates
 		   values.put("priority", priority);
 		   
 		   //insert this item, if the required method doesn't exist, use the old one
@@ -476,9 +475,25 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    
    @Override
    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
-	   //drop all the tables
+	   //check what version to version upgrade we are performing
+	   if(oldVersion == 1 && newVersion == 2){
+		   //drop tables
+		   db.execSQL("DROP TABLE "+ITEM_TABLE);
+		   db.execSQL("DROP TABLE "+ITEM_CATEGORY_TABLE);
+		   //create tables
+		   db.execSQL(CREATE_ITEM_TABLE);
+		   db.execSQL(CREATE_RELATIONSHIP_TABLE);
+	   }
+	   else{
+		   //reset everything to be sure
+		   dropTables();
+		   createTables();
+	   }
+   }
+   
+   public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion){
+	   //reset the database
 	   dropTables();
-	   //recreate the tables
 	   createTables();
    }
    
