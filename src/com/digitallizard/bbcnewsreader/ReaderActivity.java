@@ -425,6 +425,10 @@ public class ReaderActivity extends Activity {
 				//We are probably shutting down, but report it anyway
 				//Log.e("ERROR", "Unable to send message to service: " + e.getMessage());
 			}
+			catch(NullPointerException e){
+				//the service was probably killed in the background
+				//do nothing
+			}
     	}
     }
     
