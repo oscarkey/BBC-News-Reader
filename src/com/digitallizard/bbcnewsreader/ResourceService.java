@@ -205,7 +205,7 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 		catch(RemoteException e){
 			//We are probably shutting down, but report it anyway
-			Log.e("ERROR", "Unable to send message to client: " + e.getMessage());
+			//Log.e("ERROR", "Unable to send message to client: " + e.getMessage());
 		}
 	}
 	
