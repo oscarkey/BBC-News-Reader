@@ -2,34 +2,46 @@ package com.digitallizard.bbcnewsreader.data;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 
 public class DatabaseProvider extends ContentProvider {
 	
 	/** constants **/
+	public static final String AUTHORITY = "com.digitallizard.bbcnewsreader";
 	public static final Uri CONTENT_URI = Uri.parse("content://com.digitallizard.bbcnewsreader");
 	public static final Uri CONTENT_URI_CATEGORIES = Uri.parse("content://com.digitallizard.bbcnewsreader/categories");
 	public static final Uri CONTENT_URI_ITEMS = Uri.parse("content://com.digitallizard.bbcnewsreader/items");
 	
-	public static final String COLUMN_CATEGORY_ID = "category_Id";
-	public static final String COLUMN_CATEGORY_NAME = "name";
-	public static final String COLUMN_CATEGORY_ENABLED = "enabled";
-	public static final String COLUMN_CATEGORY_URL = "url";
+	//uri matcher helpers
+	private static final int CATEGORIES = 1;
+	private static final int ENABLED_CATEGORIES = 2;
 	
-	public static final String COLUMN_ITEM_ID = "item_Id";
-	public static final String COLUMN_ITEM_TITLE = "title";
-	public static final String COLUMN_ITEM_DESCRIPTION = "description";
-	public static final String COLUMN_ITEM_PUBDATE = "pubdate";
-	public static final String COLUMN_ITEM_URL = "link";
-	public static final String COLUMN_ITEM_THUMBNAIL_URL = "thumbnailurl";
-	public static final String COLUMN_ITEM_HTML = "html";
-	public static final String COLUMN_ITEM_THUMBNAIL = "thumbnail";
+	//uri matcher
+	private static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+	static {
+		uriMatcher.addURI(AUTHORITY, "categories", CATEGORIES);
+		uriMatcher.addURI(AUTHORITY, "categories/enabled", ENABLED_CATEGORIES);
+	}
 	
 	
 	/** variables **/
 	DatabaseHelper database;
-
+	
+	
+	private Cursor getCategories(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+		return database.query(DatabaseHelper.CATEGORY_TABLE, projection, selection, selectionArgs, sortOrder);
+	}
+	
+	private Cursor getEnabledCategories(String[] projection, String sortOrder) {
+		//define a selection to only retrieve enabled categories
+		String selection = "enabled='1'";
+		//ask for categories by this selection
+		return getCategories(projection, selection, null, sortOrder);
+	}
+	
+	
 	@Override
 	public int delete(Uri arg0, String arg1, String[] arg2) {
 		// TODO Auto-generated method stub
@@ -49,9 +61,24 @@ public class DatabaseProvider extends ContentProvider {
 	}
 
 	@Override
-	public Cursor query(Uri uri, String[] projection, String selecton, String[] selectionArgs, String sortOrder) {
-		// TODO Auto-generated method stub
-		return null;
+	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+		//try and match the queried url
+		switch(uriMatcher.match(uri)){
+		case CATEGORIES:
+			//query the database for all the categories
+			if(selection == null){
+				throw new IllegalArgumentException("Uri requires selection: " + uri.toString());
+			}
+			return getCategories(projection, selection, selectionArgs, sortOrder);
+		case ENABLED_CATEGORIES:
+			//query the database for enabled categories
+			if(selection == null){
+				throw new IllegalArgumentException("Uri requires selection: " + uri.toString());
+			}
+			return getEnabledCategories(projection, sortOrder);
+		default:
+			throw new IllegalArgumentException("Unknown uri: " + uri.toString());
+		}
 	}
 
 	@Override
