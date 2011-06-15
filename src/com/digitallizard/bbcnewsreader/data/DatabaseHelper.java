@@ -1,5 +1,6 @@
 package com.digitallizard.bbcnewsreader.data;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -36,7 +37,8 @@ public class DatabaseHelper {
 	DatabaseOpenHelper databaseOpenHelper;
 	
 	
-    public Cursor query(String table, String[] projection, String selection, String[] selectionArgs, String sortOrder, int limit) {
+    public Cursor query(String table, String[] projection, String selection, String[] selectionArgs, 
+    		String sortOrder, int limit) {
         //build a query
     	SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
         builder.setTables(table);
@@ -66,9 +68,23 @@ public class DatabaseHelper {
     	return this.query(table, projection, selection, selectionArgs, sortOrder, -1);
     }
     
+    public long insertWithOnConflict(String table, ContentValues values, int conflictAlgorithm){
+    	return this.insertWithOnConflict(table, values, conflictAlgorithm);
+    }
+    
+    public int updateWithOnConflict(String table, ContentValues values, String selection, 
+    		String selectionArgs, int conflictAlgorithm) {
+    	return this.updateWithOnConflict(table, values, selection, selectionArgs, conflictAlgorithm);
+    }
+    
+    public int delete(String table, String selection, String selectionArgs){
+    	return this.delete(table, selection, selectionArgs);
+    }
+    
     public DatabaseHelper(Context context) {
         databaseOpenHelper = new DatabaseOpenHelper(context);
     }
+    
     
     private static class DatabaseOpenHelper extends SQLiteOpenHelper {
 
@@ -77,25 +93,25 @@ public class DatabaseHelper {
         
         //define the tables
         private static final String CREATE_ITEM_TABLE = "CREATE TABLE " + ITEM_TABLE + 
-			  "(item_Id integer PRIMARY KEY," +
-			  "title varchar(255), " +
-			  "description varchar(255), " +
-			  "link varchar(255) UNIQUE, " +
-			  "pubdate int, " +
-			  "html blob, " +
-			  "image blob, " +
-			  "thumbnail blob," +
-			  "thumbnailurl varchar(255))";
-        private static final String CREATE_CATEGORY_TABLE = "CREATE TABLE " + CATEGORY_TABLE +
-        	"(category_Id integer PRIMARY KEY," +
-        	"name varchar(255)," +
-        	"enabled int," +
-        	"url varchar(255))";
-        private static final String CREATE_RELATIONSHIP_TABLE = "CREATE TABLE " + RELATIONSHIP_TABLE +
-        	"(categoryName varchar(255), " +
-        	"itemId INT," +
-        	"priority int," +
-        	"PRIMARY KEY (categoryName, itemId))";
+			"(item_Id integer PRIMARY KEY," +
+			"title varchar(255), " +
+			"description varchar(255), " +
+			"link varchar(255) UNIQUE, " +
+			"pubdate int, " +
+			"html blob, " +
+			"image blob, " +
+			"thumbnail blob," +
+			"thumbnailurl varchar(255))";
+		private static final String CREATE_CATEGORY_TABLE = "CREATE TABLE " + CATEGORY_TABLE +
+			"(category_Id integer PRIMARY KEY," +
+			"name varchar(255)," +
+			"enabled int," +
+			"url varchar(255))";
+		private static final String CREATE_RELATIONSHIP_TABLE = "CREATE TABLE " + RELATIONSHIP_TABLE +
+			"(categoryName varchar(255), " +
+			"itemId INT," +
+			"priority int," +
+			"PRIMARY KEY (categoryName, itemId))";
         
         
         @Override
