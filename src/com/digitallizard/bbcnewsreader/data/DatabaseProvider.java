@@ -10,9 +10,13 @@ public class DatabaseProvider extends ContentProvider {
 	
 	/** constants **/
 	public static final String AUTHORITY = "com.digitallizard.bbcnewsreader";
+	
 	public static final Uri CONTENT_URI = Uri.parse("content://com.digitallizard.bbcnewsreader");
 	public static final Uri CONTENT_URI_CATEGORIES = Uri.parse("content://com.digitallizard.bbcnewsreader/categories");
+	public static final Uri CONTENT_URI_ENABLED_CATEGORIES = Uri.withAppendedPath(CONTENT_URI_CATEGORIES, "enabled");
 	public static final Uri CONTENT_URI_ITEMS = Uri.parse("content://com.digitallizard.bbcnewsreader/items");
+	public static final Uri CONTENT_URI_ITEMS_BY_CATEGORY = Uri.withAppendedPath(CONTENT_URI_ITEMS, "category");
+	public static final Uri CONTENT_URI_UNDOWNLOADED_ITEMS = Uri.withAppendedPath(CONTENT_URI_ITEMS, "undownloaded");
 	
 	//uri matcher helpers
 	private static final int CATEGORIES = 1;
@@ -113,7 +117,7 @@ public class DatabaseProvider extends ContentProvider {
 			return getItems(projection, category, sortOrder);
 		case UNDOWNLOADED_ITEMS:
 			//query the database for undownloaded items of this type
-			
+			return null;
 		default:
 			throw new IllegalArgumentException("Unknown uri: " + uri.toString());
 		}

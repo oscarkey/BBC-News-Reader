@@ -9,6 +9,7 @@ package com.digitallizard.bbcnewsreader.data;
 import java.util.ArrayList;
 import java.util.Date;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -17,6 +18,7 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.net.Uri;
 
 import com.digitallizard.bbcnewsreader.NewsItem;
 import com.digitallizard.bbcnewsreader.R;
@@ -56,6 +58,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    private SQLiteDatabase db;
    private long clearOutAgeMilliSecs; //the number of days to keep news items
    private boolean methodInsertWithConflictExists; //used to determine if the required method exists
+   private ContentResolver contentResolver;
    
    /**
     * Inserts an RSSItem into the items table, then creates an entry in the relationship
@@ -135,29 +138,21 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    }
    
    public byte[] getHtml(int itemId){
-	   //get the html for this item
-	   String itemIdString = Integer.toString(itemId);
-	   Cursor cursor = db.query(ITEM_TABLE, new String[]{"html"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
-	   cursor.moveToNext();
+	   Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(itemId));
+	   Cursor cursor = contentResolver.query(uri, new String[]{DatabaseHelper.COLUMN_ITEM_HTML}, null, null, null);
+	   cursor.moveToFirst();
 	   byte[] html = cursor.getBlob(0);
 	   cursor.close();
 	   return html;
    }
    
    public void addImage(int itemId, byte[] image){
-	   ContentValues cv = new ContentValues(1);
-	   cv.put("image", image);
-	   String itemIdString = Integer.toString(itemId);
-	   db.update(ITEM_TABLE, cv, "item_Id=?", new String[]{itemIdString}); //add the image to the database
+	   //currently does nothing
    }
    
    public byte[] getImage(int itemId){
-	   String itemIdString = Integer.toString(itemId);
-	   Cursor cursor = db.query(ITEM_TABLE, new String[]{"image"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
-	   cursor.moveToNext();
-	   byte[] image = cursor.getBlob(0);
-	   cursor.close();
-	   return image;
+	   //currently does nothing
+	   return null;
    }
    
    public void addThumbnail(int itemId, byte[] thumbnail){
@@ -168,29 +163,27 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    }
    
    public byte[] getThumbnail(int itemId){
-	   String itemIdString = Integer.toString(itemId);
-	   Cursor cursor = db.query(ITEM_TABLE, new String[]{"thumbnail"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
-	   cursor.moveToNext();
+	   Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(itemId));
+	   Cursor cursor = contentResolver.query(uri, new String[]{DatabaseHelper.COLUMN_ITEM_THUMBNAIL}, null, null, null);
+	   cursor.moveToFirst();
 	   byte[] thumbnail = cursor.getBlob(0);
 	   cursor.close();
 	   return thumbnail;
    }
    
    public String getUrl(int itemId){
-	   //run a query to get the url for this article
-	   String itemIdString = Integer.toString(itemId);
-	   Cursor cursor = db.query(ITEM_TABLE, new String[]{"link"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
-	   cursor.moveToNext();
+	   Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(itemId));
+	   Cursor cursor = contentResolver.query(uri, new String[]{DatabaseHelper.COLUMN_ITEM_URL}, null, null, null);
+	   cursor.moveToFirst();
 	   String url = cursor.getString(0);
 	   cursor.close();
 	   return url;
    }
    
    public String getThumbnailUrl(int itemId){
-	   //run a query to get the thumbnail url for this article
-	   String itemIdString = Integer.toString(itemId);
-	   Cursor cursor = db.query(ITEM_TABLE, new String[]{"thumbnailurl"}, "item_Id=?", new String[] {itemIdString}, null, null, null);
-	   cursor.moveToNext();
+	   Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(itemId));
+	   Cursor cursor = contentResolver.query(uri, new String[]{DatabaseHelper.COLUMN_ITEM_THUMBNAIL_URL}, null, null, null);
+	   cursor.moveToFirst();
 	   String url = cursor.getString(0);
 	   cursor.close();
 	   return url;
@@ -328,14 +321,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     * @return boolean[] containing enabled column from categories table.
     */
    public boolean[] getCategoryBooleans(){
-	   Cursor cursor = db.query(CATEGORY_TABLE, new String[]{"enabled"}, null, null, null, null, "category_Id");
+	   Uri uri = DatabaseProvider.CONTENT_URI_CATEGORIES;
+	   String[] projection = new String[] {DatabaseHelper.COLUMN_CATEGORY_ENABLED};
+	   Cursor cursor = contentResolver.query(uri, projection, null, null, DatabaseHelper.COLUMN_CATEGORY_ID);
 	   boolean[] enabledCategories = new boolean[cursor.getCount()];
-	   for(int i = 1;i <= cursor.getCount(); i++){
-		   cursor.moveToNext();
+	   cursor.moveToFirst();
+	   while(cursor.moveToNext()){
 		   if(cursor.getInt(0) == 0)
-			   enabledCategories[i-1]=false;
+			   enabledCategories[cursor.getPosition() - 1] = false;
 		   else
-			   enabledCategories[i-1]=true;
+			   enabledCategories[cursor.getPosition() - 1] = true;
 	   }
 	   cursor.close();
 	   return enabledCategories;
@@ -346,13 +341,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     * @return A string[][] containing the String urls in [0] and String names in [1].
     */
    public String[][] getEnabledCategories(){
-	   //Queries the category table to get a list of enabled categories
-	   Cursor cursor = db.query(CATEGORY_TABLE, new String[]{"url", "name"}, "enabled='1'", null, null, null, "category_Id");
+	   Uri uri = DatabaseProvider.CONTENT_URI_ENABLED_CATEGORIES; //uri for enabled categories
+	   String[] projection = new String[] {DatabaseHelper.COLUMN_CATEGORY_URL, DatabaseHelper.COLUMN_CATEGORY_NAME};
+	   Cursor cursor = contentResolver.query(uri, projection, null, null, DatabaseHelper.COLUMN_CATEGORY_ID);
 	   String[][] categories = new String[2][cursor.getCount()];
-	   for(int i = 1; i <= cursor.getCount(); i++){
-		   cursor.moveToNext(); //advance the cursor
-		   categories[0][i-1] = cursor.getString(0);
-		   categories[1][i-1] = cursor.getString(1);
+	   cursor.moveToFirst();
+	   while(cursor.moveToNext()){
+		   categories[0][cursor.getPosition() - 1] = cursor.getString(0);
+		   categories[1][cursor.getPosition() - 1] = cursor.getString(1);
 	   }
 	   cursor.close();
 	   return categories;
@@ -531,6 +527,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
    public DatabaseHandler(Context context, int clearOutAgeDays){
 	   super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	   this.context = context;
+	   this.contentResolver = context.getContentResolver();
+	   
 	   this.clearOutAgeMilliSecs = (long)(clearOutAgeDays * 24 * 60 * 60 * 1000);
 	   this.db = this.getWritableDatabase();
 	   
