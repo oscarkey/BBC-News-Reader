@@ -68,66 +68,63 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     * @param pubdate News item's published data as String
     * @param category News item's category as String
     */
-   public void insertItem(String title, String description, String link, Date pubdate, String category, String thumbnailUrl, int priority){
+   public void insertItem(String title, String description, String category, Date pubdate, String url, String thumbnailUrl, int priority){
+	   //convert the date into a timestamp
 	   long timestamp = pubdate.getTime();
 	   Date now = new Date();
 	   
-	   //check if the news is old or not
-	   if(timestamp > (now.getTime() - clearOutAgeMilliSecs)){
-		   //check to see if this item is already in the database
-		   Cursor cursor = db.query(ITEM_TABLE, new String[] {"item_Id", "title"}, "link=?", new String[] {link}, null, null, null);
-		   //check if this item is not in the database
-		   long id = -1; //holds the id of the item
-		   if(cursor.getCount() == 0){
-			   //insert the item
-			   ContentValues values = new ContentValues(5);
-			   values.put("title", title);
-			   values.put("description", description);
-			   values.put("link", link);
-			   values.put("pubdate", timestamp);
-			   values.put("thumbnailurl", thumbnailUrl);
-			   id = db.insert(ITEM_TABLE, null, values); //this outputs the new primary key
-		   }
-		   else if(cursor.getCount() == 1){
-			   //this item must already exist
-			   cursor.moveToNext();
-			   id = (long)cursor.getInt(0); //save the id
-			   //test to see if the title has changed
-			   if(!cursor.getString(1).equals(title)){
-				   //update the title and clear the html and thumbnail
-				   ContentValues values = new ContentValues(3);
-				   values.put("title", title);
-				   values.putNull("html");
-				   values.putNull("thumbnail");
-				   db.update(ITEM_TABLE, values, "item_Id=?", new String[] {Long.toString(id)});
-			   }
-		   }
-		   //close the cursor
-		   cursor.close();
+	   //check if this news is older than we want to store
+	   if(timestamp < (now.getTime() - clearOutAgeMilliSecs)){
+		   //bail here, don't insert it
+		   return;
+	   }
+	   
+	   //query to see if this item is already in the database
+	   Uri uri = DatabaseProvider.CONTENT_URI_ITEMS;
+	   String[] projection = new String[] {DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_TITLE};
+	   String selection = DatabaseHelper.COLUMN_ITEM_URL + "=?";
+	   String[] selectionArgs = new String[] {url};
+	   Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, null);
+	   
+	   long id = -1; //will hold the id of the item, -1 for now to be safe
+	   
+	   //check if any rows were returned, null means no rows
+	   if(cursor == null){
+		   //insert the items
+		   ContentValues values = new ContentValues(5);
+		   values.put(DatabaseHelper.COLUMN_ITEM_TITLE, title);
+		   values.put(DatabaseHelper.COLUMN_ITEM_DESCRIPTION, description);
+		   values.put(DatabaseHelper.COLUMN_ITEM_PUBDATE, timestamp);
+		   values.put(DatabaseHelper.COLUMN_ITEM_URL, url);
+		   values.put(DatabaseHelper.COLUMN_ITEM_THUMBNAIL_URL, thumbnailUrl);
 		   
-		   //associate the item with its category
-		   ContentValues values = new ContentValues(3);
-		   values.put("categoryName", category);
-		   values.put("itemId", id);
-		   values.put("priority", priority);
+		   contentResolver.insert(DatabaseProvider.CONTENT_URI_ITEMS, values); //perform the insert operation
+	   }
+	   else if(cursor.getCount() == 1){
+		   //this item exists
+		   cursor.moveToFirst();
+		   id = (long)cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_ID)); //save the id
 		   
-		   //insert this item, if the required method doesn't exist, use the old one
-		   if(methodInsertWithConflictExists){
-			   //FIXME performance: shouldn't replace every time
-			   WrapBackwards.insertWithOnConflict(db, ITEM_CATEGORY_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-		   }
-		   else{
-			   //use an alternative method
-			   try{
-				   db.insertOrThrow(ITEM_CATEGORY_TABLE, null, values);
-			   } catch(SQLiteConstraintException e){
-				   //this item obviously already exists, replace it instead
-				   db.replace(ITEM_CATEGORY_TABLE, null, values);
-			   } catch(SQLException e){
-				   //TODO handle this type of exception
-			   }
+		   //test to see if the title has changed
+		   if(!cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_TITLE)).equals(title)){
+			   ContentValues values = new ContentValues(3);
+			   //update the row
+			   values.put(DatabaseHelper.COLUMN_ITEM_TITLE, values.getAsString(DatabaseHelper.COLUMN_ITEM_TITLE));
+			   values.putNull(DatabaseHelper.COLUMN_ITEM_HTML);
+			   values.putNull(DatabaseHelper.COLUMN_ITEM_THUMBNAIL);
+			   selection = DatabaseHelper.COLUMN_ITEM_ID + "=?";
+			   contentResolver.update(DatabaseProvider.CONTENT_URI_ITEMS, 
+					   values, selection, new String[] {Long.toString(id)});
 		   }
 	   }
+	   cursor.close();
+	   
+	   //associate this item with its category
+	   uri = DatabaseProvider.CONTENT_URI_ITEMS_BY_CATEGORY;
+	   values.clear(); //clear the content values
+	   values.put(DatabaseHelper.COLUMN_RELATIONSHIP_CATEGORY_NAME, category);
+	   values.put(DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID, id);
+	   values.put(DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY, priority);
    }
    
    public void addHtml(int itemId, byte[] html){

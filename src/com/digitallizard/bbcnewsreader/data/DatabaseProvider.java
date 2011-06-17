@@ -1,8 +1,5 @@
 package com.digitallizard.bbcnewsreader.data;
 
-import java.util.Date;
-
-
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -89,60 +86,33 @@ public class DatabaseProvider extends ContentProvider {
 		return null;
 	}
 	
+	
 	//insert functions
-	private void insertItem(ContentValues values){
-		//query to see if this item is already in the database
-		String[] projection = new String[] {DatabaseHelper.COLUMN_ITEM_ID};
-		String selection = DatabaseHelper.COLUMN_ITEM_URL + "=?";
-		String[] selectionArgs = new String[] {values.getAsString(DatabaseHelper.COLUMN_ITEM_URL)};
-		Cursor cursor = database.query(DatabaseHelper.ITEM_TABLE, projection, selection, selectionArgs, null);
-		
-		//check if this item is not in the database
-	    long id = -1; //holds the id of the item
-	    if(cursor.getCount() == 0){
-		    //insert the item
-		    id = database.insert(DatabaseHelper.ITEM_TABLE, values); //this outputs the new primary key
-	    }
-	    else if(cursor.getCount() == 1){
-		    //this item must already exist
-		    cursor.moveToNext();
-		    id = (long)cursor.getInt(0); //save the id
-		    //test to see if the title has changed
-		    if(!cursor.getString(1).equals(title)){
-			    //update the title and clear the html and thumbnail
-			    ContentValues values = new ContentValues(3);
-			    values.put("title", title);
-			    values.putNull("html");
-			    values.putNull("thumbnail");
-			    db.update(ITEM_TABLE, values, "item_Id=?", new String[] {Long.toString(id)});
-		    }
-	    }
-	    //close the cursor
-	    cursor.close();
-	    
-	    //associate the item with its category
-	    ContentValues values = new ContentValues(3);
-	    values.put("categoryName", category);
-	    values.put("itemId", id);
-	    values.put("priority", priority);
-	    
-	    //insert this item, if the required method doesn't exist, use the old one
-	    if(methodInsertWithConflictExists){
-		    //FIXME performance: shouldn't replace every time
-		    WrapBackwards.insertWithOnConflict(db, ITEM_CATEGORY_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-	    }
-	    else{
-		    //use an alternative method
-		    try{
-			    database.insertOrThrow(ITEM_CATEGORY_TABLE, null, values);
-		    } catch(SQLiteConstraintException e){
-			    //this item obviously already exists, replace it instead
-			    database.replace(ITEM_CATEGORY_TABLE, null, values);
-		    } catch(SQLException e){
-			    //TODO handle this type of exception
-		    }
-	   }
+	private void insert(ContentValues values, String category){
+		database.insert(DatabaseHelper.ITEM_TABLE, values);
 	}
+	
+	private void insertItemRelationship(ContentValues values){
+		//associate the item with its category
+		//insert it, if the required method doesn't exist, use the old one
+		if(methodInsertWithConflictExists){
+			//FIXME performance: shouldn't replace every time
+			WrapBackwards.insertWithOnConflict(database, DatabaseHelper.RELATIONSHIP_TABLE, 
+					values, SQLiteDatabase.CONFLICT_REPLACE);
+		}
+		else{
+			//use an alternative method
+			try{
+				database.insertOrThrow(DatabaseHelper.RELATIONSHIP_TABLE, values);
+			} catch(SQLiteConstraintException e){
+				//this item obviously already exists, replace it instead
+				database.replace(DatabaseHelper.RELATIONSHIP_TABLE, values);
+			} catch(SQLException e){
+				//TODO handle this type of exception
+			}
+		}
+	}
+	
 	
 	
 	@Override
@@ -163,7 +133,8 @@ public class DatabaseProvider extends ContentProvider {
 		switch(uriMatcher.match(uri)){
 		case ITEMS:
 			//insert the provided item
-			insertItem(values);
+			String category = uri.getLastPathSegment();
+			insertItem(values, category);
 			break;
 		}
 		// TODO Auto-generated method stub

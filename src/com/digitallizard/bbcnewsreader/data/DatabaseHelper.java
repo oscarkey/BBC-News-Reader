@@ -33,6 +33,10 @@ public class DatabaseHelper {
 	public static final String COLUMN_ITEM_HTML = "html";
 	public static final String COLUMN_ITEM_THUMBNAIL = "thumbnail";
 	
+	public static final String COLUMN_RELATIONSHIP_ITEM_ID = "itemId";
+	public static final String COLUMN_RELATIONSHIP_CATEGORY_NAME = "categoryName";
+	public static final String COLUMN_RELATIONSHIP_PRIORITY = "priority";
+	
 	
 	/** variables **/
 	DatabaseOpenHelper databaseOpenHelper;
@@ -81,9 +85,17 @@ public class DatabaseHelper {
     	return this.insertOrThrow(table, values);
     }
     
+    public int update(String table, ContentValues values, String selection, String[] selectionArgs){
+    	return this.update(table, values, selection, selectionArgs);
+    }
+    
     public int updateWithOnConflict(String table, ContentValues values, String selection, 
     		String selectionArgs, int conflictAlgorithm) {
     	return this.updateWithOnConflict(table, values, selection, selectionArgs, conflictAlgorithm);
+    }
+    
+    public long replace(String table, ContentValues values){
+    	return this.replace(table, values);
     }
     
     public int delete(String table, String selection, String selectionArgs){
@@ -97,7 +109,8 @@ public class DatabaseHelper {
     
     private static class DatabaseOpenHelper extends SQLiteOpenHelper {
 
-        private final Context context;
+        @SuppressWarnings("unused")
+		private final Context context;
         private SQLiteDatabase database;
         
         //define the tables
@@ -154,7 +167,8 @@ public class DatabaseHelper {
 			}
 		}
         
-        public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion){
+        @SuppressWarnings("unused")
+		public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion){
         	db.execSQL("DROP TABLE " + ITEM_TABLE);
   		   	db.execSQL("DROP TABLE " + CATEGORY_TABLE);
   		   	db.execSQL("DROP TABLE " + RELATIONSHIP_TABLE);
