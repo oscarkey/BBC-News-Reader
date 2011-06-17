@@ -22,7 +22,6 @@ import android.net.Uri;
 
 import com.digitallizard.bbcnewsreader.NewsItem;
 import com.digitallizard.bbcnewsreader.R;
-import com.digitallizard.bbcnewsreader.WrapBackwards;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 

@@ -1,4 +1,4 @@
-package com.digitallizard.bbcnewsreader;
+package com.digitallizard.bbcnewsreader.data;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;

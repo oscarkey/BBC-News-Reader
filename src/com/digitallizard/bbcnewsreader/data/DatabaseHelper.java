@@ -3,6 +3,7 @@ package com.digitallizard.bbcnewsreader.data;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -68,8 +69,16 @@ public class DatabaseHelper {
     	return this.query(table, projection, selection, selectionArgs, sortOrder, -1);
     }
     
+    public long insert(String table, ContentValues values){
+    	return this.insert(table, values);
+    }
+    
     public long insertWithOnConflict(String table, ContentValues values, int conflictAlgorithm){
     	return this.insertWithOnConflict(table, values, conflictAlgorithm);
+    }
+    
+    public long insertOrThrow(String table, ContentValues values) throws SQLException {
+    	return this.insertOrThrow(table, values);
     }
     
     public int updateWithOnConflict(String table, ContentValues values, String selection, 
