@@ -82,7 +82,11 @@ public class DatabaseProvider extends ContentProvider {
 	
 	private Cursor getItems(String[] projection, String category, String sortOrder) {
 		// get items in this category
-		return null;
+		String table = DatabaseHelper.ITEM_TABLE + "JOIN" + DatabaseHelper.RELATIONSHIP_TABLE + "ON" + DatabaseHelper.ITEM_TABLE + "." + 
+			DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID;
+		String selection = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_CATEGORY_NAME + "=";
+		String[] selectionArgs = new String[] {category};
+		return database.query(table, projection, selection, selectionArgs, sortOrder);
 	}
 	
 	private void insertItem(ContentValues values, String category) {
@@ -144,13 +148,20 @@ public class DatabaseProvider extends ContentProvider {
 		}
 	}
 	
-	private int updateItem(ContentValues values) {
-		return database.update(DatabaseHelper.ITEM_TABLE, values, null, null);
+	private int updateItem(ContentValues values, int id) {
+		String selection = DatabaseHelper.COLUMN_ITEM_ID + "=?";
+		String[] selectionArgs = new String[] {Integer.toString(id)};
+		return database.update(DatabaseHelper.ITEM_TABLE, values, selection, selectionArgs);
 	}
 	
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		// TODO Auto-generated method stub
+		// try and match the uri
+		switch (uriMatcher.match(uri)){
+		case ITEMS:
+			// just run the delete query on the database items table
+			return database.delete(DatabaseHelper.ITEM_TABLE, selection, selectionArgs);
+		}
 		return 0;
 	}
 	
@@ -168,6 +179,10 @@ public class DatabaseProvider extends ContentProvider {
 			// insert the provided item
 			String category = uri.getLastPathSegment();
 			insertItem(values, category);
+			break;
+		case CATEGORIES:
+			//insert the provided item
+			database.insert(DatabaseHelper.CATEGORY_TABLE, values);
 			break;
 		}
 		// TODO Auto-generated method stub
@@ -213,7 +228,8 @@ public class DatabaseProvider extends ContentProvider {
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		switch(uriMatcher.match(uri)){
 		case ITEM_BY_ID:
-			return updateItem(values);
+			int id = Integer.parseInt(uri.getLastPathSegment());
+			return updateItem(values, id);
 		}
 		return 0;
 	}

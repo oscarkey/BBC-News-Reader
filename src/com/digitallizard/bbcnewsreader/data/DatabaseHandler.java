@@ -17,6 +17,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.text.method.MovementMethod;
 
 import com.digitallizard.bbcnewsreader.NewsItem;
 import com.digitallizard.bbcnewsreader.R;
@@ -86,7 +87,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		ContentValues values = new ContentValues(1);
 		values.put(DatabaseHelper.COLUMN_ITEM_HTML, html);
 		contentResolver.update(uri, values, null, null);
-		db.update(ITEM_TABLE, values, "item_Id=?", new String[] { Integer.toString(itemId) });
 	}
 	
 	public byte[] getHtml(int itemId) {
@@ -108,10 +108,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	}
 	
 	public void addThumbnail(int itemId, byte[] thumbnail) {
-		ContentValues cv = new ContentValues(1);
-		cv.put("thumbnail", thumbnail);
-		String itemIdString = Integer.toString(itemId);
-		db.update(ITEM_TABLE, cv, "item_Id=?", new String[] { itemIdString });
+		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(itemId));
+		ContentValues values = new ContentValues(1);
+		values.put(DatabaseHelper.COLUMN_ITEM_THUMBNAIL, thumbnail);
+		contentResolver.update(uri, values, null, null);
 	}
 	
 	public byte[] getThumbnail(int itemId) {
@@ -238,13 +238,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	 * @param enabled
 	 *            Whether the RSSFeed should be fetched as Boolean
 	 */
-	public void insertCategory(String name, boolean enabledB, String url) {
-		int enabledI = (enabledB) ? 1 : 0;
-		ContentValues cv = new ContentValues(3);
-		cv.put("name", name);
-		cv.put("enabled", enabledI);
-		cv.put("url", url);
-		db.insert(CATEGORY_TABLE, null, cv);
+	public void insertCategory(String name, boolean enabled, String url) {
+		Uri uri = DatabaseProvider.CONTENT_URI_CATEGORIES;
+		int enabledInt = (enabled) ? 1 : 0;
+		ContentValues values = new ContentValues(3);
+		values.put(DatabaseHelper.COLUMN_CATEGORY_NAME, name);
+		values.put(DatabaseHelper.COLUMN_CATEGORY_ENABLED, enabledInt);
+		values.put(DatabaseHelper.COLUMN_CATEGORY_URL, url);
+		contentResolver.insert(uri, values);
+		db.insert(CATEGORY_TABLE, null, values);
 	}
 	
 	/**
@@ -257,25 +259,36 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	 * @return NewsItem[]
 	 */
 	public NewsItem[] getItems(String category, int limit) {
-		// build a query to find the items
-		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-		queryBuilder.setDistinct(true);
-		queryBuilder.setTables("items JOIN categories_items ON items.item_Id=categories_items.itemId");
-		String[] selectionArgs = new String[] { "title", "description", "link", "item_Id", "thumbnail" };
-		String whereStatement = "categories_items.categoryName=?";
-		String[] whereArgs = new String[] { category };
-		Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "categories_items.priority ASC",
-				Integer.toString(limit));
+		// ask the content provider for the items
+		Uri uri = DatabaseProvider.CONTENT_URI_ITEMS;
+		String[] projection = new String[] {DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_TITLE, DatabaseHelper.COLUMN_ITEM_DESCRIPTION, 
+				DatabaseHelper.COLUMN_ITEM_URL, DatabaseHelper.COLUMN_ITEM_THUMBNAIL};
+		String sortOrder = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + " ASC";
+		Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder);
 		
-		// load these items into an array
+		// load the column names
+		int id = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_ID);
+		int title = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_TITLE);
+		int description = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_DESCRIPTION);
+		int url = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_URL);
+		int thumbnail = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_THUMBNAIL);
+		
+		// load the items into an array
 		NewsItem[] items = new NewsItem[cursor.getCount()];
-		for (int i = 0; i < cursor.getCount(); i++) {
-			cursor.moveToNext();
-			// create a new news item object
-			items[i] = new NewsItem(Integer.parseInt(cursor.getString(3)), cursor.getString(0), cursor.getString(1), cursor.getString(2),
-					cursor.getBlob(4));
+		
+		cursor.moveToFirst();
+		while(cursor.moveToNext() && cursor.getPosition() < limit){
+			NewsItem item = new NewsItem(); // initialize a new item			
+			item.setId(cursor.getInt(id));
+			item.setTitle(cursor.getString(title));
+			item.setDescription(cursor.getString(description));
+			item.setUrl(cursor.getString(url));
+			item.setThumbnailBytes(cursor.getBlob(thumbnail));
+			items[cursor.getCount()] = item; // add this item to the array
 		}
+		
 		cursor.close();
+		
 		return items;
 	}
 	
@@ -292,7 +305,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		boolean[] enabledCategories = new boolean[cursor.getCount()];
 		cursor.moveToFirst();
 		while (cursor.moveToNext()) {
-			if (cursor.getInt(0) == 0) {
+			if (cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_ENABLED)) == 0) {
 				enabledCategories[cursor.getPosition() - 1] = false;
 			}
 			else {
@@ -364,12 +377,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	}
 	
 	/**
-	 * When called will remove all articles that are over one month to the second old. Then cleans up the relationship table. Possibly resource
+	 * When called will remove all articles that are over the threshold to the second old. Then cleans up the relationship table. Possibly resource
 	 * intensive.
 	 */
 	public void clearOld() {
+		// delete items older than the threshold
+		Date now = new Date();
+		long cutoffTime = (now.getTime() - clearOutAgeMilliSecs);
 		
-		// FIXME Optimise?
+		/*// FIXME Optimise?
 		// Creates a java.util date object with current time
 		// Subtracts one month in milliseconds and deletes all
 		// items with a pubdate less than that value.
@@ -381,7 +397,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 			db.delete(ITEM_CATEGORY_TABLE, "itemId=?", new String[] { Integer.toString(cursor.getInt(0)) });
 		}
 		db.delete(ITEM_TABLE, "pubdate<?", new String[] { Long.toString(oldTime) });
-		cursor.close();
+		cursor.close();*/
 	}
 	
 	/**

@@ -98,7 +98,7 @@ public class DatabaseHelper {
     	return this.replace(table, values);
     }
     
-    public int delete(String table, String selection, String selectionArgs){
+    public int delete(String table, String selection, String selectionArgs[]){
     	return this.delete(table, selection, selectionArgs);
     }
     

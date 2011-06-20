@@ -3,7 +3,7 @@ package com.digitallizard.bbcnewsreader;
 public class NewsItem {
 	private String title;
 	private String description;
-	private String link;
+	private String url;
 	private int id;
 	private byte[] thumbnailBytes;
 	
@@ -32,16 +32,16 @@ public class NewsItem {
 		this.description = description;
 	}
 	/**
-	 * @return the link
+	 * @return the url
 	 */
-	public String getLink() {
-		return link;
+	public String getUrl() {
+		return url;
 	}
 	/**
-	 * @param link the link to set
+	 * @param url the url to set
 	 */
-	public void setLink(String link) {
-		this.link = link;
+	public void setUrl(String url) {
+		this.url = url;
 	}
 	/**
 	 * @return the id
@@ -72,8 +72,12 @@ public class NewsItem {
 		super();
 		this.title = title;
 		this.description = description;
-		this.link = link;
+		this.url = link;
 		this.id = id;
 		this.thumbnailBytes = imageBytes;
+	}
+	
+	public NewsItem(){
+		super();
 	}
 }
