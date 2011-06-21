@@ -55,13 +55,13 @@ public class ReaderActivity extends Activity {
 	static final int CATEGORY_ROW_LENGTH = 4;
 	static final int DIALOG_ERROR = 0;
 	static final int NEWS_ITEM_DP_WIDTH = 100; //FIXME item width shouldn't be predefined
-	static final String PREFS_FILE_NAME = "com.digitallizard.bbcnewsreader_preferences";
-	static final int DEFAULT_ITEM_LOAD_LIMIT = 4;
-	static final int DEFAULT_CLEAR_OUT_AGE = 4;
-	static final boolean DEFAULT_LOAD_IN_BACKGROUND = true;
-	static final boolean DEFAULT_RTC_WAKEUP = true;
-	static final String DEFAULT_LOAD_INTERVAL = "1_hour";
-	static final boolean DEFAULT_DISPLAY_FULL_ERROR = false;
+	public static final String PREFS_FILE_NAME = "com.digitallizard.bbcnewsreader_preferences";
+	public static final int DEFAULT_ITEM_LOAD_LIMIT = 4;
+	public static final int DEFAULT_CLEAR_OUT_AGE = 4;
+	public static final boolean DEFAULT_LOAD_IN_BACKGROUND = true;
+	public static final boolean DEFAULT_RTC_WAKEUP = true;
+	public static final String DEFAULT_LOAD_INTERVAL = "1_hour";
+	public static final boolean DEFAULT_DISPLAY_FULL_ERROR = false;
 	static final byte[] NO_THUMBNAIL_URL_CODE = new byte[]{127};
 	
 	/* variables */
@@ -457,10 +457,9 @@ public class ReaderActivity extends Activity {
         loadSettings(); //load in the settings
         
         //load the database
-        database = new DatabaseHandler(this, settings.getInt("clearOutAge", DEFAULT_CLEAR_OUT_AGE));
+        database = new DatabaseHandler(this);
         firstRun = false;
         if(!database.isCreated()){
-        	database.createTables();
         	database.addCategoriesFromXml();
         	firstRun = true;
         	showFirstRunDialog();
@@ -590,7 +589,6 @@ public class ReaderActivity extends Activity {
     protected void onDestroy(){
     	//disconnect the service
     	doUnbindService();
-    	database.finish(); //shutdown the database
     	super.onDestroy(); //pass the destroy command to the super
     }
     

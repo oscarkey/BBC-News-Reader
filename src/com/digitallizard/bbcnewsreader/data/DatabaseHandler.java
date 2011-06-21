@@ -12,40 +12,23 @@ import java.util.Date;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.text.method.MovementMethod;
+import android.util.Log;
 
 import com.digitallizard.bbcnewsreader.NewsItem;
 import com.digitallizard.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.ReaderActivity;
 
-public class DatabaseHandler extends SQLiteOpenHelper {
-	
-	private static final String DATABASE_NAME = "bbcnewsreader.db";
-	private static final int DATABASE_VERSION = 2;
-	private static final String ITEM_TABLE = "items";
-	private static final String CATEGORY_TABLE = "categories";
-	private static final String ITEM_CATEGORY_TABLE = "categories_items";
-	private static final String CREATE_ITEM_TABLE = "CREATE TABLE " + ITEM_TABLE + "(item_Id integer PRIMARY KEY," + "title varchar(255), "
-			+ "description varchar(255), " + "link varchar(255) UNIQUE, " + "pubdate int, " + "html blob, " + "image blob, " + "thumbnail blob,"
-			+ "thumbnailurl varchar(255))";
-	private static final String CREATE_CATEGORY_TABLE = "CREATE TABLE " + CATEGORY_TABLE + "(category_Id integer PRIMARY KEY," + "name varchar(255),"
-			+ "enabled int," + "url varchar(255))";
-	private static final String CREATE_RELATIONSHIP_TABLE = "CREATE TABLE " + ITEM_CATEGORY_TABLE + "(categoryName varchar(255), " + "itemId INT,"
-			+ "priority int," + "PRIMARY KEY (categoryName, itemId))";
-	public static final String COLUMN_HTML = "html";
-	public static final String COLUMN_THUMBNAIL = "thumbnail";
-	public static final String COLUMN_IMAGE = "image";
+public class DatabaseHandler {
+
 	public static final int COLUMN_UNDOWNLOADED_ARTICLES = 0;
 	public static final int COLUMN_UNDOWNLOADED_THUMBNAILS = 1;
+	
 	private Context context;
-	private SQLiteDatabase db;
-	private long clearOutAgeMilliSecs; // the number of days to keep news items
-	private boolean methodInsertWithConflictExists; // used to determine if the required method exists
 	private ContentResolver contentResolver;
+	private long clearOutAgeMilliSecs;
 	
 	/**
 	 * Inserts an RSSItem into the items table, then creates an entry in the relationship table between it and its category, ONLY if it is more recent
@@ -189,43 +172,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	}
 	
 	/**
-	 * Fetches all the undownloaded items from the last "days" days. Returns an array containing the item Ids of all these items
-	 * 
-	 * @param category
-	 *            The category to retrieve undownloaded items from
-	 * @param days
-	 *            Number of days into the past to return undownloaded items for (Using timestamp from entry)
-	 * @return A 2d int[n], where n is the number of undownloaded items.
-	 */
-	public Integer[] getUndownloaded(String category, String column, int numItems) {
-		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-		queryBuilder.setDistinct(true);
-		queryBuilder.setTables("items JOIN categories_items ON items.item_Id=categories_items.itemId");
-		String[] selectionArgs = new String[] { "item_Id", "items." + column };
-		String whereStatement = "categories_items.categoryName=?";
-		String[] whereArgs = new String[] { category };
-		Cursor cursor = queryBuilder.query(db, selectionArgs, whereStatement, whereArgs, null, null, "categories_items.priority ASC",
-				Integer.toString(numItems));
-		// Log.v("database", "query: "+queryBuilder.buildQuery(selectionArgs, whereStatement, whereArgs, null, null, "pubdate DESC",
-		// Integer.toString(numItems)));
-		
-		ArrayList<Integer> unloadedItems = new ArrayList<Integer>();
-		
-		// loop through and store the ids of the articles that need to be loaded
-		for (int i = 0; i < cursor.getCount(); i++) {
-			cursor.moveToNext();
-			// check if we need to download this
-			if (cursor.isNull(1)) {
-				unloadedItems.add(cursor.getInt(0));
-			}
-		}
-		
-		cursor.close();
-		
-		return unloadedItems.toArray(new Integer[unloadedItems.size()]);
-	}
-	
-	/**
 	 * Inserts a category into the category table.
 	 * 
 	 * @param name
@@ -241,7 +187,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		values.put(DatabaseHelper.COLUMN_CATEGORY_ENABLED, enabledInt);
 		values.put(DatabaseHelper.COLUMN_CATEGORY_URL, url);
 		contentResolver.insert(uri, values);
-		db.insert(CATEGORY_TABLE, null, values);
 	}
 	
 	/**
@@ -315,15 +260,24 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	 * @return A string[][] containing the String urls in [0] and String names in [1].
 	 */
 	public String[][] getEnabledCategories() {
+		// query the DatabaseProvider for the categories
 		Uri uri = DatabaseProvider.CONTENT_URI_ENABLED_CATEGORIES; // uri for enabled categories
 		String[] projection = new String[] { DatabaseHelper.COLUMN_CATEGORY_URL, DatabaseHelper.COLUMN_CATEGORY_NAME };
 		Cursor cursor = contentResolver.query(uri, projection, null, null, DatabaseHelper.COLUMN_CATEGORY_ID);
+		
+		// find the column indexes
+		int url = cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_URL);
+		int name = cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_NAME);
+		
+		// loop through and save these categories to an array
 		String[][] categories = new String[2][cursor.getCount()];
 		while (cursor.moveToNext()) {
-			categories[0][cursor.getPosition() - 1] = cursor.getString(0);
-			categories[1][cursor.getPosition() - 1] = cursor.getString(1);
+			Log.v("database", "name: "+cursor.getString(name)+" url:"+cursor.getString(url));
+			categories[0][cursor.getPosition() - 1] = cursor.getString(url);
+			categories[1][cursor.getPosition() - 1] = cursor.getString(name);
 		}
 		cursor.close();
+		
 		return categories;
 	}
 	
@@ -339,13 +293,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		// update this category
 		ContentValues values = new ContentValues(1);
 		if (enabled) {
-			values.put("enabled", 1);
+			values.put(DatabaseHelper.COLUMN_CATEGORY_ENABLED, 1);
 		}
 		else {
-			values.put("enabled", 0);
+			values.put(DatabaseHelper.COLUMN_CATEGORY_ENABLED, 0);
 		}
-		// update the database with these values
-		db.update(CATEGORY_TABLE, values, "name=?", new String[] { category });
+		// tell the DatabaseProvider to update this category
+		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_CATEGORY_BY_NAME, category);
+		contentResolver.update(uri, values, null, null);
 	}
 	
 	/**
@@ -355,41 +310,51 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	 *            A boolean array of "enabled" values
 	 */
 	public void setEnabledCategories(boolean[] enabled) throws NullPointerException {
+		// loop through and update all the categories
 		ContentValues values = new ContentValues(1);
 		for (int i = 0; i < enabled.length; i++) {
+			values.clear(); // empty the content values
 			if (enabled[i]) {
-				values.put("enabled", 1);
+				values.put(DatabaseHelper.COLUMN_CATEGORY_ENABLED, 1);
 			}
 			else {
-				values.put("enabled", 0);
+				values.put(DatabaseHelper.COLUMN_CATEGORY_ENABLED, 0);
 			}
-			db.update(CATEGORY_TABLE, values, "category_Id=?", new String[] { Integer.toString(i + 1) });
-			values.clear();
+			// tell the DatabaseProvider to update this category
+			Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_CATEGORY_BY_ID, Integer.toString(i + 1));
+			contentResolver.update(uri, values, null, null);
 		}
 	}
 	
 	/**
-	 * When called will remove all articles that are over the threshold to the second old. Then cleans up the relationship table. Possibly resource
+	 * When called will remove all articles that are over the threshold, to the second, old. Then cleans up the relationship table. Possibly resource
 	 * intensive.
 	 */
 	public void clearOld() {
 		// delete items older than the threshold
 		Date now = new Date();
-		long cutoffTime = (now.getTime() - clearOutAgeMilliSecs);
+		SharedPreferences settings = context.getSharedPreferences(ReaderActivity.PREFS_FILE_NAME, Context.MODE_PRIVATE);
+		clearOutAgeMilliSecs =  settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE) * 24 * 60 * 60 * 1000;
+		long threshold = (now.getTime() - clearOutAgeMilliSecs);
 		
-		/*// FIXME Optimise?
-		// Creates a java.util date object with current time
-		// Subtracts one month in milliseconds and deletes all
-		// items with a pubdate less than that value.
-		Date now = new Date();
-		long oldTime = (now.getTime() - clearOutAgeMilliSecs);
-		Cursor cursor = db.query(ITEM_TABLE, new String[] { "item_Id" }, "pubdate<?", new String[] { Long.toString(oldTime) }, null, null, null);
-		for (int i = 1; i <= cursor.getCount(); i++) {
-			cursor.moveToNext();
-			db.delete(ITEM_CATEGORY_TABLE, "itemId=?", new String[] { Integer.toString(cursor.getInt(0)) });
+		// FIXME Optimise, should use a join
+		//find items older than the threshold
+		Uri uri = DatabaseProvider.CONTENT_URI_ITEMS;
+		String[] projection = {DatabaseHelper.COLUMN_ITEM_ID};
+		String selection = DatabaseHelper.COLUMN_ITEM_PUBDATE + "<?";
+		String[] selectionArgs = {Long.toString(threshold)};
+		Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, null);
+		
+		// find the column indexes
+		int id = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_ID);
+		
+		// loop through and delete the items
+		while(cursor.moveToNext()){
+			Uri tempUri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(cursor.getInt(id)));
+			contentResolver.delete(tempUri, null, null);
 		}
-		db.delete(ITEM_TABLE, "pubdate<?", new String[] { Long.toString(oldTime) });
-		cursor.close();*/
+		
+		cursor.close();
 	}
 	
 	/**
@@ -426,94 +391,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		}
 	}
 	
-	/**
-	 * Drops the entire database.
-	 */
-	public void dropTables() {
-		db.execSQL("DROP TABLE " + ITEM_TABLE);
-		db.execSQL("DROP TABLE " + CATEGORY_TABLE);
-		db.execSQL("DROP TABLE " + ITEM_CATEGORY_TABLE);
-	}
 	
-	/**
-	 * Attempts to create the tables.
-	 */
-	public void createTables() {
-		db.execSQL(CREATE_ITEM_TABLE);
-		db.execSQL(CREATE_CATEGORY_TABLE);
-		db.execSQL(CREATE_RELATIONSHIP_TABLE);
-	}
-	
-	@Override
-	public void onCreate(SQLiteDatabase db) {
-		// nothing to do
-	}
-	
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// check what version to version upgrade we are performing
-		if (oldVersion == 1 && newVersion == 2) {
-			// drop tables
-			db.execSQL("DROP TABLE " + ITEM_TABLE);
-			db.execSQL("DROP TABLE " + ITEM_CATEGORY_TABLE);
-			// create tables
-			db.execSQL(CREATE_ITEM_TABLE);
-			db.execSQL(CREATE_RELATIONSHIP_TABLE);
-		}
-		else {
-			// reset everything to be sure
-			dropTables();
-			createTables();
-		}
-	}
-	
-	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// reset the database
-		dropTables();
-		createTables();
-	}
-	
-	public void finish() {
-		// close the database
-		db.close();
-		db = null;
-	}
-	
-	void checkCompatibilty() {
-		// check if the insertWithOnConflict exists
-		try {
-			SQLiteDatabase.class.getMethod("insertWithOnConflict", new Class[] { String.class, String.class, ContentValues.class, Integer.TYPE });
-			// success, this method exists, set the boolean
-			methodInsertWithConflictExists = true;
-		} catch (NoSuchMethodException e) {
-			// failure, set the boolean
-			methodInsertWithConflictExists = false;
-		}
-	}
-	
-	@Override
-	protected void finalize() throws Throwable {
-		// use try-catch to make sure we do not break super
-		try {
-			// make sure the database has been shutdown
-			if (db != null) {
-				db.close();
-				db = null;
-			}
-		} finally {
-			super.finalize();
-		}
-	}
-	
-	public DatabaseHandler(Context context, int clearOutAgeDays) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+	public DatabaseHandler(Context context) {
 		this.context = context;
 		this.contentResolver = context.getContentResolver();
 		
-		this.clearOutAgeMilliSecs = (clearOutAgeDays * 24 * 60 * 60 * 1000);
-		this.db = this.getWritableDatabase();
-		
-		// check compatibility with this version of Android
-		checkCompatibilty();
+		SharedPreferences settings = context.getSharedPreferences(ReaderActivity.PREFS_FILE_NAME, Context.MODE_PRIVATE);
+		clearOutAgeMilliSecs =  settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE) * 24 * 60 * 60 * 1000;
 	}
 }

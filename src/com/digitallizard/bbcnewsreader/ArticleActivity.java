@@ -169,7 +169,6 @@ public class ArticleActivity extends Activity {
     protected void onDestroy(){
     	//disconnect the service
     	doUnbindService();
-    	database.finish(); //shutdown the database
     	super.onDestroy(); //pass the destroy command to the super
     }
 	
@@ -183,7 +182,7 @@ public class ArticleActivity extends Activity {
 		webView = new WebView(this); //create a web view to display the article
 		//retrieve the article text from the database
 		id = this.getIntent().getIntExtra("id", 0);
-		database = new DatabaseHandler(this, 0); //we don't need to bother with the clear old date
+		database = new DatabaseHandler(this); //we don't need to bother with the clear old date
 		byte[] html = database.getHtml(id);
 		//check if any html was returned
 		if(html != null){

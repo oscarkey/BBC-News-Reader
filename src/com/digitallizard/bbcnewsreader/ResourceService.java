@@ -132,19 +132,9 @@ public class ResourceService extends Service implements ResourceInterface {
 			//set the flag saying that we are loading
 			loadInProgress = true;
 			//retrieve the active category urls
-			String[] urls = getDatabase().getEnabledCategories()[0];
-			//work out the names
-			String[] names = new String[urls.length];
-			String[] allNames = getResources().getStringArray(R.array.category_names);
-			String[] allUrls = getResources().getStringArray(R.array.catergory_rss_urls);
-			//FIXME very inefficient, should be done by database
-			for(int i = 0; i < allUrls.length; i++){
-				for(int j = 0; j < urls.length; j++){
-					if(allUrls[i].equals(urls[j])){
-						names[j] = allNames[i];
-					}
-				}
-			}
+			String[][] enabledCategories = getDatabase().getEnabledCategories();
+			String[] urls = enabledCategories[0];
+			String[] names = enabledCategories[1];
 			//start the RSS Manager
 			rssManager.load(names, urls);
 		}
@@ -389,11 +379,9 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 		if(database == null){
 			//load the database
-			int clearOutAge = settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE); //load user preference
-			setDatabase(new DatabaseHandler(this, clearOutAge));
+			setDatabase(new DatabaseHandler(this));
 			//create tables in the database if needed
 			if(!getDatabase().isCreated()){
-				getDatabase().createTables();
 				getDatabase().addCategoriesFromXml();
 	        }
 		}
@@ -455,7 +443,6 @@ public class ResourceService extends Service implements ResourceInterface {
 	@Override
 	public void onDestroy(){
 		this.unregisterReceiver(broadcastReceiver);
-		database.finish(); //shutdown the database
 		super.onDestroy();
 	}
 	

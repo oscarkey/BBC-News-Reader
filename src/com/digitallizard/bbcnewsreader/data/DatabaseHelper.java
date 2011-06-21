@@ -70,40 +70,40 @@ public class DatabaseHelper {
     
     public Cursor query(String table, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
     	//call the main function with limit as -1
-    	return this.query(table, projection, selection, selectionArgs, sortOrder, -1);
+    	return query(table, projection, selection, selectionArgs, sortOrder, -1);
     }
     
     public long insert(String table, ContentValues values){
-    	return this.insert(table, values);
+    	return getDatabase().insert(table, null, values);
     }
     
     public long insertWithOnConflict(String table, ContentValues values, int conflictAlgorithm){
-    	return this.insertWithOnConflict(table, values, conflictAlgorithm);
+    	return getDatabase().insertWithOnConflict(table, null, values, conflictAlgorithm);
     }
     
     public long insertOrThrow(String table, ContentValues values) throws SQLException {
-    	return this.insertOrThrow(table, values);
+    	return getDatabase().insertOrThrow(table, null, values);
     }
     
     public int update(String table, ContentValues values, String selection, String[] selectionArgs){
-    	return this.update(table, values, selection, selectionArgs);
+    	return getDatabase().update(table, values, selection, selectionArgs);
     }
     
     public int updateWithOnConflict(String table, ContentValues values, String selection, 
-    		String selectionArgs, int conflictAlgorithm) {
-    	return this.updateWithOnConflict(table, values, selection, selectionArgs, conflictAlgorithm);
+    		String[] selectionArgs, int conflictAlgorithm) {
+    	return getDatabase().updateWithOnConflict(table, values, selection, selectionArgs, conflictAlgorithm);
     }
     
     public long replace(String table, ContentValues values){
-    	return this.replace(table, values);
+    	return getDatabase().replace(table, null, values);
     }
     
     public int delete(String table, String selection, String selectionArgs[]){
-    	return this.delete(table, selection, selectionArgs);
+    	return getDatabase().delete(table, selection, selectionArgs);
     }
     
     public SQLiteDatabase getDatabase(){
-    	return this.getDatabase();
+    	return databaseOpenHelper.getWritableDatabase();
     }
     
     public DatabaseHelper(Context context) {

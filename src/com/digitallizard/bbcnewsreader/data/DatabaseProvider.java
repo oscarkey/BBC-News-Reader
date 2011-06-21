@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.util.Log;
 
 public class DatabaseProvider extends ContentProvider {
 	
@@ -18,12 +19,16 @@ public class DatabaseProvider extends ContentProvider {
 	public static final Uri CONTENT_URI = Uri.parse("content://com.digitallizard.bbcnewsreader");
 	public static final Uri CONTENT_URI_CATEGORIES = Uri.parse("content://com.digitallizard.bbcnewsreader/categories");
 	public static final Uri CONTENT_URI_ENABLED_CATEGORIES = Uri.withAppendedPath(CONTENT_URI_CATEGORIES, "enabled");
+	public static final Uri CONTENT_URI_CATEGORY_BY_ID = Uri.withAppendedPath(CONTENT_URI_CATEGORIES, "id");
+	public static final Uri CONTENT_URI_CATEGORY_BY_NAME = Uri.withAppendedPath(CONTENT_URI_CATEGORIES, "name");
 	public static final Uri CONTENT_URI_ITEMS = Uri.parse("content://com.digitallizard.bbcnewsreader/items");
 	public static final Uri CONTENT_URI_ITEMS_BY_CATEGORY = Uri.withAppendedPath(CONTENT_URI_ITEMS, "category");
 	public static final Uri CONTENT_URI_UNDOWNLOADED_ITEMS = Uri.withAppendedPath(CONTENT_URI_ITEMS, "undownloaded");
 	
 	// uri matcher helpers
 	private static final int CATEGORIES = 1;
+	private static final int CATEGORY_BY_ID = 8;
+	private static final int CATEGORY_BY_NAME = 7;
 	private static final int ENABLED_CATEGORIES = 2;
 	private static final int ITEMS = 4;
 	private static final int ITEM_BY_ID = 5;
@@ -35,6 +40,8 @@ public class DatabaseProvider extends ContentProvider {
 	static {
 		uriMatcher.addURI(AUTHORITY, "categories", CATEGORIES);
 		uriMatcher.addURI(AUTHORITY, "categories/enabled", ENABLED_CATEGORIES);
+		uriMatcher.addURI(AUTHORITY, "categories/id/#", CATEGORY_BY_ID);
+		uriMatcher.addURI(AUTHORITY, "categories/name/*", CATEGORY_BY_NAME);
 		uriMatcher.addURI(AUTHORITY, "items/", ITEMS);
 		uriMatcher.addURI(AUTHORITY, "items/#", ITEM_BY_ID);
 		uriMatcher.addURI(AUTHORITY, "items/category/*", ITEMS_BY_CATEGORY);
@@ -65,14 +72,18 @@ public class DatabaseProvider extends ContentProvider {
 	
 	private Cursor getEnabledCategories(String[] projection, String sortOrder) {
 		// define a selection to only retrieve enabled categories
-		String selection = "enabled='1'";
+		String selection = DatabaseHelper.COLUMN_CATEGORY_ENABLED + "='1'";
 		// ask for categories by this selection
 		return getCategories(projection, selection, null, sortOrder);
 	}
 	
 	private Cursor getItems(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		// get items
-		return database.query(DatabaseHelper.ITEM_TABLE, projection, selection, selectionArgs, sortOrder);
+		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+		queryBuilder.setDistinct(true);
+		queryBuilder.setTables(DatabaseHelper.ITEM_TABLE + " JOIN " + DatabaseHelper.RELATIONSHIP_TABLE + " ON " + DatabaseHelper.ITEM_TABLE + "." + 
+			DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID);
+		return queryBuilder.query(database.getDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
 	}
 	
 	private Cursor getItem(String[] projection, int id) {
@@ -83,11 +94,13 @@ public class DatabaseProvider extends ContentProvider {
 	
 	private Cursor getItems(String[] projection, String category, String sortOrder) {
 		// get items in this category
-		String table = DatabaseHelper.ITEM_TABLE + "JOIN" + DatabaseHelper.RELATIONSHIP_TABLE + "ON" + DatabaseHelper.ITEM_TABLE + "." + 
-			DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID;
+		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+		queryBuilder.setDistinct(true);
+		queryBuilder.setTables(DatabaseHelper.ITEM_TABLE + " JOIN " + DatabaseHelper.RELATIONSHIP_TABLE + " ON " + DatabaseHelper.ITEM_TABLE + "." + 
+			DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID);
 		String selection = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_CATEGORY_NAME + "=";
 		String[] selectionArgs = new String[] {category};
-		return database.query(table, projection, selection, selectionArgs, sortOrder);
+		return queryBuilder.query(database.getDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
 	}
 	
 	private Cursor getUndownloadedItems(String[] projection, int numItems){
@@ -102,7 +115,7 @@ public class DatabaseProvider extends ContentProvider {
 		return queryBuilder.query(database.getDatabase(), projection, selection, selectionArgs, null, null, null);
 	}
 	
-	private void insertItem(ContentValues values, String category) {
+	private Uri insertItem(ContentValues values, String category) {
 		long id = -1; // will hold the id of the item, -1 for now to be safe
 		// retrieve useful stuff from the content values
 		int priority = values.getAsInteger(DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY);
@@ -159,6 +172,9 @@ public class DatabaseProvider extends ContentProvider {
 				// TODO handle this type of exception
 			}
 		}
+		
+		//return a uri to the new item
+		return Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Long.toString(id));
 	}
 	
 	private int updateItem(ContentValues values, int id) {
@@ -167,15 +183,45 @@ public class DatabaseProvider extends ContentProvider {
 		return database.update(DatabaseHelper.ITEM_TABLE, values, selection, selectionArgs);
 	}
 	
+	private int updateCategory(ContentValues values, int id){
+		String selection = DatabaseHelper.COLUMN_CATEGORY_ID + "=?";
+		String[] selectionArgs = new String[] {Integer.toString(id)};
+		return database.update(DatabaseHelper.CATEGORY_TABLE, values, selection, selectionArgs);
+	}
+	
+	private int updateCategory(ContentValues values, String name){
+		String selection = DatabaseHelper.COLUMN_CATEGORY_NAME + "=?";
+		String[] selectionArgs = new String[] {name};
+		return database.update(DatabaseHelper.CATEGORY_TABLE, values, selection, selectionArgs);
+	}
+	
+	private int deleteItem(int id){
+		// delete this item from the item table
+		String selection = DatabaseHelper.COLUMN_ITEM_ID + "=?";
+		String[] selectionArgs = new String[] {Integer.toString(id)};
+		database.delete(DatabaseHelper.ITEM_TABLE, selection, selectionArgs);
+		
+		// delete this item from the relationship table
+		selection = DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID + "=?";
+		selectionArgs = new String[] {Integer.toString(id)};
+		database.delete(DatabaseHelper.RELATIONSHIP_TABLE, selection, selectionArgs);
+		
+		return 1;
+	}
+	
+	
+	
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		// try and match the uri
 		switch (uriMatcher.match(uri)){
 		case ITEMS:
-			// just run the delete query on the database items table
-			return database.delete(DatabaseHelper.ITEM_TABLE, selection, selectionArgs);
+			// delete this item
+			int id = Integer.parseInt(uri.getLastPathSegment());
+			return deleteItem(id);
+		default:
+			throw new IllegalArgumentException("Unknown uri: " + uri.toString());
 		}
-		return 0;
 	}
 	
 	@Override
@@ -191,15 +237,14 @@ public class DatabaseProvider extends ContentProvider {
 		case ITEMS:
 			// insert the provided item
 			String category = uri.getLastPathSegment();
-			insertItem(values, category);
-			break;
+			return insertItem(values, category);
 		case CATEGORIES:
-			//insert the provided item
-			database.insert(DatabaseHelper.CATEGORY_TABLE, values);
-			break;
+			// insert the provided item
+			long id = database.insert(DatabaseHelper.CATEGORY_TABLE, values);
+			return Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_CATEGORIES, Long.toString(id));
+		default:
+			throw new IllegalArgumentException("Unknown uri: " + uri.toString());
 		}
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 	@Override
@@ -208,15 +253,9 @@ public class DatabaseProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)) {
 		case CATEGORIES:
 			// query the database for all the categories
-			if (selection == null) {
-				throw new IllegalArgumentException("Uri requires selection: " + uri.toString());
-			}
 			return getCategories(projection, selection, selectionArgs, sortOrder);
 		case ENABLED_CATEGORIES:
 			// query the database for enabled categories
-			if (selection == null) {
-				throw new IllegalArgumentException("Uri requires selection: " + uri.toString());
-			}
 			return getEnabledCategories(projection, sortOrder);
 		case ITEMS:
 			// query the database for items
@@ -244,8 +283,15 @@ public class DatabaseProvider extends ContentProvider {
 		case ITEM_BY_ID:
 			int id = Integer.parseInt(uri.getLastPathSegment());
 			return updateItem(values, id);
+		case CATEGORY_BY_ID:
+			id = Integer.parseInt(uri.getLastPathSegment());
+			return updateCategory(values, id);
+		case CATEGORY_BY_NAME:
+			String name = uri.getLastPathSegment();
+			return updateCategory(values, name);
+		default:
+			throw new IllegalArgumentException("Unknown uri: " + uri.toString());
 		}
-		return 0;
 	}
 	
 	@Override
