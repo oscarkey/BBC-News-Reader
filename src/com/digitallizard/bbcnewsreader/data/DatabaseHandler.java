@@ -276,7 +276,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		// load the items into an array
 		NewsItem[] items = new NewsItem[cursor.getCount()];
 		
-		cursor.moveToFirst();
 		while(cursor.moveToNext() && cursor.getPosition() < limit){
 			NewsItem item = new NewsItem(); // initialize a new item			
 			item.setId(cursor.getInt(id));
@@ -303,7 +302,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		String[] projection = new String[] { DatabaseHelper.COLUMN_CATEGORY_ENABLED };
 		Cursor cursor = contentResolver.query(uri, projection, null, null, DatabaseHelper.COLUMN_CATEGORY_ID);
 		boolean[] enabledCategories = new boolean[cursor.getCount()];
-		cursor.moveToFirst();
 		while (cursor.moveToNext()) {
 			if (cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_ENABLED)) == 0) {
 				enabledCategories[cursor.getPosition() - 1] = false;
@@ -326,7 +324,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		String[] projection = new String[] { DatabaseHelper.COLUMN_CATEGORY_URL, DatabaseHelper.COLUMN_CATEGORY_NAME };
 		Cursor cursor = contentResolver.query(uri, projection, null, null, DatabaseHelper.COLUMN_CATEGORY_ID);
 		String[][] categories = new String[2][cursor.getCount()];
-		cursor.moveToFirst();
 		while (cursor.moveToNext()) {
 			categories[0][cursor.getPosition() - 1] = cursor.getString(0);
 			categories[1][cursor.getPosition() - 1] = cursor.getString(1);
