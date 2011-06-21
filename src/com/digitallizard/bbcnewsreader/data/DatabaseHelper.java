@@ -102,6 +102,10 @@ public class DatabaseHelper {
     	return this.delete(table, selection, selectionArgs);
     }
     
+    public SQLiteDatabase getDatabase(){
+    	return this.getDatabase();
+    }
+    
     public DatabaseHelper(Context context) {
         databaseOpenHelper = new DatabaseOpenHelper(context);
     }

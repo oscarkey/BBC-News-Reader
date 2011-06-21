@@ -39,6 +39,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	public static final String COLUMN_HTML = "html";
 	public static final String COLUMN_THUMBNAIL = "thumbnail";
 	public static final String COLUMN_IMAGE = "image";
+	public static final int COLUMN_UNDOWNLOADED_ARTICLES = 0;
+	public static final int COLUMN_UNDOWNLOADED_THUMBNAILS = 1;
 	private Context context;
 	private SQLiteDatabase db;
 	private long clearOutAgeMilliSecs; // the number of days to keep news items
@@ -146,50 +148,43 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	 * 
 	 * @param days
 	 *            Number of days into the past to return undownloaded items for (Using timestamp from entry)
-	 * @return A 2d int[3][n], where 3 is the type of item and n is the number of undownloaded items of that type. type is either 0, 1 or 2 for html,
-	 *         thumbnail or image respectively.
+	 * @return A 2d int[2][n], where 2 is the type of item and n is the number of undownloaded items of that type. type is either 0 or 1 for html,
+	 *         and thumbnail respectively.
 	 */
-	public Integer[][] getUndownloaded(int days) {
-		Date now = new Date();
-		long curTime = now.getTime();
-		long timeComparison = curTime - 86400000L * days;
-		String timeComparisonS = Long.toString(timeComparison);
+	public Integer[][] getUndownloaded(int numItems) {
+		// query the content provider for undownloaded items
+		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_UNDOWNLOADED_ITEMS, Integer.toString(numItems));
+		String[] projection = new String[] {DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_HTML, DatabaseHelper.COLUMN_ITEM_THUMBNAIL};
+		Cursor cursor = contentResolver.query(uri, projection, null, null, null);
 		
-		Cursor cursorArticles = db.query(ITEM_TABLE, new String[] { "item_Id" }, "html IS NULL AND pubdate>?", new String[] { timeComparisonS },
-				null, null, null);
-		Cursor cursorThumbnails = db.query(ITEM_TABLE, new String[] { "item_Id" }, "thumbnail IS NULL AND pubdate>?",
-				new String[] { timeComparisonS }, null, null, null);
-		Cursor cursorImages = db.query(ITEM_TABLE, new String[] { "item_Id" }, "image IS NULL AND pubdate>?", new String[] { timeComparisonS }, null,
-				null, null);
+		// get the column name index
+		int id = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_ID);
+		int html = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_HTML);
+		int thumbnail = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_THUMBNAIL);
 		
-		ArrayList<Integer> unloadedArticles = new ArrayList<Integer>();
-		ArrayList<Integer> unloadedThumbnails = new ArrayList<Integer>();
-		ArrayList<Integer> unloadedImages = new ArrayList<Integer>();
+		// create lists to save the arrays to
+		ArrayList<Integer> undownloadedArticles = new ArrayList<Integer>();
+		ArrayList<Integer> undownloadedThumbnails = new ArrayList<Integer>();
 		
-		// loop through and store the ids of the articles that need to be loaded
-		for (int i = 0; i < cursorArticles.getCount(); i++) {
-			cursorArticles.moveToNext();
-			unloadedArticles.add(cursorArticles.getInt(0));
-		}
-		// loop through and store the ids of the thumbnails that need to be loaded
-		for (int i = 0; i < cursorThumbnails.getCount(); i++) {
-			cursorThumbnails.moveToNext();
-			unloadedThumbnails.add(cursorThumbnails.getInt(0));
-		}
-		// loop through and store the ids of the images that need to be loaded
-		for (int i = 0; i < cursorImages.getCount(); i++) {
-			cursorImages.moveToNext();
-			unloadedImages.add(cursorImages.getInt(0));
+		// loop through and save what needs to be loaded
+		while(cursor.moveToNext()){
+			// check if we need to load this article
+			if(cursor.isNull(html)){
+				undownloadedArticles.add(new Integer(cursor.getInt(id)));
+			}
+			// check if we need to load this thumbnail
+			if(cursor.isNull(thumbnail)){
+				undownloadedThumbnails.add(new Integer(cursor.getInt(id)));
+			}
 		}
 		
-		cursorArticles.close();
-		cursorThumbnails.close();
-		cursorImages.close();
+		cursor.close();
 		
-		Integer[][] values = new Integer[3][];
-		values[0] = unloadedArticles.toArray(new Integer[unloadedArticles.size()]);
-		values[1] = unloadedThumbnails.toArray(new Integer[unloadedThumbnails.size()]);
-		values[2] = unloadedImages.toArray(new Integer[unloadedImages.size()]);
+		// convert the array lists into a 2d array
+		Integer[][] values = new Integer[2][];
+		values[COLUMN_UNDOWNLOADED_ARTICLES] = undownloadedArticles.toArray(new Integer[undownloadedArticles.size()]);
+		values[COLUMN_UNDOWNLOADED_THUMBNAILS] = undownloadedThumbnails.toArray(new Integer[undownloadedThumbnails.size()]);
+		
 		return values;
 	}
 	

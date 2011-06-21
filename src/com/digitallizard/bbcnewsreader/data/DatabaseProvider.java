@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
 public class DatabaseProvider extends ContentProvider {
@@ -87,6 +88,18 @@ public class DatabaseProvider extends ContentProvider {
 		String selection = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_CATEGORY_NAME + "=";
 		String[] selectionArgs = new String[] {category};
 		return database.query(table, projection, selection, selectionArgs, sortOrder);
+	}
+	
+	private Cursor getUndownloadedItems(String[] projection, int numItems){
+		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+		queryBuilder.setDistinct(true);
+		queryBuilder.setTables(DatabaseHelper.ITEM_TABLE + " JOIN " + DatabaseHelper.RELATIONSHIP_TABLE + " ON " + DatabaseHelper.ITEM_TABLE + 
+				"." + DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID);
+		queryBuilder.setTables("items JOIN categories_items ON items.item_Id=categories_items.itemId");
+		String selection = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + "<?" +
+				" AND (" + DatabaseHelper.COLUMN_ITEM_HTML + " IS NULL OR " + DatabaseHelper.COLUMN_ITEM_THUMBNAIL + " IS NULL)";
+		String[] selectionArgs = new String[] {Integer.toString(numItems)};
+		return queryBuilder.query(database.getDatabase(), projection, selection, selectionArgs, null, null, null);
 	}
 	
 	private void insertItem(ContentValues values, String category) {
@@ -218,7 +231,8 @@ public class DatabaseProvider extends ContentProvider {
 			return getItems(projection, category, sortOrder);
 		case UNDOWNLOADED_ITEMS:
 			// query the database for undownloaded items of this type
-			return null;
+			int numItems = Integer.parseInt(uri.getLastPathSegment());
+			return getUndownloadedItems(projection, numItems);
 		default:
 			throw new IllegalArgumentException("Unknown uri: " + uri.toString());
 		}
