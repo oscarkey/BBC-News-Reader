@@ -87,7 +87,7 @@ public class DatabaseProvider extends ContentProvider {
 	}
 	
 	private Cursor getItem(String[] projection, int id) {
-		String selection = DatabaseHelper.COLUMN_ITEM_ID;
+		String selection = DatabaseHelper.COLUMN_ITEM_ID + "=?";
 		String[] selectionArgs = new String[] { Integer.toString(id) };
 		return database.query(DatabaseHelper.ITEM_TABLE, projection, selection, selectionArgs, null);
 	}
@@ -98,7 +98,7 @@ public class DatabaseProvider extends ContentProvider {
 		queryBuilder.setDistinct(true);
 		queryBuilder.setTables(DatabaseHelper.ITEM_TABLE + " JOIN " + DatabaseHelper.RELATIONSHIP_TABLE + " ON " + DatabaseHelper.ITEM_TABLE + "." + 
 			DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID);
-		String selection = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_CATEGORY_NAME + "=";
+		String selection = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_CATEGORY_NAME + "=?";
 		String[] selectionArgs = new String[] {category};
 		return queryBuilder.query(database.getDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
 	}
@@ -147,8 +147,8 @@ public class DatabaseProvider extends ContentProvider {
 				selection = DatabaseHelper.COLUMN_ITEM_ID + "=?";
 				database.update(DatabaseHelper.ITEM_TABLE, values, selection, new String[] { Long.toString(id) });
 			}
+			cursor.close();
 		}
-		cursor.close();
 		
 		// associate the item with its category
 		values.clear();
@@ -215,7 +215,7 @@ public class DatabaseProvider extends ContentProvider {
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		// try and match the uri
 		switch (uriMatcher.match(uri)){
-		case ITEMS:
+		case ITEM_BY_ID:
 			// delete this item
 			int id = Integer.parseInt(uri.getLastPathSegment());
 			return deleteItem(id);
@@ -234,7 +234,7 @@ public class DatabaseProvider extends ContentProvider {
 	public Uri insert(Uri uri, ContentValues values) {
 		// try and match the uri
 		switch (uriMatcher.match(uri)) {
-		case ITEMS:
+		case ITEMS_BY_CATEGORY:
 			// insert the provided item
 			String category = uri.getLastPathSegment();
 			return insertItem(values, category);

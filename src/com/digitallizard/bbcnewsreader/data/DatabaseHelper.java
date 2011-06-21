@@ -61,7 +61,7 @@ public class DatabaseHelper {
         //return the cursor if it suitable
         if (cursor == null) {
             return null;
-        } else if (!cursor.moveToFirst()) {
+        } else if (cursor.getCount() == 0) {
             cursor.close();
             return null;
         }

@@ -60,6 +60,7 @@ public class DatabaseHandler {
 		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS_BY_CATEGORY, category);
 		ContentValues values = new ContentValues(5);
 		values.put(DatabaseHelper.COLUMN_ITEM_TITLE, title);
+		values.put(DatabaseHelper.COLUMN_ITEM_DESCRIPTION, description);
 		values.put(DatabaseHelper.COLUMN_ITEM_PUBDATE, timestamp);
 		values.put(DatabaseHelper.COLUMN_ITEM_URL, url);
 		values.put(DatabaseHelper.COLUMN_ITEM_THUMBNAIL_URL, thumbnailUrl);
@@ -200,11 +201,17 @@ public class DatabaseHandler {
 	 */
 	public NewsItem[] getItems(String category, int limit) {
 		// ask the content provider for the items
-		Uri uri = DatabaseProvider.CONTENT_URI_ITEMS;
+		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS_BY_CATEGORY, category);
 		String[] projection = new String[] {DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_TITLE, DatabaseHelper.COLUMN_ITEM_DESCRIPTION, 
 				DatabaseHelper.COLUMN_ITEM_URL, DatabaseHelper.COLUMN_ITEM_THUMBNAIL};
 		String sortOrder = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + " ASC";
 		Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder);
+		
+		//check the cursor isn't null
+		if(cursor == null){
+			//bail here, returning an empty array
+			return new NewsItem[0];
+		}
 		
 		// load the column names
 		int id = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_ID);
@@ -214,7 +221,7 @@ public class DatabaseHandler {
 		int thumbnail = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_THUMBNAIL);
 		
 		// load the items into an array
-		NewsItem[] items = new NewsItem[cursor.getCount()];
+		ArrayList<NewsItem> items = new ArrayList<NewsItem>();
 		
 		while(cursor.moveToNext() && cursor.getPosition() < limit){
 			NewsItem item = new NewsItem(); // initialize a new item			
@@ -223,12 +230,12 @@ public class DatabaseHandler {
 			item.setDescription(cursor.getString(description));
 			item.setUrl(cursor.getString(url));
 			item.setThumbnailBytes(cursor.getBlob(thumbnail));
-			items[cursor.getCount()] = item; // add this item to the array
+			items.add(item); // add this item to the array
 		}
 		
 		cursor.close();
 		
-		return items;
+		return items.toArray(new NewsItem[items.size()]);
 	}
 	
 	/**
@@ -244,10 +251,10 @@ public class DatabaseHandler {
 		boolean[] enabledCategories = new boolean[cursor.getCount()];
 		while (cursor.moveToNext()) {
 			if (cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_ENABLED)) == 0) {
-				enabledCategories[cursor.getPosition() - 1] = false;
+				enabledCategories[cursor.getPosition()] = false;
 			}
 			else {
-				enabledCategories[cursor.getPosition() - 1] = true;
+				enabledCategories[cursor.getPosition()] = true;
 			}
 		}
 		cursor.close();
@@ -272,9 +279,8 @@ public class DatabaseHandler {
 		// loop through and save these categories to an array
 		String[][] categories = new String[2][cursor.getCount()];
 		while (cursor.moveToNext()) {
-			Log.v("database", "name: "+cursor.getString(name)+" url:"+cursor.getString(url));
-			categories[0][cursor.getPosition() - 1] = cursor.getString(url);
-			categories[1][cursor.getPosition() - 1] = cursor.getString(name);
+			categories[0][cursor.getPosition()] = cursor.getString(url);
+			categories[1][cursor.getPosition()] = cursor.getString(name);
 		}
 		cursor.close();
 		
