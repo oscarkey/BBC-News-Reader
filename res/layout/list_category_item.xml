@@ -20,18 +20,21 @@ android:paddingBottom="0.5sp">
 		android:layout_span="2"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:padding="2dp"
+		android:padding="3dp"
 		android:textSize="17sp"/>
 		<TextView
 		android:text="more..."
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:gravity="right"
+		android:padding="1dp"
 		android:textSize="15sp"/>
 	</TableRow>
 	<TableRow android:id="@+id/rowNewsItem"
 	android:orientation="horizontal"
-	android:padding="2dp"
+	android:paddingTop="2dp"
+	android:paddingLeft="2dp"
+	android:paddingRight="2dp"
 	android:background="#3D3D3D"
 	android:gravity="center_horizontal">
 	</TableRow>

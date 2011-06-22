@@ -135,8 +135,6 @@ public class CategoryActivity extends Activity {
     }
 	
 	public void onDestroy(){
-		//shutdown the database
-		database.finish();
 		//shutdown the list adapter
 		((ItemAdapter)listView.getAdapter()).finish();
 		//disconnect the service
@@ -156,7 +154,7 @@ public class CategoryActivity extends Activity {
 		((TextView)findViewById(R.id.categoryTitle)).setText(title);
 		
 		//load in news items
-		database = new DatabaseHandler(this, 0); //clear old date doesn't matter here
+		database = new DatabaseHandler(this); //clear old date doesn't matter here
 		items = new ArrayList<NewsItem>(Arrays.asList(database.getItems(title, 50))); //specify a high limit for the number of items
 		listView.setAdapter(new ItemAdapter(this, R.layout.category_item, items));
 		listView.setChoiceMode(ListView.CHOICE_MODE_NONE);
