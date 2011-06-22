@@ -132,19 +132,9 @@ public class ResourceService extends Service implements ResourceInterface {
 			//set the flag saying that we are loading
 			loadInProgress = true;
 			//retrieve the active category urls
-			String[] urls = getDatabase().getEnabledCategories()[0];
-			//work out the names
-			String[] names = new String[urls.length];
-			String[] allNames = getResources().getStringArray(R.array.category_names);
-			String[] allUrls = getResources().getStringArray(R.array.catergory_rss_urls);
-			//FIXME very inefficient, should be done by database
-			for(int i = 0; i < allUrls.length; i++){
-				for(int j = 0; j < urls.length; j++){
-					if(allUrls[i].equals(urls[j])){
-						names[j] = allNames[i];
-					}
-				}
-			}
+			String[][] enabledCategories = getDatabase().getEnabledCategories();
+			String[] urls = enabledCategories[0];
+			String[] names = enabledCategories[1];
 			//start the RSS Manager
 			rssManager.load(names, urls);
 		}
@@ -243,7 +233,7 @@ public class ResourceService extends Service implements ResourceInterface {
 			String thumbUrl = null;
 			if(items[i].getThumbnails().size() == 2)
 				thumbUrl = items[i].getThumbnails().get(1).toString();
-			getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), items[i].getLink().toString(), items[i].getPubDate(), category, thumbUrl, i);
+			getDatabase().insertItem(items[i].getTitle(), items[i].getDescription(), category, items[i].getPubDate(), items[i].getLink().toString(), thumbUrl, i);
 		}
 		//send a message to the gui to tell it that we have loaded the category
 		Bundle bundle = new Bundle();
@@ -266,57 +256,57 @@ public class ResourceService extends Service implements ResourceInterface {
 	}
 	
 	public synchronized void rssLoadComplete(boolean successful){
-		//check if the load was successful before continuing
-		if(successful){
-			updateLastLoadTime(); //save last load time
-			//tell the gui
-			sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
-			
-			//add unloaded items to the download queue
-			totalItemsToDownload = 0;
-			itemsDownloaded = 0;
-			int itemLoadLimit = settings.getInt("itemLoadLimit", ReaderActivity.DEFAULT_ITEM_LOAD_LIMIT); //the limit for the number of items to load
-			//find out which categories are enabled
-			String[] categories = database.getEnabledCategories()[1];
-			for(int i = 0; i < categories.length; i++){
-				//load the unloaded html for this category
-				Integer[] htmlIds = database.getUndownloaded(categories[i], DatabaseHandler.COLUMN_HTML, itemLoadLimit);
-				for(int t = 0; t < htmlIds.length; t++){
-					String url = database.getUrl(htmlIds[t]);
-					webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, htmlIds[t]);
-				}
-				//load the unloaded thumbnails for this category
-				Integer[] thumbIds = database.getUndownloaded(categories[i], DatabaseHandler.COLUMN_THUMBNAIL, itemLoadLimit);
-				for(int t = 0; t < thumbIds.length; t++){
-					String url = database.getThumbnailUrl(thumbIds[t]);
-					//check if there is a thumbnail url, if so load it
-					if(url == null)
-					{
-						database.addThumbnail(thumbIds[t], ReaderActivity.NO_THUMBNAIL_URL_CODE);//Set thumbnail to no thumbnail
-						//report that the thumbnail has been loaded so it can be displayed
-						Bundle bundle = new Bundle();
-						bundle.putInt("id", thumbIds[t]);
-						sendMsgToAll(MSG_THUMB_LOADED, bundle);
-					}
-					else
-					{
-						webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, thumbIds[t]);
-					}
-				}
-				
-				//increment the number of items to download
-				totalItemsToDownload += htmlIds.length + thumbIds.length;
+		// check if the load was successful before continuing
+		if(!successful){
+			fullLoadComplete(false); //end the load here, it was not successful
+			return; //bail
+		}
+		
+		updateLastLoadTime(); //save last load time
+		//tell the gui
+		sendMsgToAll(MSG_RSS_LOAD_COMPLETE, null);
+		
+		
+		//add unloaded items to the download queue
+		totalItemsToDownload = 0;
+		itemsDownloaded = 0;
+		
+		// query the database to find out which items to load
+		int itemLoadLimit = settings.getInt("itemLoadLimit", ReaderActivity.DEFAULT_ITEM_LOAD_LIMIT); //the limit for the number of items to load
+		Integer[][] items = database.getUndownloaded(itemLoadLimit);
+		
+		// load the undownloaded articles
+		Integer[] htmlIds = items[DatabaseHandler.COLUMN_UNDOWNLOADED_ARTICLES];
+		for(int t = 0; t < htmlIds.length; t++){
+			String url = database.getUrl(htmlIds[t]);
+			webManager.addToQueue(url, WebManager.ITEM_TYPE_HTML, htmlIds[t]);
+		}
+		// load the undownloaded thumbnails
+		Integer[] thumbIds = items[DatabaseHandler.COLUMN_UNDOWNLOADED_ARTICLES];
+		for(int t = 0; t < thumbIds.length; t++){
+			String url = database.getThumbnailUrl(thumbIds[t]);
+			//check if there is a thumbnail url, if so load it
+			if(url == null)
+			{
+				database.addThumbnail(thumbIds[t], ReaderActivity.NO_THUMBNAIL_URL_CODE);//Set thumbnail to no thumbnail
+				//report that the thumbnail has been loaded so it can be displayed
+				Bundle bundle = new Bundle();
+				bundle.putInt("id", thumbIds[t]);
+				sendMsgToAll(MSG_THUMB_LOADED, bundle);
 			}
-			
-			reportItemsToDownload();
-			
-			//if we didn't have to add anything, report the load as fully complete
-			if(webManager.isQueueEmpty()){
-				fullLoadComplete(true);
+			else
+			{
+				webManager.addToQueue(url, WebManager.ITEM_TYPE_THUMB, thumbIds[t]);
 			}
 		}
-		else{
-			fullLoadComplete(false); //end the load here, it was not successful
+		
+		// set the items to download
+		totalItemsToDownload = htmlIds.length + thumbIds.length;
+		reportItemsToDownload();
+		
+		//if we didn't have to add anything, report the load as fully complete
+		if(webManager.isQueueEmpty()){
+			fullLoadComplete(true);
 		}
 	}
 	
@@ -389,11 +379,9 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 		if(database == null){
 			//load the database
-			int clearOutAge = settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE); //load user preference
-			setDatabase(new DatabaseHandler(this, clearOutAge));
+			setDatabase(new DatabaseHandler(this));
 			//create tables in the database if needed
 			if(!getDatabase().isCreated()){
-				getDatabase().createTables();
 				getDatabase().addCategoriesFromXml();
 	        }
 		}
@@ -455,7 +443,6 @@ public class ResourceService extends Service implements ResourceInterface {
 	@Override
 	public void onDestroy(){
 		this.unregisterReceiver(broadcastReceiver);
-		database.finish(); //shutdown the database
 		super.onDestroy();
 	}
 	
