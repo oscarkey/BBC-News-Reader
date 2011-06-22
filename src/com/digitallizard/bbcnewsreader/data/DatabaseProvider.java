@@ -9,7 +9,6 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.util.Log;
 
 public class DatabaseProvider extends ContentProvider {
 	
@@ -122,59 +121,71 @@ public class DatabaseProvider extends ContentProvider {
 		values.remove(DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY);
 		String title = values.getAsString(DatabaseHelper.COLUMN_ITEM_TITLE);
 		
-		// query to see if this item is already in the database
-		String[] projection = new String[] { DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_TITLE };
-		String selection = DatabaseHelper.COLUMN_ITEM_URL + "=?";
-		String[] selectionArgs = new String[] { values.getAsString(DatabaseHelper.COLUMN_ITEM_URL) };
-		Cursor cursor = database.query(DatabaseHelper.ITEM_TABLE, projection, selection, selectionArgs, null);
+		// lock the database
+		database.beginTransaction();
+		try {
 		
-		// check if any rows were returned, null means no rows
-		if (cursor == null) {
-			// insert the items
-			database.insert(DatabaseHelper.ITEM_TABLE, values); // perform the insert operation
-		}
-		else if (cursor.getCount() == 1) {
-			// this item exists
-			cursor.moveToFirst();
-			id = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_ID)); // save the id
-			// test to see if the title has changed
-			if (!cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_TITLE)).equals(title)) {
-				values.clear();
-				// update the row
-				values.put(DatabaseHelper.COLUMN_ITEM_TITLE, title);
-				values.putNull(DatabaseHelper.COLUMN_ITEM_HTML);
-				values.putNull(DatabaseHelper.COLUMN_ITEM_THUMBNAIL);
-				selection = DatabaseHelper.COLUMN_ITEM_ID + "=?";
-				database.update(DatabaseHelper.ITEM_TABLE, values, selection, new String[] { Long.toString(id) });
+			// query to see if this item is already in the database
+			String[] projection = new String[] { DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_TITLE };
+			String selection = DatabaseHelper.COLUMN_ITEM_URL + "=?";
+			String[] selectionArgs = new String[] { values.getAsString(DatabaseHelper.COLUMN_ITEM_URL) };
+			Cursor cursor = database.query(DatabaseHelper.ITEM_TABLE, projection, selection, selectionArgs, null);
+			
+			// check if any rows were returned, null means no rows
+			if (cursor == null) {
+				// insert the items
+				id = database.insert(DatabaseHelper.ITEM_TABLE, values); // perform the insert operation
 			}
-			cursor.close();
-		}
-		
-		// associate the item with its category
-		values.clear();
-		values.put(DatabaseHelper.COLUMN_RELATIONSHIP_CATEGORY_NAME, category);
-		values.put(DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID, id);
-		values.put(DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY, priority);
-		
-		// insert it, if the required method doesn't exist, use the old one
-		if (methodInsertWithConflictExists) {
-			// FIXME performance: shouldn't replace every time
-			WrapBackwards.insertWithOnConflict(database, DatabaseHelper.RELATIONSHIP_TABLE, values, SQLiteDatabase.CONFLICT_REPLACE);
-		}
-		else {
-			// use an alternative method
-			try {
-				database.insertOrThrow(DatabaseHelper.RELATIONSHIP_TABLE, values);
-			} catch (SQLiteConstraintException e) {
-				// this item obviously already exists, replace it instead
-				database.replace(DatabaseHelper.RELATIONSHIP_TABLE, values);
-			} catch (SQLException e) {
-				// TODO handle this type of exception
+			else if (cursor.getCount() == 1) {
+				// this item exists
+				cursor.moveToFirst();
+				id = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_ID)); // save the id
+				// test to see if the title has changed
+				if (!cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_TITLE)).equals(title)) {
+					values.clear();
+					// update the row
+					values.put(DatabaseHelper.COLUMN_ITEM_TITLE, title);
+					values.putNull(DatabaseHelper.COLUMN_ITEM_HTML);
+					values.putNull(DatabaseHelper.COLUMN_ITEM_THUMBNAIL);
+					selection = DatabaseHelper.COLUMN_ITEM_ID + "=?";
+					database.update(DatabaseHelper.ITEM_TABLE, values, selection, new String[] { Long.toString(id) });
+				}
+				cursor.close();
 			}
+			
+			// associate the item with its category
+			values.clear();
+			values.put(DatabaseHelper.COLUMN_RELATIONSHIP_CATEGORY_NAME, category);
+			values.put(DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID, id);
+			values.put(DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY, priority);
+			
+			// insert it, if the required method doesn't exist, use the old one
+			if (methodInsertWithConflictExists) {
+				// FIXME performance: shouldn't replace every time
+				WrapBackwards.insertWithOnConflict(database, DatabaseHelper.RELATIONSHIP_TABLE, values, SQLiteDatabase.CONFLICT_REPLACE);
+			}
+			else {
+				// use an alternative method
+				try {
+					database.insertOrThrow(DatabaseHelper.RELATIONSHIP_TABLE, values);
+				} catch (SQLiteConstraintException e) {
+					// this item obviously already exists, replace it instead
+					database.replace(DatabaseHelper.RELATIONSHIP_TABLE, values);
+				} catch (SQLException e) {
+					// TODO handle this type of exception
+				}
+			}
+			
+			// mark the transaction as successful
+			database.setTransactionSuccessful();
+			
+			//return a uri to the new item
+			return Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Long.toString(id));
+			
+		} finally {
+			// end the transaction, unlocking that database
+			database.endTransaction();
 		}
-		
-		//return a uri to the new item
-		return Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Long.toString(id));
 	}
 	
 	private int updateItem(ContentValues values, int id) {

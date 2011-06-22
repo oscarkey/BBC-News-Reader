@@ -102,6 +102,18 @@ public class DatabaseHelper {
     	return getDatabase().delete(table, selection, selectionArgs);
     }
     
+    public void beginTransaction(){
+    	getDatabase().beginTransaction();
+    }
+    
+    public void setTransactionSuccessful(){
+    	getDatabase().setTransactionSuccessful();
+    }
+    
+    public void endTransaction(){
+    	getDatabase().endTransaction();
+    }
+    
     public SQLiteDatabase getDatabase(){
     	return databaseOpenHelper.getWritableDatabase();
     }
