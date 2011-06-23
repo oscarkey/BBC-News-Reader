@@ -227,6 +227,9 @@ public class ResourceService extends Service implements ResourceInterface {
 	 * Called when an RSS feed has loaded
 	 * @param item The item that has been loaded */
 	public synchronized void categoryRssLoaded(RSSItem[] items, String category){
+		// clear the priorities for this category to prevent old items hanging around
+		database.clearPriorities(category);
+		
 		//insert the items into the database
 		for(int i = 0; i < items.length; i++){
 			//check there are some thumbnails
