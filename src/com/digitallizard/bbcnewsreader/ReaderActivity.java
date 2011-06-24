@@ -470,7 +470,9 @@ public class ReaderActivity extends Activity {
         Eula.show(this); //show the eula
         
         //start the service
-        doBindService(); //loads the service
+        Intent intent = new Intent(this, ResourceService.class);
+        this.startService(intent);
+        doBindService(); // binds the service to this activity to allow communication
     }
     
     public void onResume(){

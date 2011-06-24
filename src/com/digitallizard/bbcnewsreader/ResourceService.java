@@ -423,6 +423,7 @@ public class ResourceService extends Service implements ResourceInterface {
 				loadInterval = AlarmManager.INTERVAL_HALF_DAY;
 			else
 				loadInterval = AlarmManager.INTERVAL_HOUR;
+			
 			//register an alarm to go off and start loads
 			Calendar calendar = Calendar.getInstance();
 			calendar.add(Calendar.HOUR, 1); //move the calendar to 30 minutes in the future
