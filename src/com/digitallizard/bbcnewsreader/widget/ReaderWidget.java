@@ -25,7 +25,7 @@ public class ReaderWidget extends AppWidgetProvider {
 		view.removeAllViews(R.id.widgetFlipper);
 		
 		// loop through and add the latest news to the item
-		for(int i = 0; i < NUM_ITEMS; i++){
+		for(int i = 0; i < NUM_ITEMS && i < items.length; i++){
 			// create a view for this item
 			RemoteViews item = new RemoteViews(context.getPackageName(), R.layout.widget_item);
 			// set the text
