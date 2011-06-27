@@ -138,7 +138,9 @@ public class DatabaseHandler {
 		// query the content provider for undownloaded items
 		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_UNDOWNLOADED_ITEMS, Integer.toString(numItems));
 		String[] projection = new String[] {DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_HTML, DatabaseHelper.COLUMN_ITEM_THUMBNAIL};
-		Cursor cursor = contentResolver.query(uri, projection, null, null, null);
+		String sortOrder = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + " ASC, " +
+		DatabaseHelper.ITEM_TABLE + "." + DatabaseHelper.COLUMN_ITEM_PUBDATE + " DESC";
+		Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder);
 		
 		// get the column name index
 		int id = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_ID);
@@ -203,7 +205,8 @@ public class DatabaseHandler {
 		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS_BY_CATEGORY, category);
 		String[] projection = new String[] {DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_TITLE, DatabaseHelper.COLUMN_ITEM_DESCRIPTION, 
 				DatabaseHelper.COLUMN_ITEM_URL, DatabaseHelper.COLUMN_ITEM_THUMBNAIL};
-		String sortOrder = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + " ASC";
+		String sortOrder = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + " ASC, " +
+				DatabaseHelper.ITEM_TABLE + "." + DatabaseHelper.COLUMN_ITEM_PUBDATE + " DESC";
 		Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder);
 		
 		//check the cursor isn't null
@@ -329,6 +332,15 @@ public class DatabaseHandler {
 			Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_CATEGORY_BY_ID, Integer.toString(i + 1));
 			contentResolver.update(uri, values, null, null);
 		}
+	}
+	
+	public void clearPriorities(String category){
+		Uri uri = DatabaseProvider.CONTENT_URI_RELATIONSHIPS;
+		ContentValues values = new ContentValues(1);
+		values.put(DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY, 80); //specify a high prioirity to hide it
+		String selection = DatabaseHelper.COLUMN_RELATIONSHIP_CATEGORY_NAME + "=?";
+		String[] selectionArgs = new String[] {category};
+		contentResolver.update(uri, values, selection, selectionArgs);
 	}
 	
 	/**

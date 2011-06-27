@@ -14,6 +14,7 @@ android:layout_height="wrap_content"
 android:gravity="center_horizontal"
 android:paddingLeft="2dp"
 android:paddingRight="2dp"
+android:paddingBottom="5dp"
 android:onClick="itemClicked">
 	<RelativeLayout
 	android:layout_width="100dp"
@@ -21,7 +22,7 @@ android:onClick="itemClicked">
 		<ImageView android:id="@+id/imageNewsItem"
 		android:src="@drawable/no_thumb_grey"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"/>
+		android:layout_height="70dp"/>
 		<TextView android:id="@+id/textNewsItemTitle"
 		android:text="No Title"
 		android:maxLines="4"

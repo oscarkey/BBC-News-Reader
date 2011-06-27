@@ -23,6 +23,7 @@ public class DatabaseProvider extends ContentProvider {
 	public static final Uri CONTENT_URI_ITEMS = Uri.parse("content://com.digitallizard.bbcnewsreader/items");
 	public static final Uri CONTENT_URI_ITEMS_BY_CATEGORY = Uri.withAppendedPath(CONTENT_URI_ITEMS, "category");
 	public static final Uri CONTENT_URI_UNDOWNLOADED_ITEMS = Uri.withAppendedPath(CONTENT_URI_ITEMS, "undownloaded");
+	public static final Uri CONTENT_URI_RELATIONSHIPS = Uri.parse("content://com.digitallizard.bbcnewsreader/relationships");
 	
 	// uri matcher helpers
 	private static final int CATEGORIES = 1;
@@ -33,6 +34,7 @@ public class DatabaseProvider extends ContentProvider {
 	private static final int ITEM_BY_ID = 5;
 	private static final int ITEMS_BY_CATEGORY = 3;
 	private static final int UNDOWNLOADED_ITEMS = 6;
+	private static final int RELATIONSHIPS = 9;
 	
 	// uri matcher
 	private static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -45,6 +47,7 @@ public class DatabaseProvider extends ContentProvider {
 		uriMatcher.addURI(AUTHORITY, "items/#", ITEM_BY_ID);
 		uriMatcher.addURI(AUTHORITY, "items/category/*", ITEMS_BY_CATEGORY);
 		uriMatcher.addURI(AUTHORITY, "items/undownloaded/*", UNDOWNLOADED_ITEMS);
+		uriMatcher.addURI(AUTHORITY, "relationships",RELATIONSHIPS);
 	}
 	
 	/** variables **/
@@ -206,6 +209,10 @@ public class DatabaseProvider extends ContentProvider {
 		return database.update(DatabaseHelper.CATEGORY_TABLE, values, selection, selectionArgs);
 	}
 	
+	private int updateRelationships(ContentValues values, String selection, String[] selectionArgs){
+		return database.update(DatabaseHelper.RELATIONSHIP_TABLE, values, selection, selectionArgs);
+	}
+	
 	private int deleteItem(int id){
 		// delete this item from the item table
 		String selection = DatabaseHelper.COLUMN_ITEM_ID + "=?";
@@ -300,6 +307,8 @@ public class DatabaseProvider extends ContentProvider {
 		case CATEGORY_BY_NAME:
 			String name = uri.getLastPathSegment();
 			return updateCategory(values, name);
+		case RELATIONSHIPS:
+			return updateRelationships(values, selection, selectionArgs);
 		default:
 			throw new IllegalArgumentException("Unknown uri: " + uri.toString());
 		}
