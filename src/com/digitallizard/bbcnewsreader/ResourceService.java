@@ -318,6 +318,12 @@ public class ResourceService extends Service implements ResourceInterface {
 		loadInProgress = false;
 		//send a message saying that we have loaded
 		sendMsgToAll(MSG_FULL_LOAD_COMPLETE, null);
+		
+		// update the widget, if the load was sucessful
+		if(successful){
+			Intent intent = new Intent("android.appwidget.action.APPWIDGET_UPDATE");
+			sendBroadcast(intent);
+		}
 	}
 	
 	public synchronized void itemDownloadComplete(boolean specific, int itemId, int type, Object download){
