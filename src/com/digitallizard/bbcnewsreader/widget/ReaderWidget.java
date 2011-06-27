@@ -1,4 +1,4 @@
-package com.digitallizard.bbcnewsreader;
+package com.digitallizard.bbcnewsreader.widget;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;

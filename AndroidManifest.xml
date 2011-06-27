@@ -26,9 +26,9 @@
 <activity android:name="CategoryActivity" android:label="@string/app_name"></activity>
 <activity android:name="SettingsActivity"></activity>
 <provider android:authorities="com.digitallizard.bbcnewsreader" android:name=".data.DatabaseProvider"></provider>
-<receiver android:label="@string/app_name" android:name="ReaderWidget">
+<receiver android:label="@string/app_name" android:name="com.digitallizard.bbcnewsreader.widget.ReaderWidget">
     <intent-filter>
-        <action android:name="com.digitallizard.action.APPWIDGET_UPDATE"></action>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE"></action>
     </intent-filter>
     <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_provider"></meta-data>
 </receiver>
