@@ -1,13 +1,17 @@
 package com.digitallizard.bbcnewsreader.widget;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.RemoteViews;
 
+import com.digitallizard.bbcnewsreader.ArticleActivity;
 import com.digitallizard.bbcnewsreader.NewsItem;
 import com.digitallizard.bbcnewsreader.R;
+import com.digitallizard.bbcnewsreader.ReaderActivity;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
 public class ReaderWidget extends AppWidgetProvider {
@@ -21,6 +25,11 @@ public class ReaderWidget extends AppWidgetProvider {
 		// create references to the required view
 		RemoteViews view = new RemoteViews(context.getPackageName(), R.layout.widget);
 		
+		// make the bbc news logo clickable
+		Intent appIntent = new Intent(context, ReaderActivity.class);
+		PendingIntent appPendingIntent = PendingIntent.getActivity(context, 0, appIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
+		view.setOnClickPendingIntent(R.id.widgetLogo, appPendingIntent);
+		
 		// remote existing views from the flipper
 		view.removeAllViews(R.id.widgetFlipper);
 		
@@ -31,6 +40,13 @@ public class ReaderWidget extends AppWidgetProvider {
 			// set the text
 			item.setTextViewText(R.id.widgetItemTitle, items[i].getTitle());
 			item.setTextViewText(R.id.widgetItemDesc, items[i].getDescription());
+			
+			// make the item clickable
+			Intent itemIntent = new Intent(context, ArticleActivity.class);
+			itemIntent.putExtra("id", items[i].getId());
+			PendingIntent itemPendingIntent = PendingIntent.getActivity(context, i, itemIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
+			item.setOnClickPendingIntent(R.id.widgetItemTitle, itemPendingIntent);
+			item.setOnClickPendingIntent(R.id.widgetItemDesc, itemPendingIntent);
 			
 			// add this item to the flipper
 			view.addView(R.id.widgetFlipper, item);
