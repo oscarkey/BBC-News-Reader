@@ -17,8 +17,11 @@ android:background="@drawable/widget_background">
 	android:layout_height="55dp"
 	android:scaleType="fitCenter"
 	android:src="@drawable/icon"/>
-  	<TextView
-  	android:layout_width="match_parent"
-  	android:layout_height="match_parent"
-  	android:text="Widget"/>
+	<ViewFlipper android:id="@+id/widgetFlipper"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:padding="10dp"
+	android:autoStart="true"
+	android:flipInterval="5000">
+	</ViewFlipper>
 </LinearLayout>
