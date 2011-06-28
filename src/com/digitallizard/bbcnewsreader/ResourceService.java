@@ -14,7 +14,9 @@ import org.mcsoxford.rss.RSSItem;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -33,6 +35,7 @@ import android.util.Log;
 
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.digitallizard.bbcnewsreader.resource.web.WebManager;
+import com.digitallizard.bbcnewsreader.widget.ReaderWidget;
 
 public class ResourceService extends Service implements ResourceInterface {
 	/* variables */
@@ -311,6 +314,19 @@ public class ResourceService extends Service implements ResourceInterface {
 		if(webManager.isQueueEmpty()){
 			fullLoadComplete(true);
 		}
+		
+		// update the widget, if the load was successful
+		if(successful){
+			AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
+			ComponentName provider = new ComponentName(this, ReaderWidget.class);
+			int[] ids = widgetManager.getAppWidgetIds(provider);
+			// only broadcast an update request if there are some active widgets
+			if(ids.length > 0){
+				Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+				intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+				sendBroadcast(intent);
+			}
+		}
 	}
 	
 	public synchronized void fullLoadComplete(boolean successful){
@@ -318,12 +334,6 @@ public class ResourceService extends Service implements ResourceInterface {
 		loadInProgress = false;
 		//send a message saying that we have loaded
 		sendMsgToAll(MSG_FULL_LOAD_COMPLETE, null);
-		
-		// update the widget, if the load was sucessful
-		if(successful){
-			Intent intent = new Intent("android.appwidget.action.APPWIDGET_UPDATE");
-			sendBroadcast(intent);
-		}
 	}
 	
 	public synchronized void itemDownloadComplete(boolean specific, int itemId, int type, Object download){
