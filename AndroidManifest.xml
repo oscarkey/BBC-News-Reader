@@ -37,6 +37,11 @@
     </intent-filter>
     <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_provider"></meta-data>
 </receiver>
+<activity android:name="com.digitallizard.bbcnewsreader.widget.WidgetConfigActivity">
+    <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"></action>
+    </intent-filter>
+</activity>
 </application>
 
 

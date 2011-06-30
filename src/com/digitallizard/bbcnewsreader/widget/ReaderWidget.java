@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.widget.RemoteViews;
 
 import com.digitallizard.bbcnewsreader.ArticleActivity;
@@ -16,11 +17,15 @@ import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
 public class ReaderWidget extends AppWidgetProvider {
 	private static final int NUM_ITEMS = 5; // the number of items to flip through
+	public static final String PREF_KEY_CATEGORY = "widget_category_"; // key for the category
+	public static final String DEFAULT_CATEGORY = "Headlines"; // the default category
 	
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds){
 		// retrieve the news from the database
 		DatabaseHandler database = new DatabaseHandler(context);
-		NewsItem[] items = database.getItems("Headlines", NUM_ITEMS);
+		SharedPreferences settings = context.getSharedPreferences(ReaderActivity.PREFS_FILE_NAME, Context.MODE_PRIVATE);
+		String category = settings.getString(PREF_KEY_CATEGORY, DEFAULT_CATEGORY);
+		NewsItem[] items = database.getItems(category, NUM_ITEMS);
 		
 		// create references to the required view
 		RemoteViews view = new RemoteViews(context.getPackageName(), R.layout.widget);
