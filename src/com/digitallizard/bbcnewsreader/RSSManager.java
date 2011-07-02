@@ -9,7 +9,9 @@ package com.digitallizard.bbcnewsreader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.conn.ConnectTimeoutException;
 import org.mcsoxford.rss.RSSException;
+import org.mcsoxford.rss.RSSFault;
 import org.mcsoxford.rss.RSSFeed;
 import org.mcsoxford.rss.RSSItem;
 import org.mcsoxford.rss.RSSReader;
@@ -75,6 +77,11 @@ public class RSSManager implements Runnable {
 				} catch (RSSException e) {
 					//report the error to the resource service
 					resourceInterface.reportError(false, "The rss feed could not be read.", e.toString());
+					//give up loading
+					stopLoading();
+				} catch (RSSFault e){
+					//report the error to the resource service
+					resourceInterface.reportError(false, "The rss feed could not be read. Check your internet connection.", e.toString());
 					//give up loading
 					stopLoading();
 				}
