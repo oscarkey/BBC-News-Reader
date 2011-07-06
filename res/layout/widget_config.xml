@@ -32,7 +32,6 @@ android:layout_height="match_parent">
 			android:layout_width="100dp"
 			android:layout_height="40dp"
 			android:textSize="17sp"
-			android:onClick="saveClicked"
 			android:text="Save"/>
 		</RelativeLayout>
 	</LinearLayout>
