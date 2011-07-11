@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -60,8 +59,8 @@ public class WidgetConfigActivity extends Activity {
 				// store the selected category
 				String chosenCategory = enabledCategories[(int)listView.getCheckedItemPosition()];
 				Editor editor = settings.edit();
-				Log.v("widget config", "putting "+chosenCategory+" into "+ReaderWidget.PREF_KEY_CATEGORY + widgetId);
 				editor.putString(ReaderWidget.PREF_KEY_CATEGORY + widgetId, chosenCategory);
+				editor.commit();
 				
 				// update the widget
 				Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
