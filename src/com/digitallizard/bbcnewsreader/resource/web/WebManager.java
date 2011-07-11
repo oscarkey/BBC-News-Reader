@@ -4,7 +4,9 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
+import com.digitallizard.bbcnewsreader.ReaderActivity;
 import com.digitallizard.bbcnewsreader.ResourceInterface;
+import com.digitallizard.bbcnewsreader.ResourceService;
 
 public class WebManager implements Runnable {
 	/* constants */
@@ -73,7 +75,8 @@ public class WebManager implements Runnable {
 			numErrors ++; //increment the number of errors
 			if(numErrors > ERROR_FAIL_THRESHOLD){
 				//report the error
-				handler.reportError(false, "There was an error retrieving articles.", e.toString());
+				//FIXME need to work out if internet error or not
+				handler.reportError(ReaderActivity.ERROR_TYPE_INTERNET, "There was an error retrieving articles.", e.toString());
 				stopDownload(); //give up loading
 			}
 		}
@@ -89,7 +92,8 @@ public class WebManager implements Runnable {
 			numErrors ++; //increment the number of errors
 			if(numErrors > ERROR_FAIL_THRESHOLD){
 				//report the error
-				handler.reportError(false, "There was an error retrieving thumbnails.", e.toString());
+				//FIXME need to work out if internet error or not
+				handler.reportError(ReaderActivity.ERROR_TYPE_INTERNET, "There was an error retrieving thumbnails.", e.toString());
 				stopDownload(); //give up loading
 			}
 		}
@@ -105,7 +109,7 @@ public class WebManager implements Runnable {
 			numErrors ++; //increment the number of errors
 			if(numErrors > ERROR_FAIL_THRESHOLD){
 				//report the error
-				handler.reportError(false, "There was an error retrieving images.", e.toString());
+				handler.reportError(ReaderActivity.ERROR_TYPE_INTERNET, "There was an error retrieving images.", e.toString());
 				e.printStackTrace();
 			}
 		}

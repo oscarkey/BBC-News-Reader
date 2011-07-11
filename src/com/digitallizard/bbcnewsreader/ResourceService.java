@@ -64,7 +64,9 @@ public class ResourceService extends Service implements ResourceInterface {
 	static final int MSG_RSS_LOAD_COMPLETE = 10;
 	static final int MSG_UPDATE_LOAD_PROGRESS = 18;
 	static final int MSG_ERROR = 7; //help! An error occurred
-	static final int MSG_NO_INTERNET = 17; //sent when the internet has failed
+	static final String KEY_ERROR_TYPE = "type";
+	static final String KEY_ERROR_MESSAGE = "message";
+	static final String KEY_ERROR_ERROR = "error";
 	static final String ACTION_LOAD = "com.digitallizard.bbcnewsreader.action.LOAD_NEWS";
 	
 	//the handler class to process new messages
@@ -139,8 +141,8 @@ public class ResourceService extends Service implements ResourceInterface {
 			rssManager.load(names, urls);
 		}
 		else{
-			//report that there is no internet connection
-			sendMsgToAll(MSG_NO_INTERNET, null);
+			// report that there is no internet connection
+			reportError(ReaderActivity.ERROR_TYPE_INTERNET, "There is no internet connection.", null);
 		}
 	}
 	
@@ -244,18 +246,14 @@ public class ResourceService extends Service implements ResourceInterface {
 		sendMsgToAll(MSG_CATEGORY_LOADED, bundle);
 	}
 	
-	public synchronized void reportError(boolean fatal, String msg, String error){
+	public synchronized void reportError(int type, String msg, String error){
 		//an error has occurred, send a message to the gui
 		//this will display something useful to the user
 		Bundle bundle = new Bundle();
-		bundle.putBoolean("fatal", fatal);
-		bundle.putString("msg", msg);
-		bundle.putString("error", error);
+		bundle.putInt(KEY_ERROR_TYPE, type);
+		bundle.putString(KEY_ERROR_MESSAGE, msg);
+		bundle.putString(KEY_ERROR_ERROR, error);
 		sendMsgToAll(MSG_ERROR, bundle);
-		if(!isOnline()){
-			//if we are not online, this may be the cause of the error
-			sendMsgToAll(MSG_NO_INTERNET, null);
-		}
 	}
 	
 	public synchronized void rssLoadComplete(boolean successful){

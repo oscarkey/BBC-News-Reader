@@ -75,13 +75,15 @@ public class RSSManager implements Runnable {
 					//loop through the items and send them to the parent service
 					resourceInterface.categoryRssLoaded((RSSItem[])items.toArray(new RSSItem[items.size()]), names[i]);
 				} catch (RSSException e) {
+					//FIXME not a good way to handle these errors, will be fixed by new RSSManager
 					//report the error to the resource service
-					resourceInterface.reportError(false, "The rss feed could not be read.", e.toString());
+					resourceInterface.reportError(ReaderActivity.ERROR_TYPE_GENERAL, "The rss feed could not be read.", e.toString());
 					//give up loading
 					stopLoading();
 				} catch (RSSFault e){
+					//FIXME not a good way to handle these errors, will be fixed by new RSSManager
 					//report the error to the resource service
-					resourceInterface.reportError(false, "The rss feed could not be read. Check your internet connection.", e.toString());
+					resourceInterface.reportError(ReaderActivity.ERROR_TYPE_INTERNET, "The rss feed could not be read. Check your internet connection.", e.toString());
 					//give up loading
 					stopLoading();
 				}
