@@ -49,6 +49,7 @@ class RSSParser implements RSSParserSPI {
    * @return in-memory representation of RSS feed
    * @throws RSSFault if an unrecoverable parse error occurs
    */
+  @Override
   public RSSFeed parse(InputStream feed) {
     try {
       // Since SAXParserFactory implementations are not guaranteed to be

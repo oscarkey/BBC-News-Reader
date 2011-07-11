@@ -93,6 +93,7 @@ class RSSHandler extends org.xml.sax.helpers.DefaultHandler {
    * {@link #item} is set.
    */
   private final Setter SET_TITLE = new ContentSetter() {
+    @Override
     public void set(String title) {
       if (item == null) {
         feed.setTitle(title);
@@ -109,6 +110,7 @@ class RSSHandler extends org.xml.sax.helpers.DefaultHandler {
    * {@link #item} is set.
    */
   private final Setter SET_DESCRIPTION = new ContentSetter() {
+    @Override
     public void set(String description) {
       if (item == null) {
         feed.setDescription(description);
@@ -125,6 +127,7 @@ class RSSHandler extends org.xml.sax.helpers.DefaultHandler {
    * {@link #item} is set.
    */
   private final Setter SET_LINK = new ContentSetter() {
+    @Override
     public void set(String link) {
       final android.net.Uri uri = android.net.Uri.parse(link);
       if (item == null) {
@@ -142,6 +145,7 @@ class RSSHandler extends org.xml.sax.helpers.DefaultHandler {
    * {@link #item} is set.
    */
   private final Setter SET_PUBDATE = new ContentSetter() {
+    @Override
     public void set(String pubDate) {
       final java.util.Date date = Dates.parseRfc822(pubDate);
       if (item == null) {
@@ -160,6 +164,7 @@ class RSSHandler extends org.xml.sax.helpers.DefaultHandler {
    */
   private final Setter ADD_CATEGORY = new ContentSetter() {
 
+    @Override
     public void set(String category) {
       if (item == null) {
         feed.addCategory(category);
@@ -181,6 +186,7 @@ class RSSHandler extends org.xml.sax.helpers.DefaultHandler {
     private static final String MEDIA_THUMBNAIL_URL = "url";
     private static final int DEFAULT_DIMENSION = -1;
 
+    @Override
     public void set(org.xml.sax.Attributes attributes) {
       if (item == null) {
         // ignore invalid media:thumbnail elements which are not inside item

@@ -6,89 +6,80 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
-import org.apache.http.conn.ConnectTimeoutException;
-import org.mcsoxford.rss.RSSException;
-import org.mcsoxford.rss.RSSFault;
 import org.mcsoxford.rss.RSSFeed;
 import org.mcsoxford.rss.RSSItem;
-import org.mcsoxford.rss.RSSReader;
+import org.mcsoxford.rss.RSSLoader;
 
-public class RSSManager implements Runnable {
+public class RSSManager implements Runnable{
 	/* constants */
 	
 	
 	/* variables */
 	ResourceInterface resourceInterface;
-	Thread thread;
+	Thread storeThread;
 	String[] names;
-	String[] urls;
-	ArrayList<RSSFeed> feeds;
-	RSSReader reader;
-	boolean isLoading;
+	//String[] urls;
+	//ArrayList<RSSFeed> feeds;
+	//RSSReader reader;
+	RSSLoader loader;
+	volatile boolean isLoading;
 	volatile boolean noError;
-	
-	synchronized void setIsLoading(boolean keepLoading){
-		this.isLoading = keepLoading;
-	}
-	
-	synchronized boolean isLoading(){
-		return isLoading;
-	}
 	
 	public RSSManager(ResourceInterface service){
 		this.resourceInterface = service;
 	}
 	
-	public void load(String[] names, String[] urls){
-		//check we are not already loading
-		if(!isLoading()){
-			this.names = names; //store the names
-			this.urls = urls; //store the URLS
-			feeds = new ArrayList<RSSFeed>();
-			thread = new Thread(this);
-			setIsLoading(true);
+	public void load(String[] names, String[] uris){
+		// check we are not already loading
+		if(!isLoading){
+			this.names = names;
+			isLoading = true;
 			noError = true;
-			thread.start();
+			
+			// schedule feeds for loading
+			loader = RSSLoader.priority(uris.length); // initiate a new loader
+			// loop through and add feeds to the queue
+			for(int i = 0; i < uris.length; i++){
+				loader.load(uris[i], uris.length - i);
+			}
+			
+			// start a second thread to retrieve items from the loader and store them
+			storeThread = new Thread(this);
+			storeThread.start();
 		}
 	}
 	
 	public void stopLoading(){
+		// stop the rss loader
+		if(loader.isLoading()){
+			loader.stop();
+		}
+		isLoading = false;
 		noError = false;
-		setIsLoading(false);
 	}
 	
 	public void run(){
-		//create a reader
-		reader = new RSSReader();
-		//load in the feeds
-		for(int i = 0; i < urls.length; i++){
-			//check we haven't been cancelled
-			if(isLoading()){
-				RSSFeed feed;
-				try {
-					feed = reader.load(urls[i]);
-					feeds.add(feed);
-					List<RSSItem> items = (List<RSSItem>) feed.getItems();
-					//loop through the items and send them to the parent service
-					resourceInterface.categoryRssLoaded((RSSItem[])items.toArray(new RSSItem[items.size()]), names[i]);
-				} catch (RSSException e) {
-					//report the error to the resource service
-					resourceInterface.reportError(false, "The rss feed could not be read.", e.toString());
-					//give up loading
-					stopLoading();
-				} catch (RSSFault e){
-					//report the error to the resource service
-					resourceInterface.reportError(false, "The rss feed could not be read. Check your internet connection.", e.toString());
-					//give up loading
-					stopLoading();
-				}
+		// retrieve the items as they are loaded
+		for(int i = 0; loader.isLoading(); i++){
+			try{
+				Future<RSSFeed> future = loader.take();
+				RSSFeed feed = future.get();
+				List<RSSItem> items = feed.getItems();
+				resourceInterface.categoryRssLoaded((RSSItem[])items.toArray(new RSSItem[items.size()]), names[i]);
+			} catch(ExecutionException e){
+				// mark the load as failed
+				noError = false;
+			} catch(InterruptedException e){
+				// mark the load as failed
+				noError = false;
 			}
 		}
-		//report that the load is complete
+		// report that the load is complete
 		resourceInterface.rssLoadComplete(noError);
-		setIsLoading(false); //we are not longer loading
+		isLoading = false;
 	}
 }
