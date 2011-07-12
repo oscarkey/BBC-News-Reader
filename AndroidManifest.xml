@@ -6,8 +6,8 @@
   All rights reserved.
 -->
 <manifest package="com.digitallizard.bbcnewsreader"
-      android:versionCode="5"
-      android:versionName="1.1.2" xmlns:android="http://schemas.android.com/apk/res/android">
+      android:versionCode="6"
+      android:versionName="1.2" xmlns:android="http://schemas.android.com/apk/res/android">
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:killAfterRestore="false" android:debuggable="true">
         <activity android:name=".ReaderActivity" android:label="@string/app_name">
             <intent-filter>

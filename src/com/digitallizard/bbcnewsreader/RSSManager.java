@@ -9,7 +9,6 @@ package com.digitallizard.bbcnewsreader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.conn.ConnectTimeoutException;
 import org.mcsoxford.rss.RSSException;
 import org.mcsoxford.rss.RSSFault;
 import org.mcsoxford.rss.RSSFeed;

@@ -6,7 +6,6 @@ import java.util.PriorityQueue;
 
 import com.digitallizard.bbcnewsreader.ReaderActivity;
 import com.digitallizard.bbcnewsreader.ResourceInterface;
-import com.digitallizard.bbcnewsreader.ResourceService;
 
 public class WebManager implements Runnable {
 	/* constants */
