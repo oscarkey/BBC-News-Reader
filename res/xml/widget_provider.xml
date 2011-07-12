@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  BBC News Reader
+  Released under the BSD License. See README or LICENSE.
+  Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+  All rights reserved.
+-->
+<appwidget-provider
+  xmlns:android="http://schemas.android.com/apk/res/android" android:initialLayout="@layout/widget" android:updatePeriodMillis="86400000" android:minWidth="292dp" android:minHeight="72dp" android:configure="com.digitallizard.bbcnewsreader.widget.WidgetConfigActivity">
+</appwidget-provider>

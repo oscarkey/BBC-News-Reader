@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  BBC News Reader
+  Released under the BSD License. See README or LICENSE.
+  Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+  All rights reserved.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical">
+	<TextView android:id="@+id/widgetItemTitle"
+  	android:layout_width="match_parent"
+  	android:layout_height="wrap_content"
+  	android:textStyle="bold"
+  	android:textSize="13sp"
+  	android:maxLines="1"
+  	android:text="Widget"/>
+  	<TextView android:id="@+id/widgetItemDesc"
+  	android:layout_width="match_parent"
+  	android:layout_height="wrap_content"
+  	android:textSize="12sp"
+  	android:maxLines="3"
+  	android:text="Description goes here. This could be quite long indeed, but I wonder how Android will truncate it, we had probably keep going"/>
+</LinearLayout>

@@ -62,6 +62,9 @@ public class ReaderActivity extends Activity {
 	public static final boolean DEFAULT_RTC_WAKEUP = true;
 	public static final String DEFAULT_LOAD_INTERVAL = "1_hour";
 	public static final boolean DEFAULT_DISPLAY_FULL_ERROR = false;
+	public static final int ERROR_TYPE_GENERAL = 0;
+	public static final int ERROR_TYPE_INTERNET = 1;
+	public static final int ERROR_TYPE_FATAL = 2;
 	static final byte[] NO_THUMBNAIL_URL_CODE = new byte[]{127};
 	
 	/* variables */
@@ -81,6 +84,7 @@ public class ReaderActivity extends Activity {
 	int categoryRowLength; //the number of items to show per row
 	Dialog errorDialog;
 	boolean errorWasFatal;
+	boolean errorDuringThisLoad;
 	boolean firstRun;
 	Dialog firstRunDialog;
 	Dialog backgroundLoadDialog;
@@ -104,11 +108,8 @@ public class ReaderActivity extends Activity {
 				break;
 			case ResourceService.MSG_ERROR:
 				Bundle bundle = msg.getData(); //retrieve the data
-				errorOccured(bundle.getBoolean("fatal"), bundle.getString("msg"), bundle.getString("error"));
-				break;
-			case ResourceService.MSG_NO_INTERNET:
-				//tell the user that there is no internet connection
-				showErrorDialog("There is no internet connection.\nThe news cannot be updated.");
+				errorOccured(bundle.getInt(ResourceService.KEY_ERROR_TYPE), 
+						bundle.getString(ResourceService.KEY_ERROR_MESSAGE), bundle.getString(ResourceService.KEY_ERROR_ERROR));
 				break;
 			case ResourceService.MSG_CATEGORY_LOADED:
 				categoryLoadFinished(msg.getData().getString("category"));
@@ -155,38 +156,62 @@ public class ReaderActivity extends Activity {
 	    }
 	};
     
-    void errorOccured(boolean fatal, String msg, String error){
-    	errorWasFatal = fatal; //so we know if we need to crash or not
+    void errorOccured(int type, String msg, String error){
+    	// check if we need to fill in the error messages
+    	if(msg == null){
+    		msg = "null";
+    	}
+    	if(error == null){
+    		error = "null";
+    	}
+    	
+    	// check if we need to shutdown after displaying the message
+    	if(type == ERROR_TYPE_FATAL){
+    		errorWasFatal = true;
+    	}
+    	
     	//show a user friendly message or just the error
     	if(settings.getBoolean("displayFullError", DEFAULT_DISPLAY_FULL_ERROR)){
     		showErrorDialog("Error: "+error);
     	}
     	else{
     		//display a user friendly message
-    		if(fatal){
+    		if(type == ERROR_TYPE_FATAL){
         		showErrorDialog("Fatal error:\n"+msg+"\nPlease try resetting the app.");
         		//Log.e("BBC News Reader", "Fatal error: "+msg);
         		//Log.e("BBC News Reader", error);
         	}
-        	else{
+        	else if(type == ERROR_TYPE_GENERAL){
         		showErrorDialog("Error:\n"+msg);
         		//Log.e("BBC News Reader", "Error: "+msg);
             	//Log.e("BBC News Reader", error);
+        	}
+        	else if(type == ERROR_TYPE_INTERNET){
+        		// only allow one internet error per load
+        		if(!errorDuringThisLoad){
+        			errorDuringThisLoad = true;
+        			showErrorDialog("Please check your internet connection.");
+        		}
+        		//Log.e("BBC News Reader", "Error: "+msg);
+        		//Log.e("BBC News Reader", error);
         	}
     	}
     }
     
     void showErrorDialog(String error){
-    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    	builder.setMessage(error);
-    	builder.setCancelable(false);
-    	builder.setPositiveButton("Close", new DialogInterface.OnClickListener() {
-           public void onClick(DialogInterface dialog, int id) {
-                closeErrorDialog();
-           }
-    	});
-    	errorDialog = builder.create();
-    	errorDialog.show();
+    	// only show the error dialog if one isn't already visible
+    	if(errorDialog == null){
+	    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    	builder.setMessage(error);
+	    	builder.setCancelable(false);
+	    	builder.setPositiveButton("Close", new DialogInterface.OnClickListener() {
+	           public void onClick(DialogInterface dialog, int id) {
+	                closeErrorDialog();
+	           }
+	    	});
+	    	errorDialog = builder.create();
+	    	errorDialog.show();
+    	}
     }
     
     void closeErrorDialog(){
@@ -322,12 +347,14 @@ public class ReaderActivity extends Activity {
 	    	//TODO display old news as old
 	    	//tell the service to load the data
 	    	sendMessageToService(ResourceService.MSG_LOAD_DATA);
+	    	errorDuringThisLoad = false;
     	}
     }
     
     void stopDataLoad(){
     	//check we are actually loading news
     	if(loadInProgress){
+    		errorDuringThisLoad = false;
     		//send a message to the service to stop it loading the data
     		sendMessageToService(ResourceService.MSG_STOP_DATA_LOAD);
     	}

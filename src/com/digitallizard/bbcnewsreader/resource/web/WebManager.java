@@ -1,9 +1,16 @@
+/*******************************************************************************
+ * BBC News Reader
+ * Released under the BSD License. See README or LICENSE.
+ * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+ * All rights reserved.
+ ******************************************************************************/
 package com.digitallizard.bbcnewsreader.resource.web;
 
 import java.net.URL;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
+import com.digitallizard.bbcnewsreader.ReaderActivity;
 import com.digitallizard.bbcnewsreader.ResourceInterface;
 
 public class WebManager implements Runnable {
@@ -73,7 +80,8 @@ public class WebManager implements Runnable {
 			numErrors ++; //increment the number of errors
 			if(numErrors > ERROR_FAIL_THRESHOLD){
 				//report the error
-				handler.reportError(false, "There was an error retrieving articles.", e.toString());
+				//FIXME need to work out if internet error or not
+				handler.reportError(ReaderActivity.ERROR_TYPE_INTERNET, "There was an error retrieving articles.", e.toString());
 				stopDownload(); //give up loading
 			}
 		}
@@ -89,7 +97,8 @@ public class WebManager implements Runnable {
 			numErrors ++; //increment the number of errors
 			if(numErrors > ERROR_FAIL_THRESHOLD){
 				//report the error
-				handler.reportError(false, "There was an error retrieving thumbnails.", e.toString());
+				//FIXME need to work out if internet error or not
+				handler.reportError(ReaderActivity.ERROR_TYPE_INTERNET, "There was an error retrieving thumbnails.", e.toString());
 				stopDownload(); //give up loading
 			}
 		}
@@ -105,7 +114,7 @@ public class WebManager implements Runnable {
 			numErrors ++; //increment the number of errors
 			if(numErrors > ERROR_FAIL_THRESHOLD){
 				//report the error
-				handler.reportError(false, "There was an error retrieving images.", e.toString());
+				handler.reportError(ReaderActivity.ERROR_TYPE_INTERNET, "There was an error retrieving images.", e.toString());
 				e.printStackTrace();
 			}
 		}

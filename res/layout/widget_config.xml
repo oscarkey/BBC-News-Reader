@@ -18,16 +18,26 @@ android:layout_height="match_parent">
 	android:paddingTop="5dp"
 	android:paddingLeft="5dp"
 	android:paddingRight="5dp">
-		<TextView android:id="@+id/categoryTitle"
+		<TextView
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:padding="2dp"
 		android:textSize="17sp"
-		android:text="No Title"/>
+		android:text="Choose a category"/>
+		<RelativeLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="right">
+			<Button android:id="@+id/widgetChoiceSaveButton"
+			android:layout_width="100dp"
+			android:layout_height="40dp"
+			android:textSize="17sp"
+			android:text="Save"/>
+		</RelativeLayout>
 	</LinearLayout>
-	<ListView android:id="@+id/categoryListView"
+	<ListView android:id="@+id/widgetCategoryChoiceListView"
 	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
+	android:layout_height="match_parent"
 	android:divider="#303030"
     android:dividerHeight="2sp">
 	</ListView>

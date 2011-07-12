@@ -11,7 +11,7 @@ import org.mcsoxford.rss.RSSItem;
 
 public interface ResourceInterface {
 	public void categoryRssLoaded(RSSItem[] items, String category); //called when the RSS has loaded
-	public void reportError(boolean fatal, String msg, String error);
+	public void reportError(int type, String msg, String error);
 	public void rssLoadComplete(boolean successful);
 	public void fullLoadComplete(boolean successful);
 	public void itemDownloadComplete(boolean specific, int itemId, int type, Object download);
