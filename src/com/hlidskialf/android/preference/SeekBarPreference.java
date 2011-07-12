@@ -1,3 +1,9 @@
+/*******************************************************************************
+ * BBC News Reader
+ * Released under the BSD License. See README or LICENSE.
+ * Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+ * All rights reserved.
+ ******************************************************************************/
 /* The following code was written by Matthew Wiggins 
  * and is released under the APACHE 2.0 license 
  * 
