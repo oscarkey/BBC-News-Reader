@@ -274,6 +274,12 @@ public class DatabaseHandler {
 		String[] projection = new String[] { DatabaseHelper.COLUMN_CATEGORY_URL, DatabaseHelper.COLUMN_CATEGORY_NAME };
 		Cursor cursor = contentResolver.query(uri, projection, null, null, DatabaseHelper.COLUMN_CATEGORY_ID);
 		
+		// check if no rows were returned
+		if(cursor == null) {
+			// bail here
+			return null;
+		}
+		
 		// find the column indexes
 		int url = cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_URL);
 		int name = cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_NAME);
