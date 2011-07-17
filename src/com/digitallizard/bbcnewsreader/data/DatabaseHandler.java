@@ -77,6 +77,11 @@ public class DatabaseHandler {
 	public byte[] getHtml(int itemId) {
 		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(itemId));
 		Cursor cursor = contentResolver.query(uri, new String[] { DatabaseHelper.COLUMN_ITEM_HTML }, null, null, null);
+		// temporary code to try and diagnose problem
+		if(cursor == null) {
+			NullPointerException exception = new NullPointerException("Cursor returned null when searching for item: id="+itemId);
+			throw exception;
+		}
 		cursor.moveToFirst();
 		byte[] html = cursor.getBlob(0);
 		cursor.close();
@@ -273,6 +278,12 @@ public class DatabaseHandler {
 		Uri uri = DatabaseProvider.CONTENT_URI_ENABLED_CATEGORIES; // uri for enabled categories
 		String[] projection = new String[] { DatabaseHelper.COLUMN_CATEGORY_URL, DatabaseHelper.COLUMN_CATEGORY_NAME };
 		Cursor cursor = contentResolver.query(uri, projection, null, null, DatabaseHelper.COLUMN_CATEGORY_ID);
+		
+		// check if no rows were returned
+		if(cursor == null) {
+			// bail here
+			return null;
+		}
 		
 		// find the column indexes
 		int url = cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_URL);
