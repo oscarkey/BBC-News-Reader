@@ -77,6 +77,11 @@ public class DatabaseHandler {
 	public byte[] getHtml(int itemId) {
 		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(itemId));
 		Cursor cursor = contentResolver.query(uri, new String[] { DatabaseHelper.COLUMN_ITEM_HTML }, null, null, null);
+		// temporary code to try and diagnose problem
+		if(cursor == null) {
+			NullPointerException exception = new NullPointerException("Cursor returned null when searching for item: id="+itemId);
+			throw exception;
+		}
 		cursor.moveToFirst();
 		byte[] html = cursor.getBlob(0);
 		cursor.close();
