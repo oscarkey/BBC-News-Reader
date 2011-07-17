@@ -248,7 +248,8 @@ public class ReaderActivity extends Activity {
     void showBackgroundLoadDialog(){
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	String message = "Load news in the background? \n\n" +
-    			"This could increase data usage but will reduce load times.";
+    			"This could increase data usage but will reduce load times.\n\n" +
+    			"If you wish to use the widget, this should be switched on.";
     	builder.setMessage(message);
     	builder.setCancelable(false);
     	builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
