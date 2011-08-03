@@ -7,7 +7,7 @@
 package com.digitallizard.bbcnewsreader;
 
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
 
 import org.mcsoxford.rss.RSSItem;
 
@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
@@ -47,6 +48,7 @@ public class ResourceService extends Service implements ResourceInterface {
 	RSSManager rssManager;
 	WebManager webManager;
 	SharedPreferences settings;
+	OnSharedPreferenceChangeListener settingsChangedListener;
 	int totalItemsToDownload;
 	int itemsDownloaded;
 		
@@ -384,6 +386,46 @@ public class ResourceService extends Service implements ResourceInterface {
 		reportItemsToDownload();
 	}
 	
+	void updateSettings() {
+		// get the alarm manager to allow triggering of loads in the future
+		AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+		
+		// produce the intent to trigger a load
+		Intent intent = new Intent(ACTION_LOAD);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		
+		// register alarms for background loading
+		if(settings.getBoolean(ReaderActivity.PREFKEY_LOAD_IN_BACKGROUND, ReaderActivity.DEFAULT_LOAD_IN_BACKGROUND)){
+			// background loading is switched on, register an alarm to trigger loads, first work out the interval
+			String loadIntervalString = settings.getString(ReaderActivity.PREFKEY_LOAD_INTERVAL, ReaderActivity.DEFAULT_LOAD_INTERVAL);
+			long loadInterval;
+			if(loadIntervalString.equals("15_mins"))
+				loadInterval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
+			else if(loadIntervalString.equals("30_mins"))
+				loadInterval = AlarmManager.INTERVAL_HALF_HOUR;
+			else if(loadIntervalString.equals("1_hour"))
+				loadInterval = AlarmManager.INTERVAL_HOUR;
+			else if(loadIntervalString.equals("half_day"))
+				loadInterval = AlarmManager.INTERVAL_HALF_DAY;
+			else
+				loadInterval = AlarmManager.INTERVAL_HOUR;
+			
+			// work out the starting time of the alarm
+			long startingTime = System.currentTimeMillis() + loadInterval; // now plus the interval
+			
+			// register an alarm to start loads, depending on rtc wakeup
+			if(settings.getBoolean(ReaderActivity.PREFKEY_RTC_WAKEUP, ReaderActivity.DEFAULT_RTC_WAKEUP)) {
+				alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, startingTime, loadInterval, pendingIntent);
+			}
+			else {
+				alarmManager.setInexactRepeating(AlarmManager.RTC, startingTime, loadInterval, pendingIntent);
+			}
+		} else {
+			// background loading is switched off, cancel alarms
+			alarmManager.cancel(pendingIntent);
+		}
+	}
+	
 	@Override
 	public void onCreate(){
 		//init variables
@@ -416,40 +458,24 @@ public class ResourceService extends Service implements ResourceInterface {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				if(intent.getAction().equals("com.digitallizard.bbcnewsreader.action.LOAD_NEWS")){
+					Date time = new Date();
 					loadData(); //load the news
 				}
 			}
 		};
 		this.registerReceiver(broadcastReceiver, new IntentFilter(ACTION_LOAD));
 		
-		//check the preferences in terms of background loading
-		if(settings.getBoolean("loadInBackground", ReaderActivity.DEFAULT_LOAD_IN_BACKGROUND)){
-			//get the load interval
-			String loadIntervalString = settings.getString("loadInterval", ReaderActivity.DEFAULT_LOAD_INTERVAL);
-			long loadInterval;
-			if(loadIntervalString.equals("15_minutes"))
-				loadInterval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
-			else if(loadIntervalString.equals("30_minutes"))
-				loadInterval = AlarmManager.INTERVAL_HALF_HOUR;
-			else if(loadIntervalString.equals("1_hour"))
-				loadInterval = AlarmManager.INTERVAL_HOUR;
-			else if(loadIntervalString.equals("half_day"))
-				loadInterval = AlarmManager.INTERVAL_HALF_DAY;
-			else
-				loadInterval = AlarmManager.INTERVAL_HOUR;
-			
-			//register an alarm to go off and start loads
-			Calendar calendar = Calendar.getInstance();
-			calendar.add(Calendar.HOUR, 1); //move the calendar to 30 minutes in the future
-			Intent intent = new Intent(ACTION_LOAD);
-			PendingIntent sender = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
-			//check if rtc wakeup is on or not (load when phone is in standby)
-			if(settings.getBoolean("rtcWakeup", ReaderActivity.DEFAULT_RTC_WAKEUP))
-				alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), loadInterval, sender);
-			else
-				alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), loadInterval, sender);
-		}
+		// load in the settings
+		updateSettings();
+		
+		// register a change listener on the settings
+		settingsChangedListener = new OnSharedPreferenceChangeListener() {
+			public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+				// update the settings
+				updateSettings();
+			}
+		};
+		settings.registerOnSharedPreferenceChangeListener(settingsChangedListener);
 	}
 	 
 	@Override
@@ -460,7 +486,11 @@ public class ResourceService extends Service implements ResourceInterface {
 	
 	@Override
 	public void onDestroy(){
+		// unregister receivers
 		this.unregisterReceiver(broadcastReceiver);
+		if(settings != null && settingsChangedListener != null){
+			settings.unregisterOnSharedPreferenceChangeListener(settingsChangedListener);
+		}
 		super.onDestroy();
 	}
 	
