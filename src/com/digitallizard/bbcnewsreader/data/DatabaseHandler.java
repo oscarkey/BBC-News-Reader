@@ -28,6 +28,7 @@ public class DatabaseHandler {
 	private Context context;
 	private ContentResolver contentResolver;
 	private long clearOutAgeMilliSecs;
+	private ItemClearer itemClearer;
 	
 	/**
 	 * Inserts an RSSItem into the items table, then creates an entry in the relationship table between it and its category, ONLY if it is more recent
@@ -365,24 +366,7 @@ public class DatabaseHandler {
 		clearOutAgeMilliSecs =  settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE) * 24 * 60 * 60 * 1000;
 		long threshold = (now.getTime() - clearOutAgeMilliSecs);
 		
-		// FIXME Optimise, should use a join
-		//find items older than the threshold
-		Uri uri = DatabaseProvider.CONTENT_URI_ITEMS;
-		String[] projection = {DatabaseHelper.COLUMN_ITEM_ID};
-		String selection = DatabaseHelper.COLUMN_ITEM_PUBDATE + "<?";
-		String[] selectionArgs = {Long.toString(threshold)};
-		Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, null);
-		
-		// find the column indexes
-		int id = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_ID);
-		
-		// loop through and delete the items
-		while(cursor.moveToNext()){
-			Uri tempUri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(cursor.getInt(id)));
-			contentResolver.delete(tempUri, null, null);
-		}
-		
-		cursor.close();
+		itemClearer.clearItems(contentResolver, threshold);
 	}
 	
 	/**
@@ -426,5 +410,7 @@ public class DatabaseHandler {
 		
 		SharedPreferences settings = context.getSharedPreferences(ReaderActivity.PREFS_FILE_NAME, Context.MODE_PRIVATE);
 		clearOutAgeMilliSecs =  settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE) * 24 * 60 * 60 * 1000;
+		
+		itemClearer = new ItemClearer();
 	}
 }
