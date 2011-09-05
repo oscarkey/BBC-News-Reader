@@ -458,7 +458,6 @@ public class ResourceService extends Service implements ResourceInterface {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				if(intent.getAction().equals("com.digitallizard.bbcnewsreader.action.LOAD_NEWS")){
-					Date time = new Date();
 					loadData(); //load the news
 				}
 			}
