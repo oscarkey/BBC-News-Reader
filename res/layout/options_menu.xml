@@ -6,6 +6,6 @@
   All rights reserved.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:title="Choose Categories" android:icon="@drawable/tick"/>
-	<item android:title="Settings" android:icon="@drawable/settings"/>
+	<item android:title="Choose Categories" android:icon="@drawable/tick" android:showAsAction="always"/>
+	<item android:title="Settings" android:icon="@drawable/settings" android:showAsAction="always"/>
 </menu>
