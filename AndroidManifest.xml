@@ -6,49 +6,58 @@
   All rights reserved.
 -->
 <manifest package="com.digitallizard.bbcnewsreader"
-      android:versionCode="9"
-      android:versionName="1.2.3" xmlns:android="http://schemas.android.com/apk/res/android">
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:killAfterRestore="false" android:debuggable="true">
-        <activity android:name=".ReaderActivity" android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+	android:versionCode="10"
+	android:versionName="1.3" xmlns:android="http://schemas.android.com/apk/res/android">
+		<application android:icon="@drawable/icon" android:label="@string/app_name" android:killAfterRestore="false" android:debuggable="true" android:theme="@style/readerStyle" android:hardwareAccelerated="true">
+        	<activity android:name=".ReaderActivity" android:label="@string/app_name">
+            	<intent-filter>
+                	<action android:name="android.intent.action.MAIN" />
+                	<category android:name="android.intent.category.LAUNCHER" />
+            	</intent-filter>
+        	</activity>
 
-    <activity android:name="ArticleActivity" android:label="@string/app_name" android:taskAffinity="">
-    	<intent-filter>
-			<!-- <action android:name="android.intent.action.VIEW" />
-			<category android:name="android.intent.category.DEFAULT" />-->
-			<action android:name="android.intent.action.MAIN" />
-    	</intent-filter>
-    </activity>
-<activity android:name="CategoryChooserActivity" android:label="BBC News Reader"></activity>
-<service android:name="ResourceService">
-    <intent-filter android:label="load_news">
-        <action android:name="com.digitallizard.bbcnewsreader.action.LOAD_NEWS"></action>
-    </intent-filter>
-</service>
-<activity android:name="CategoryActivity" android:label="@string/app_name"></activity>
-<activity android:name="SettingsActivity"></activity>
-<provider android:authorities="com.digitallizard.bbcnewsreader" android:name=".data.DatabaseProvider"></provider>
-<receiver android:label="@string/app_name" android:name="com.digitallizard.bbcnewsreader.widget.ReaderWidget">
-    <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_UPDATE"></action>
-    </intent-filter>
-    <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_provider"></meta-data>
-</receiver>
-<activity android:name="com.digitallizard.bbcnewsreader.widget.WidgetConfigActivity">
-    <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"></action>
-    </intent-filter>
-</activity>
-</application>
+			<activity android:name="ArticleActivity" android:label="@string/app_name" android:taskAffinity="">
+    			<intent-filter>
+				<!-- <action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />-->
+				<action android:name="android.intent.action.MAIN" />
+    			</intent-filter>
+    		</activity>
+    		
+			<activity android:name="CategoryChooserActivity" android:label="Choose categories"></activity>
+			
+			<service android:name="ResourceService">
+   				<intent-filter android:label="load_news">
+       				<action android:name="com.digitallizard.bbcnewsreader.action.LOAD_NEWS"></action>
+   				</intent-filter>
+			</service>
+			
+			<activity android:name="CategoryActivity" android:label="@string/app_name"></activity>
+			
+			<activity android:name="SettingsActivity" android:label="Settings" android:theme="@style/readerNoBackStyle"></activity>
+			
+			<provider android:authorities="com.digitallizard.bbcnewsreader" android:name=".data.DatabaseProvider"></provider>
+			
+			<receiver android:label="@string/app_name" android:name="com.digitallizard.bbcnewsreader.widget.ReaderWidget">
+				<intent-filter>
+	        		<action android:name="android.appwidget.action.APPWIDGET_UPDATE"></action>
+	    		</intent-filter>
+	    		<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_provider"></meta-data>
+			</receiver>
+			
+			<activity android:name="com.digitallizard.bbcnewsreader.widget.WidgetConfigActivity" android:theme="@style/readerNoBackStyle" android:label="Choose category">
+	    		<intent-filter>
+	        		<action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"></action>
+	    		</intent-filter>
+			</activity>
+			
+			<activity android:name="com.google.ads.AdActivity"
+              android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+		</application>
 
-
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
-<uses-permission android:name="android.permission.INTERNET"></uses-permission>
-<supports-screens android:normalScreens="true" android:anyDensity="false" android:largeScreens="true" android:smallScreens="true" android:resizeable="true"></supports-screens>
-<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="8"></uses-sdk>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
+	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+	<supports-screens android:normalScreens="true" android:anyDensity="true" android:largeScreens="true" android:smallScreens="true" android:resizeable="true" android:xlargeScreens="true"></supports-screens>
+	<uses-sdk android:minSdkVersion="7" android:targetSdkVersion="14"></uses-sdk>
 
 </manifest> 

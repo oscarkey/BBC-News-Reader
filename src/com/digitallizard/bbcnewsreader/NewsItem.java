@@ -19,56 +19,70 @@ public class NewsItem {
 	public String getTitle() {
 		return title;
 	}
+	
 	/**
-	 * @param title the title to set
+	 * @param title
+	 *            the title to set
 	 */
 	public void setTitle(String title) {
 		this.title = title;
 	}
+	
 	/**
 	 * @return the description
 	 */
 	public String getDescription() {
 		return description;
 	}
+	
 	/**
-	 * @param description the description to set
+	 * @param description
+	 *            the description to set
 	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
 	/**
 	 * @return the url
 	 */
 	public String getUrl() {
 		return url;
 	}
+	
 	/**
-	 * @param url the url to set
+	 * @param url
+	 *            the url to set
 	 */
 	public void setUrl(String url) {
 		this.url = url;
 	}
+	
 	/**
 	 * @return the id
 	 */
 	public int getId() {
 		return id;
 	}
+	
 	/**
-	 * @param id the id to set
+	 * @param id
+	 *            the id to set
 	 */
 	public void setId(int id) {
 		this.id = id;
 	}
+	
 	/**
 	 * @return the thumbnailBytes
 	 */
 	public byte[] getThumbnailBytes() {
 		return thumbnailBytes;
 	}
+	
 	/**
-	 * @param thumbnailBytes the thumbnailBytes to set
+	 * @param thumbnailBytes
+	 *            the thumbnailBytes to set
 	 */
 	public void setThumbnailBytes(byte[] thumbnailBytes) {
 		this.thumbnailBytes = thumbnailBytes;
@@ -83,7 +97,7 @@ public class NewsItem {
 		this.thumbnailBytes = imageBytes;
 	}
 	
-	public NewsItem(){
+	public NewsItem() {
 		super();
 	}
 }

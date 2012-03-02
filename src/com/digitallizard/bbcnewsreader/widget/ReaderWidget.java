@@ -27,12 +27,13 @@ public class ReaderWidget extends AppWidgetProvider {
 	public static final String PREF_KEY_CATEGORY = "widget_category_"; // key for the category
 	public static final String DEFAULT_CATEGORY = "Headlines"; // the default category
 	
-	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds){        
+	@Override
+	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 		// retrieve the news from the database
 		DatabaseHandler database = new DatabaseHandler(context);
 		SharedPreferences settings = context.getSharedPreferences(ReaderActivity.PREFS_FILE_NAME, Context.MODE_PRIVATE);
 		
-		for(int i = 0; i < appWidgetIds.length; i++){
+		for (int i = 0; i < appWidgetIds.length; i++) {
 			String category = settings.getString(PREF_KEY_CATEGORY + appWidgetIds[i], DEFAULT_CATEGORY);
 			NewsItem[] items = database.getItems(category, NUM_ITEMS);
 			
@@ -50,7 +51,7 @@ public class ReaderWidget extends AppWidgetProvider {
 			view.removeAllViews(R.id.widgetFlipper);
 			
 			// loop through and add the latest news to the item
-			for(int j = 0; j < NUM_ITEMS && j < items.length; j++){
+			for (int j = 0; j < NUM_ITEMS && j < items.length; j++) {
 				// create a view for this item
 				RemoteViews item = new RemoteViews(context.getPackageName(), R.layout.widget_item);
 				// set the text
@@ -60,7 +61,7 @@ public class ReaderWidget extends AppWidgetProvider {
 				// make the item clickable
 				Intent itemIntent = new Intent(context, ArticleActivity.class);
 				itemIntent.setData(Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(items[j].getId())));
-				itemIntent.putExtra("id", items[j].getId());
+				itemIntent.putExtra(ArticleActivity.EXTRA_KEY_ITEM_ID, items[j].getId());
 				itemIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 				itemIntent.setAction(Intent.ACTION_MAIN);
 				PendingIntent itemPendingIntent = PendingIntent.getActivity(context, j, itemIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -72,8 +73,8 @@ public class ReaderWidget extends AppWidgetProvider {
 			}
 			
 			// update the widget with the updated views
-	        AppWidgetManager manager = AppWidgetManager.getInstance(context);
-	        manager.updateAppWidget(appWidgetIds[i], view);
+			AppWidgetManager manager = AppWidgetManager.getInstance(context);
+			manager.updateAppWidget(appWidgetIds[i], view);
 		}
 	}
 	

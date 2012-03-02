@@ -21,7 +21,7 @@ import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.ReaderActivity;
 
 public class DatabaseHandler {
-
+	
 	public static final int COLUMN_UNDOWNLOADED_ARTICLES = 0;
 	public static final int COLUMN_UNDOWNLOADED_THUMBNAILS = 1;
 	
@@ -79,8 +79,8 @@ public class DatabaseHandler {
 		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(itemId));
 		Cursor cursor = contentResolver.query(uri, new String[] { DatabaseHelper.COLUMN_ITEM_HTML }, null, null, null);
 		// temporary code to try and diagnose problem
-		if(cursor == null) {
-			NullPointerException exception = new NullPointerException("Cursor returned null when searching for item: id="+itemId);
+		if (cursor == null) {
+			NullPointerException exception = new NullPointerException("Cursor returned null when searching for item: id=" + itemId);
 			throw exception;
 		}
 		cursor.moveToFirst();
@@ -108,6 +108,12 @@ public class DatabaseHandler {
 	public byte[] getThumbnail(int itemId) {
 		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(itemId));
 		Cursor cursor = contentResolver.query(uri, new String[] { DatabaseHelper.COLUMN_ITEM_THUMBNAIL }, null, null, null);
+		
+		// if the cursor is null, return an empty array
+		if (cursor == null) {
+			return new byte[0];
+		}
+		
 		cursor.moveToFirst();
 		byte[] thumbnail = cursor.getBlob(0);
 		cursor.close();
@@ -137,15 +143,15 @@ public class DatabaseHandler {
 	 * 
 	 * @param days
 	 *            Number of days into the past to return undownloaded items for (Using timestamp from entry)
-	 * @return A 2d int[2][n], where 2 is the type of item and n is the number of undownloaded items of that type. type is either 0 or 1 for html,
-	 *         and thumbnail respectively.
+	 * @return A 2d int[2][n], where 2 is the type of item and n is the number of undownloaded items of that type. type is either 0 or 1 for html, and
+	 *         thumbnail respectively.
 	 */
 	public Integer[][] getUndownloaded(int numItems) {
 		// query the content provider for undownloaded items
 		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_UNDOWNLOADED_ITEMS, Integer.toString(numItems));
-		String[] projection = new String[] {DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_HTML, DatabaseHelper.COLUMN_ITEM_THUMBNAIL};
-		String sortOrder = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + " ASC, " +
-		DatabaseHelper.ITEM_TABLE + "." + DatabaseHelper.COLUMN_ITEM_PUBDATE + " DESC";
+		String[] projection = new String[] { DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_HTML, DatabaseHelper.COLUMN_ITEM_THUMBNAIL };
+		String sortOrder = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + " ASC, "
+				+ DatabaseHelper.ITEM_TABLE + "." + DatabaseHelper.COLUMN_ITEM_PUBDATE + " DESC";
 		Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder);
 		
 		// get the column name index
@@ -158,13 +164,13 @@ public class DatabaseHandler {
 		ArrayList<Integer> undownloadedThumbnails = new ArrayList<Integer>();
 		
 		// loop through and save what needs to be loaded
-		while(cursor.moveToNext()){
+		while (cursor.moveToNext()) {
 			// check if we need to load this article
-			if(cursor.isNull(html)){
+			if (cursor.isNull(html)) {
 				undownloadedArticles.add(new Integer(cursor.getInt(id)));
 			}
 			// check if we need to load this thumbnail
-			if(cursor.isNull(thumbnail)){
+			if (cursor.isNull(thumbnail)) {
 				undownloadedThumbnails.add(new Integer(cursor.getInt(id)));
 			}
 		}
@@ -209,15 +215,15 @@ public class DatabaseHandler {
 	public NewsItem[] getItems(String category, int limit) {
 		// ask the content provider for the items
 		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS_BY_CATEGORY, category);
-		String[] projection = new String[] {DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_TITLE, DatabaseHelper.COLUMN_ITEM_DESCRIPTION, 
-				DatabaseHelper.COLUMN_ITEM_URL, DatabaseHelper.COLUMN_ITEM_THUMBNAIL};
-		String sortOrder = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + " ASC, " +
-				DatabaseHelper.ITEM_TABLE + "." + DatabaseHelper.COLUMN_ITEM_PUBDATE + " DESC";
+		String[] projection = new String[] { DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_TITLE, DatabaseHelper.COLUMN_ITEM_DESCRIPTION,
+				DatabaseHelper.COLUMN_ITEM_URL, DatabaseHelper.COLUMN_ITEM_THUMBNAIL };
+		String sortOrder = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + " ASC, "
+				+ DatabaseHelper.ITEM_TABLE + "." + DatabaseHelper.COLUMN_ITEM_PUBDATE + " DESC";
 		Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder);
 		
-		//check the cursor isn't null
-		if(cursor == null){
-			//bail here, returning an empty array
+		// check the cursor isn't null
+		if (cursor == null) {
+			// bail here, returning an empty array
 			return new NewsItem[0];
 		}
 		
@@ -231,8 +237,8 @@ public class DatabaseHandler {
 		// load the items into an array
 		ArrayList<NewsItem> items = new ArrayList<NewsItem>();
 		
-		while(cursor.moveToNext() && cursor.getPosition() < limit){
-			NewsItem item = new NewsItem(); // initialize a new item			
+		while (cursor.moveToNext() && cursor.getPosition() < limit) {
+			NewsItem item = new NewsItem(); // initialize a new item
 			item.setId(cursor.getInt(id));
 			item.setTitle(cursor.getString(title));
 			item.setDescription(cursor.getString(description));
@@ -281,7 +287,7 @@ public class DatabaseHandler {
 		Cursor cursor = contentResolver.query(uri, projection, null, null, DatabaseHelper.COLUMN_CATEGORY_ID);
 		
 		// check if no rows were returned
-		if(cursor == null) {
+		if (cursor == null) {
 			// bail here
 			return null;
 		}
@@ -346,12 +352,12 @@ public class DatabaseHandler {
 		}
 	}
 	
-	public void clearPriorities(String category){
+	public void clearPriorities(String category) {
 		Uri uri = DatabaseProvider.CONTENT_URI_RELATIONSHIPS;
 		ContentValues values = new ContentValues(1);
-		values.put(DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY, 80); //specify a high prioirity to hide it
+		values.put(DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY, 80); // specify a high prioirity to hide it
 		String selection = DatabaseHelper.COLUMN_RELATIONSHIP_CATEGORY_NAME + "=?";
-		String[] selectionArgs = new String[] {category};
+		String[] selectionArgs = new String[] { category };
 		contentResolver.update(uri, values, selection, selectionArgs);
 	}
 	
@@ -363,7 +369,7 @@ public class DatabaseHandler {
 		// delete items older than the threshold
 		Date now = new Date();
 		SharedPreferences settings = context.getSharedPreferences(ReaderActivity.PREFS_FILE_NAME, Context.MODE_PRIVATE);
-		clearOutAgeMilliSecs =  settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE) * 24 * 60 * 60 * 1000;
+		clearOutAgeMilliSecs = settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE) * 24 * 60 * 60 * 1000;
 		long threshold = (now.getTime() - clearOutAgeMilliSecs);
 		
 		itemClearer.clearItems(contentResolver, threshold);
@@ -403,13 +409,12 @@ public class DatabaseHandler {
 		}
 	}
 	
-	
 	public DatabaseHandler(Context context) {
 		this.context = context;
 		this.contentResolver = context.getContentResolver();
 		
 		SharedPreferences settings = context.getSharedPreferences(ReaderActivity.PREFS_FILE_NAME, Context.MODE_PRIVATE);
-		clearOutAgeMilliSecs =  settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE) * 24 * 60 * 60 * 1000;
+		clearOutAgeMilliSecs = settings.getInt("clearOutAge", ReaderActivity.DEFAULT_CLEAR_OUT_AGE) * 24 * 60 * 60 * 1000;
 		
 		itemClearer = new ItemClearer();
 	}

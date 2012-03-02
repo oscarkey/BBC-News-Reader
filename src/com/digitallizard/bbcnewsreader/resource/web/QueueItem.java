@@ -6,60 +6,58 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader.resource.web;
 
-
 public class QueueItem implements Comparable<QueueItem> {
-	public static final int PRIORITY_DOWNLOAD_NOW = 5; //the priority if instant download is needed
+	public static final int PRIORITY_DOWNLOAD_NOW = 5; // the priority if instant download is needed
 	private String url;
 	private int type;
 	private int itemId;
 	private int priority;
 	
-	public QueueItem(String url, int type, int itemId, int priority)
-	{
+	public QueueItem(String url, int type, int itemId, int priority) {
 		this.url = url;
 		this.type = type;
 		this.itemId = itemId;
 		this.priority = priority;
 	}
 	
-	public int compareTo(QueueItem item){
-		if(this.priority < item.getPriority())
+	public int compareTo(QueueItem item) {
+		if (this.priority < item.getPriority()) {
 			return 1;
-		else if(this.priority > item.getPriority())
+		}
+		else if (this.priority > item.getPriority()) {
 			return -1;
-		else
+		}
+		else {
 			return 0;
+		}
 	}
 	
-	public int getType()
-	{
+	public int getType() {
 		return type;
 	}
 	
-	public String getUrl()
-	{
+	public String getUrl() {
 		return url;
 	}
 	
-	public int getItemId()
-	{
+	public int getItemId() {
 		return itemId;
 	}
 	
-	public boolean wasSpecificallyRequested(){
-		if(priority == PRIORITY_DOWNLOAD_NOW){
+	public boolean wasSpecificallyRequested() {
+		if (priority == PRIORITY_DOWNLOAD_NOW) {
 			return true;
 		}
-		else{
+		else {
 			return false;
 		}
 	}
 	
-	public int getPriority(){
+	public int getPriority() {
 		return this.priority;
 	}
 	
-	public void setPriority(int priority){
+	public void setPriority(int priority) {
 		this.priority = priority;
 	}
 }

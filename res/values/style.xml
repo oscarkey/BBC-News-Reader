@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<style name="readerStyle" parent="Theme.Sherlock">
+        <item name="abBackground">@drawable/actionbar_background</item>
+        <item name="abDisplayOptions">showTitle|homeAsUp</item>
+    </style>
+    
+	<style name="readerNoBackStyle" parent="readerStyle">
+        <item name="abDisplayOptions">showTitle</item>
+    </style>
+	
+</resources>
