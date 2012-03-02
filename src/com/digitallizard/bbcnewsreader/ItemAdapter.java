@@ -24,50 +24,49 @@ public class ItemAdapter extends ArrayAdapter<NewsItem> {
 	private int layout;
 	private LayoutInflater inflater;
 	
-	public View getView(int position, View convertView, ViewGroup parent){
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
-		if(view == null){
-			//initialise the view
+		if (view == null) {
+			// initialise the view
 			view = inflater.inflate(layout, null);
 		}
 		
-		//set the values for this view
-		TextView title = (TextView)view.findViewById(R.id.categoryItemName);
-		TextView desc = (TextView)view.findViewById(R.id.categoryItemDescription);
+		// set the values for this view
+		TextView title = (TextView) view.findViewById(R.id.textNewsItemTitle);
 		title.setText(items.get(position).getTitle());
-		desc.setText(items.get(position).getDescription());
 		
-		//try to load in an thumbnail
+		// try to load in an thumbnail
 		byte[] thumbnailBytes = items.get(position).getThumbnailBytes();
-		//check if any data was returned
-		if(Arrays.equals(thumbnailBytes,ReaderActivity.NO_THUMBNAIL_URL_CODE)){
-			//set the image to the loaded but no image thumnail
-			ImageView imageView = (ImageView)view.findViewById(R.id.categoryItemImage);
+		ImageView imageView = (ImageView) view.findViewById(R.id.imageNewsItem);
+		
+		// check if any data was returned
+		if (Arrays.equals(thumbnailBytes, ReaderActivity.NO_THUMBNAIL_URL_CODE)) {
+			// set the image to the loaded but no image thumnail
 			imageView.setImageResource(R.drawable.no_thumb);
 		}
-		else if(thumbnailBytes != null){
-			//try to construct an image out of the bytes given by the database
-			Bitmap imageBitmap = BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length); //load the image into a bitmap
-			ImageView imageView = (ImageView)view.findViewById(R.id.categoryItemImage);
+		else if (thumbnailBytes != null) {
+			// try to construct an image out of the bytes given by the database
+			Bitmap imageBitmap = BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length); // load the image into a bitmap
 			imageView.setImageBitmap(imageBitmap);
 		}
-		else{
-			//set the image to the default thumbnail
-			ImageView imageView = (ImageView)view.findViewById(R.id.categoryItemImage);
+		else {
+			// set the image to the default thumbnail
 			imageView.setImageResource(R.drawable.no_thumb_grey);
 		}
 		
 		return view;
 	}
 	
-	public void finish(){
-		//do nothing
+	public void finish() {
+		// do nothing
 	}
 	
-	public ItemAdapter(Context context, int layout, ArrayList<NewsItem> items){
+	public ItemAdapter(Context context, int layout, ArrayList<NewsItem> items /*, int thumbWidth */) {
 		super(context, layout, items);
 		this.items = items;
 		this.layout = layout;
-		inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		//this.thumbWidth = thumbWidth;
+		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 }

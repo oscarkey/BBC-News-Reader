@@ -53,7 +53,7 @@ public class DatabaseProvider extends ContentProvider {
 		uriMatcher.addURI(AUTHORITY, "items/#", ITEM_BY_ID);
 		uriMatcher.addURI(AUTHORITY, "items/category/*", ITEMS_BY_CATEGORY);
 		uriMatcher.addURI(AUTHORITY, "items/undownloaded/*", UNDOWNLOADED_ITEMS);
-		uriMatcher.addURI(AUTHORITY, "relationships",RELATIONSHIPS);
+		uriMatcher.addURI(AUTHORITY, "relationships", RELATIONSHIPS);
 	}
 	
 	/** variables **/
@@ -89,8 +89,8 @@ public class DatabaseProvider extends ContentProvider {
 		// get items
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 		queryBuilder.setDistinct(true);
-		queryBuilder.setTables(DatabaseHelper.ITEM_TABLE + " JOIN " + DatabaseHelper.RELATIONSHIP_TABLE + " ON " + DatabaseHelper.ITEM_TABLE + "." + 
-			DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID);
+		queryBuilder.setTables(DatabaseHelper.ITEM_TABLE + " JOIN " + DatabaseHelper.RELATIONSHIP_TABLE + " ON " + DatabaseHelper.ITEM_TABLE + "."
+				+ DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID);
 		return queryBuilder.query(database.getDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
 	}
 	
@@ -104,22 +104,22 @@ public class DatabaseProvider extends ContentProvider {
 		// get items in this category
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 		queryBuilder.setDistinct(true);
-		queryBuilder.setTables(DatabaseHelper.ITEM_TABLE + " JOIN " + DatabaseHelper.RELATIONSHIP_TABLE + " ON " + DatabaseHelper.ITEM_TABLE + "." + 
-			DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID);
+		queryBuilder.setTables(DatabaseHelper.ITEM_TABLE + " JOIN " + DatabaseHelper.RELATIONSHIP_TABLE + " ON " + DatabaseHelper.ITEM_TABLE + "."
+				+ DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID);
 		String selection = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_CATEGORY_NAME + "=?";
-		String[] selectionArgs = new String[] {category};
+		String[] selectionArgs = new String[] { category };
 		return queryBuilder.query(database.getDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
 	}
 	
-	private Cursor getUndownloadedItems(String[] projection, int numItems){
+	private Cursor getUndownloadedItems(String[] projection, int numItems) {
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 		queryBuilder.setDistinct(true);
-		queryBuilder.setTables(DatabaseHelper.ITEM_TABLE + " JOIN " + DatabaseHelper.RELATIONSHIP_TABLE + " ON " + DatabaseHelper.ITEM_TABLE + 
-				"." + DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID);
+		queryBuilder.setTables(DatabaseHelper.ITEM_TABLE + " JOIN " + DatabaseHelper.RELATIONSHIP_TABLE + " ON " + DatabaseHelper.ITEM_TABLE + "."
+				+ DatabaseHelper.COLUMN_ITEM_ID + "=" + DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID);
 		queryBuilder.setTables("items JOIN categories_items ON items.item_Id=categories_items.itemId");
-		String selection = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + "<?" +
-				" AND (" + DatabaseHelper.COLUMN_ITEM_HTML + " IS NULL OR " + DatabaseHelper.COLUMN_ITEM_THUMBNAIL + " IS NULL)";
-		String[] selectionArgs = new String[] {Integer.toString(numItems)};
+		String selection = DatabaseHelper.RELATIONSHIP_TABLE + "." + DatabaseHelper.COLUMN_RELATIONSHIP_PRIORITY + "<?" + " AND ("
+				+ DatabaseHelper.COLUMN_ITEM_HTML + " IS NULL OR " + DatabaseHelper.COLUMN_ITEM_THUMBNAIL + " IS NULL)";
+		String[] selectionArgs = new String[] { Integer.toString(numItems) };
 		return queryBuilder.query(database.getDatabase(), projection, selection, selectionArgs, null, null, null);
 	}
 	
@@ -133,7 +133,7 @@ public class DatabaseProvider extends ContentProvider {
 		// lock the database
 		database.beginTransaction();
 		try {
-		
+			
 			// query to see if this item is already in the database
 			String[] projection = new String[] { DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_TITLE };
 			String selection = DatabaseHelper.COLUMN_ITEM_URL + "=?";
@@ -188,7 +188,7 @@ public class DatabaseProvider extends ContentProvider {
 			// mark the transaction as successful
 			database.setTransactionSuccessful();
 			
-			//return a uri to the new item
+			// return a uri to the new item
 			return Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Long.toString(id));
 			
 		} finally {
@@ -199,46 +199,44 @@ public class DatabaseProvider extends ContentProvider {
 	
 	private int updateItem(ContentValues values, int id) {
 		String selection = DatabaseHelper.COLUMN_ITEM_ID + "=?";
-		String[] selectionArgs = new String[] {Integer.toString(id)};
+		String[] selectionArgs = new String[] { Integer.toString(id) };
 		return database.update(DatabaseHelper.ITEM_TABLE, values, selection, selectionArgs);
 	}
 	
-	private int updateCategory(ContentValues values, int id){
+	private int updateCategory(ContentValues values, int id) {
 		String selection = DatabaseHelper.COLUMN_CATEGORY_ID + "=?";
-		String[] selectionArgs = new String[] {Integer.toString(id)};
+		String[] selectionArgs = new String[] { Integer.toString(id) };
 		return database.update(DatabaseHelper.CATEGORY_TABLE, values, selection, selectionArgs);
 	}
 	
-	private int updateCategory(ContentValues values, String name){
+	private int updateCategory(ContentValues values, String name) {
 		String selection = DatabaseHelper.COLUMN_CATEGORY_NAME + "=?";
-		String[] selectionArgs = new String[] {name};
+		String[] selectionArgs = new String[] { name };
 		return database.update(DatabaseHelper.CATEGORY_TABLE, values, selection, selectionArgs);
 	}
 	
-	private int updateRelationships(ContentValues values, String selection, String[] selectionArgs){
+	private int updateRelationships(ContentValues values, String selection, String[] selectionArgs) {
 		return database.update(DatabaseHelper.RELATIONSHIP_TABLE, values, selection, selectionArgs);
 	}
 	
-	private int deleteItem(int id){
+	private int deleteItem(int id) {
 		// delete this item from the item table
 		String selection = DatabaseHelper.COLUMN_ITEM_ID + "=?";
-		String[] selectionArgs = new String[] {Integer.toString(id)};
+		String[] selectionArgs = new String[] { Integer.toString(id) };
 		database.delete(DatabaseHelper.ITEM_TABLE, selection, selectionArgs);
 		
 		// delete this item from the relationship table
 		selection = DatabaseHelper.COLUMN_RELATIONSHIP_ITEM_ID + "=?";
-		selectionArgs = new String[] {Integer.toString(id)};
+		selectionArgs = new String[] { Integer.toString(id) };
 		database.delete(DatabaseHelper.RELATIONSHIP_TABLE, selection, selectionArgs);
 		
 		return 1;
 	}
 	
-	
-	
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		// try and match the uri
-		switch (uriMatcher.match(uri)){
+		switch (uriMatcher.match(uri)) {
 		case ITEM_BY_ID:
 			// delete this item
 			int id = Integer.parseInt(uri.getLastPathSegment());
@@ -303,7 +301,7 @@ public class DatabaseProvider extends ContentProvider {
 	
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-		switch(uriMatcher.match(uri)){
+		switch (uriMatcher.match(uri)) {
 		case ITEM_BY_ID:
 			int id = Integer.parseInt(uri.getLastPathSegment());
 			return updateItem(values, id);

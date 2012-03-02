@@ -6,70 +6,79 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.View;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.Menu;
+import android.support.v4.view.MenuItem;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
-public class CategoryChooserActivity extends Activity {
+public class CategoryChooserActivity extends FragmentActivity {
 	/* constants */
-	
+	public static final String KEY_CATEGORY_BOOLEANS = "categorybooleans";
 	
 	/* variables */
 	String[] allCategoryNames;
 	ListView listView;
 	Button saveButton;
 	
-	void saveCategoriesAndReturn(){
-		//send the category state back to the main activity where it will be saved
+	void saveCategoriesAndReturn() {
+		// send the category state back to the main activity where it will be saved
 		Intent result = new Intent();
-		boolean[] booleans = new boolean[allCategoryNames.length]; //stores the checked booleans
-		//loop through to set booleans
-		for(int i = 0; i < allCategoryNames.length; i++){
+		boolean[] booleans = new boolean[allCategoryNames.length]; // stores the checked booleans
+		// loop through to set booleans
+		for (int i = 0; i < allCategoryNames.length; i++) {
 			booleans[i] = listView.isItemChecked(i);
 		}
 		result.putExtra("categorybooleans", booleans);
 		setResult(RESULT_OK, result);
-		this.finish(); //end the activity
+		this.finish(); // end the activity
 	}
 	
-	public void saveClicked(View view){
-		saveCategoriesAndReturn(); //save the categories and go back to the main activity
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		// inflate the menu
+		getMenuInflater().inflate(R.menu.category_chooser_menu, menu);
+		return true; // we have made the menu so we can return true
 	}
 	
-	public boolean onKeyDown(int keyCode, KeyEvent event){
-		//a key has been pressed
-	    if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-	    	//it was the back key
-	    	saveCategoriesAndReturn(); //save the categories and go back to the main activity
-	    	return true; //we have used to key press
-	    }
-	    //we don't know what to do, lets hope the super does
-	    return super.onKeyDown(keyCode, event);
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.categoryChooserMenuItemSave) {
+			// save the categories and exit
+			saveCategoriesAndReturn();
+			return true;
+		}
+		else if (item.getItemId() == android.R.id.home) {
+			// go back without saving
+			this.finish();
+			return true;
+		}
+		else {
+			return super.onOptionsItemSelected(item);
+		}
 	}
 	
-	public void onCreate(Bundle savedInstanceState){
-		super.onCreate(savedInstanceState); //load any saved state
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState); // load any saved state
 		this.setContentView(R.layout.category_choice);
 		
-		//create a reference to the list view
-		listView = (ListView)this.findViewById(R.id.categoryChoiceListView);
+		// create a reference to the list view
+		listView = (ListView) this.findViewById(R.id.categoryChoiceListView);
 		
-		//decide if to show the save button
-		
-		
-		//load the all the categories
-		allCategoryNames = getResources().getStringArray(R.array.category_names); //load the full list of categories from the XML file
-		listView.setAdapter(new ArrayAdapter<String>(this, R.layout.category_choice_item, allCategoryNames)); //load the categories into the list
-		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE); //allow multiple choices
-		//load the enabled categories from the intent
-		boolean[] categoryBooleans = getIntent().getBooleanArrayExtra("categorybooleans");
-		//loop through enabling the categories as needed
-		for(int i = 0; i < categoryBooleans.length; i++){
+		// load the all the categories
+		allCategoryNames = getResources().getStringArray(R.array.category_names); // load the full list of categories from the XML file
+		listView.setAdapter(new ArrayAdapter<String>(this, R.layout.category_choice_item, allCategoryNames)); // load the categories into the list
+		listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE); // allow multiple choices
+		// load the enabled categories from the intent
+		boolean[] categoryBooleans = getIntent().getBooleanArrayExtra(KEY_CATEGORY_BOOLEANS);
+		// loop through enabling the categories as needed
+		for (int i = 0; i < categoryBooleans.length; i++) {
 			listView.setItemChecked(i, categoryBooleans[i]);
 		}
 	}

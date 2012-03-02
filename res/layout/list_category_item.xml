@@ -5,37 +5,24 @@
   Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
   All rights reserved.
 -->
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-android:id="@+id/rootCategoryItem"
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:stretchColumns="1"
-android:paddingTop="0.5sp"
-android:paddingBottom="0.5sp">
-	<TableRow
-	android:background="@drawable/list_item_color"
-	android:onClick="categoryClicked">
-		<TextView android:id="@+id/textCategoryName"
-		android:text="No Title"
-		android:layout_span="2"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:padding="5dp"
-		android:textSize="17sp"/>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/categoryTitleBar"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:gravity="center_vertical"
+	android:paddingLeft="7dp"
+	android:paddingRight="7dp"
+	android:paddingTop="7dp"
+	android:paddingBottom="7dp">
+		<TextView android:id="@+id/categoryTitle"
+			android:text="No Title"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="left"
+			android:textSize="17sp"/>
 		<TextView
-		android:text="more..."
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:gravity="right"
-		android:padding="5dp"
-		android:textSize="15sp"/>
-	</TableRow>
-	<TableRow android:id="@+id/rowNewsItem"
-	android:orientation="horizontal"
-	android:paddingTop="2dp"
-	android:paddingLeft="2dp"
-	android:paddingRight="2dp"
-	android:background="#3D3D3D"
-	android:gravity="center_horizontal">
-	</TableRow>
-</TableLayout>
+			android:text="more..."
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"/>
+</RelativeLayout>

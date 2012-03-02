@@ -9,26 +9,13 @@
 android:orientation="vertical"
 android:layout_width="match_parent"
 android:layout_height="match_parent">
-	<LinearLayout
-	android:orientation="horizontal"
-	android:layout_width="match_parent"
-	android:layout_height="50sp"
-	android:gravity="center_vertical"
-	android:background="@drawable/top_bar_gradient"
-	android:paddingTop="5dp"
-	android:paddingLeft="5dp"
-	android:paddingRight="5dp">
-		<TextView android:id="@+id/categoryTitle"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:padding="2dp"
-		android:textSize="17sp"
-		android:text="No Title"/>
-	</LinearLayout>
-	<ListView android:id="@+id/categoryListView"
+	<GridView android:id="@+id/categoryNewsItemGrid"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
-	android:divider="#303030"
-    android:dividerHeight="2sp">
-	</ListView>
+	android:numColumns="auto_fit"
+	android:background="#3D3D3D"
+    android:verticalSpacing="4dp"
+    android:horizontalSpacing="4dp"
+    android:stretchMode="columnWidth">
+	</GridView>
 </LinearLayout>

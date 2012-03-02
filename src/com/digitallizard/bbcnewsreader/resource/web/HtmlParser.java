@@ -16,11 +16,11 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.util.ByteArrayBuffer;
 
 public class HtmlParser {
-
+	
 	/**
 	 * @param args
-	 * @throws IOException 
-	 * @throws ClientProtocolException 
+	 * @throws IOException
+	 * @throws ClientProtocolException
 	 */
 	public static byte[] getPage(String stringUrl) throws Exception {
 		URL url = new URL(stringUrl);
@@ -31,26 +31,27 @@ public class HtmlParser {
 		
 		ByteArrayBuffer arraybuffer = new ByteArrayBuffer(50);
 		int current = 0;
-        while ((current = inputbuffer.read()) != -1) {
-                arraybuffer.append((byte) current);
-        }
-        return arraybuffer.toByteArray();
+		while ((current = inputbuffer.read()) != -1) {
+			arraybuffer.append((byte) current);
+		}
+		return arraybuffer.toByteArray();
 	}
 	
-	public static String parsePage(byte[] bytes){
-		if(bytes != null){
-			//convert the bytes into a string
+	public static String parsePage(byte[] bytes) {
+		if (bytes != null) {
+			// convert the bytes into a string
 			String html = new String(bytes);
-			//parse the page
+			// parse the page
 			final String[] parsed = html.split("<div class=\"storybody\">", 2);
-			if(parsed.length > 1) {
+			if (parsed.length > 1) {
 				// assume there are start and stop tags
 				return parsed[1].split("</div>", 2)[0];
-			} else{
+			}
+			else {
 				return parsed[0];
 			}
 		}
-		else{
+		else {
 			return "";
 		}
 	}
