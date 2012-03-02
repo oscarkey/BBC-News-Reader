@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  BBC News Reader
+  Released under the BSD License. See README or LICENSE.
+  Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+  All rights reserved.
+-->
+<merge xmlns:android="http://schemas.android.com/apk/res/android" xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
+    android:id="@+id/articleActivityContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    <fragment android:id="@+id/articleFragment"
+	    android:name="com.digitallizard.bbcnewsreader.fragments.ArticleFragment" 
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:layout_gravity="top" 
+	    android:layout_marginBottom="50dp"/>
+   	<com.google.ads.AdView android:id="@+id/adView"
+		android:layout_width="match_parent"
+		android:layout_height="50dp"
+		android:layout_gravity="bottom"
+		ads:adUnitId="a14f0749c716805"
+		ads:adSize="BANNER"
+		ads:testDevices="TEST_EMULATOR, 91526C7E561363534953D2F42B7099F8"
+		ads:loadAdOnCreate="true"/>
+</merge>

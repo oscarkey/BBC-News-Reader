@@ -12,7 +12,7 @@ public class ItemClearer implements Runnable {
 	
 	public void clearItems(ContentResolver contentResolver, long threshold) {
 		// only allow clearing if the thread isn't running
-		if(!isClearing){
+		if (!isClearing) {
 			this.isClearing = true;
 			this.contentResolver = contentResolver;
 			this.threshold = threshold;
@@ -25,16 +25,16 @@ public class ItemClearer implements Runnable {
 		// FIXME Optimise, should use a join
 		// find items older than the threshold
 		Uri uri = DatabaseProvider.CONTENT_URI_ITEMS;
-		String[] projection = {DatabaseHelper.COLUMN_ITEM_ID};
+		String[] projection = { DatabaseHelper.COLUMN_ITEM_ID };
 		String selection = DatabaseHelper.COLUMN_ITEM_PUBDATE + "<?";
-		String[] selectionArgs = {Long.toString(threshold)};
+		String[] selectionArgs = { Long.toString(threshold) };
 		Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, null);
 		
 		// find the column indexes
 		int id = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_ID);
 		
 		// loop through and delete the items
-		while(cursor.moveToNext()){
+		while (cursor.moveToNext()) {
 			Uri tempUri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS, Integer.toString(cursor.getInt(id)));
 			contentResolver.delete(tempUri, null, null);
 		}

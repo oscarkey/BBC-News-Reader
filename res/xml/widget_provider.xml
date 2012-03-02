@@ -6,5 +6,5 @@
   All rights reserved.
 -->
 <appwidget-provider
-  xmlns:android="http://schemas.android.com/apk/res/android" android:initialLayout="@layout/widget" android:updatePeriodMillis="86400000" android:minWidth="292dp" android:minHeight="72dp" android:configure="com.digitallizard.bbcnewsreader.widget.WidgetConfigActivity">
+  xmlns:android="http://schemas.android.com/apk/res/android" android:initialLayout="@layout/widget" android:updatePeriodMillis="86400000" android:minWidth="292dp" android:minHeight="64dp" android:configure="com.digitallizard.bbcnewsreader.widget.WidgetConfigActivity" android:resizeMode="none" android:minResizeHeight="64dp" android:minResizeWidth="292dp">
 </appwidget-provider>

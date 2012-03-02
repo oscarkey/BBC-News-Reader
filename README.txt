@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # BBC News Reader
 # Released under the BSD License. See README or LICENSE.
-# Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+# Copyright (c) 2011, 2012, Digital Lizard (Oscar Key, Thomas Boby)
 # All rights reserved.
 #-------------------------------------------------------------------------------
 Authors: Digital Lizard (Oscar Key, Thomas Boby)

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<style name="readerStyle" parent="android:Theme.Holo">
-        <item name="android:actionBarStyle">@style/actionBar</item>
-    </style>
-    <style name="actionBar" parent="android:style/Widget.Holo.ActionBar">
-        <item name="android:background">@drawable/actionbar_background</item>
+	<style name="readerStyle" parent="Theme.Sherlock">
+        <item name="abBackground">@drawable/actionbar_background</item>
+        <item name="abDisplayOptions">showTitle|homeAsUp</item>
     </style>
     
+	<style name="readerNoBackStyle" parent="readerStyle">
+        <item name="abDisplayOptions">showTitle</item>
+    </style>
+	
 </resources>

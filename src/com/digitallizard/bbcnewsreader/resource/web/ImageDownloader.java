@@ -15,19 +15,19 @@ import org.apache.http.util.ByteArrayBuffer;
 
 public class ImageDownloader {
 	public static byte[] getImage(URL url) throws Exception {
-		URLConnection connection=url.openConnection();
+		URLConnection connection = url.openConnection();
 		
-		InputStream stream=connection.getInputStream();
-		BufferedInputStream inputbuffer=new BufferedInputStream(stream,8000);
+		InputStream stream = connection.getInputStream();
+		BufferedInputStream inputbuffer = new BufferedInputStream(stream, 8000);
 		
-		ByteArrayBuffer arraybuffer=new ByteArrayBuffer(50);
+		ByteArrayBuffer arraybuffer = new ByteArrayBuffer(50);
 		int current = 0;
-        while ((current = inputbuffer.read()) != -1) {
-                arraybuffer.append((byte) current);
-        }
-        
-        byte[] image=arraybuffer.toByteArray();
-        
-        return image;
+		while ((current = inputbuffer.read()) != -1) {
+			arraybuffer.append((byte) current);
+		}
+		
+		byte[] image = arraybuffer.toByteArray();
+		
+		return image;
 	}
 }
