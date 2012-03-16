@@ -9,6 +9,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="lib" path="C:/Users/Oscar/Documents/Programming/libs/GoogleAdMobAdsSdk-4.3.1.jar"/>
+	<classpathentry kind="lib" path="/home/oscar/Documents/Programming/libs/GoogleAdMobAdsSdk-4.3.1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

@@ -23,6 +23,8 @@ public class ItemAdapter extends ArrayAdapter<NewsItem> {
 	private ArrayList<NewsItem> items;
 	private int layout;
 	private LayoutInflater inflater;
+	private int thumbWidth;
+	private int thumbHeight;
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -55,18 +57,26 @@ public class ItemAdapter extends ArrayAdapter<NewsItem> {
 			imageView.setImageResource(R.drawable.no_thumb_grey);
 		}
 		
+		// set the image size
+		ViewGroup.LayoutParams layout = imageView.getLayoutParams();
+		layout.width = thumbWidth;
+		layout.height = thumbHeight;
+		imageView.setLayoutParams(layout);
+		
 		return view;
 	}
+	
 	
 	public void finish() {
 		// do nothing
 	}
 	
-	public ItemAdapter(Context context, int layout, ArrayList<NewsItem> items /*, int thumbWidth */) {
+	public ItemAdapter(Context context, int layout, ArrayList<NewsItem> items, int thumbWidth, int thumbHeight) {
 		super(context, layout, items);
 		this.items = items;
 		this.layout = layout;
-		//this.thumbWidth = thumbWidth;
+		this.thumbWidth = thumbWidth;
+		this.thumbHeight = thumbHeight;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 }

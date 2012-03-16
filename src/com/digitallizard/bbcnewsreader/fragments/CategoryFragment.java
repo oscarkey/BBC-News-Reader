@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.SupportActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,10 +29,10 @@ import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.digitallizard.bbcnewsreader.fragments.FrontpageFragment.FrontPageClickHandler;
 
 public class CategoryFragment extends Fragment implements MessageReceiver {
-	public static final int THUMBNAIL_WIDTH_PX = 144;
-	public static final int THUMBNAIL_HEIGHT_PX = 81;
-	// public static final int THUMBNAIL_WIDTH_PX = 288;
-	// public static final int THUMBNAIL_HEIGHT_PX = 162;
+	//public static final int THUMBNAIL_WIDTH_PX = 144;
+	//public static final int THUMBNAIL_HEIGHT_PX = 81;
+	public static final int THUMBNAIL_WIDTH_PX = 216;
+	public static final int THUMBNAIL_HEIGHT_PX = 121;
 	
 	DatabaseHandler database;
 	ServiceManager service;
@@ -119,14 +118,14 @@ public class CategoryFragment extends Fragment implements MessageReceiver {
 		// work out the ideal thumbnail size
 		int rowPixelWidth = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth();
 		//int rowPixelWidth = this.getView().getLayoutParams().width;
-		Log.v("bbcnews", "width: " + rowPixelWidth);
 		int rowLength = (int) Math.floor(rowPixelWidth / THUMBNAIL_WIDTH_PX);
-		// grid.setColumnWidth(thumbWidth);
+		int thumbWidth =  (int) Math.floor(rowPixelWidth / rowLength);
+		int thumbHeight = (int) Math.floor((thumbWidth / THUMBNAIL_WIDTH_PX) * THUMBNAIL_HEIGHT_PX);
 		grid.setNumColumns(rowLength);
 		
 		// find the items and add them to the list
-		items = new ArrayList<NewsItem>(Arrays.asList(database.getItems(categoryTitle, 40))); // specify a high limit for the number of items
-		grid.setAdapter(new ItemAdapter(getActivity(), R.layout.list_news_item, items));
+		items = new ArrayList<NewsItem>(Arrays.asList(database.getItems(categoryTitle, 28))); // specify a high limit for the number of items
+		grid.setAdapter(new ItemAdapter(getActivity(), R.layout.list_news_item, items, thumbWidth, thumbHeight));
 	}
 	
 	private void thumbLoadComplete(int id) {
