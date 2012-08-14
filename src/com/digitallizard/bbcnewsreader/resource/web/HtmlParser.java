@@ -42,10 +42,10 @@ public class HtmlParser {
 			// convert the bytes into a string
 			String html = new String(bytes);
 			// parse the page
-			final String[] parsed = html.split("<div class=\"storybody\">", 2);
+			final String[] parsed = html.split("<div class=\"story-inner\">", 2);
 			if (parsed.length > 1) {
 				// assume there are start and stop tags
-				return parsed[1].split("</div>", 2)[0];
+				return parsed[1].split("<!-- / .story-inner -->", 2)[0];
 			}
 			else {
 				return parsed[0];
