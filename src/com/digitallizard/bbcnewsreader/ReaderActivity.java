@@ -445,7 +445,7 @@ public class ReaderActivity extends SherlockFragmentActivity implements MessageR
 	
 	@Override
 	protected void onDestroy() {
-		// disconnect the service
+		// unbind from the service
 		service.doUnbindService();
 		super.onDestroy(); // pass the destroy command to the super
 	}

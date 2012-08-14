@@ -86,8 +86,7 @@ public class ResourceService extends Service implements ResourceInterface {
 				sendMsg(msg.replyTo, MSG_CLIENT_REGISTERED, null);
 				break;
 			case MSG_UNREGISTER_CLIENT:
-				clients.remove(msg.replyTo); // remove our reference to the client
-				// FIXME when should the service shutdown?
+				unregisterClient(msg.replyTo);
 				break;
 			case MSG_LOAD_DATA:
 				loadData(); // start of the loading of data
@@ -216,6 +215,15 @@ public class ResourceService extends Service implements ResourceInterface {
 		}
 	}
 	
+	private void unregisterClient(Messenger client) {
+		// remove our reference to the client
+		clients.remove(client);
+		// if we have no more clients and a load is not in progress, shutdown
+		if(clients.isEmpty() && !loadInProgress) {
+			stopSelf();
+		}
+	}
+	
 	boolean isOnline() {
 		ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo info = manager.getActiveNetworkInfo();
@@ -332,8 +340,14 @@ public class ResourceService extends Service implements ResourceInterface {
 	public synchronized void fullLoadComplete(boolean successful) {
 		// set the flag to false
 		loadInProgress = false;
-		// send a message saying that we have loaded
-		sendMsgToAll(MSG_FULL_LOAD_COMPLETE, null);
+		
+		// if we have clients, tell them the load is complete, else shutdown
+		if(!clients.isEmpty()) {
+			// send a message saying that we have loaded
+			sendMsgToAll(MSG_FULL_LOAD_COMPLETE, null);
+		} else {
+			stopSelf();
+		}
 	}
 	
 	public synchronized void itemDownloadComplete(boolean specific, int itemId, int type, Object download) {
