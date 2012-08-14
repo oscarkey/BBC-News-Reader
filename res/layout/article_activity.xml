@@ -21,6 +21,6 @@
 		android:layout_gravity="bottom"
 		ads:adUnitId="a14f0749c716805"
 		ads:adSize="BANNER"
-		ads:testDevices="TEST_EMULATOR, 91526C7E561363534953D2F42B7099F8"
+		ads:testDevices="TEST_EMULATOR, 82C63CDC1F7B73E897FA6D08BEF63589"
 		ads:loadAdOnCreate="true"/>
 </merge>

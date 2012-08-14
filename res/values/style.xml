@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 	<style name="readerStyle" parent="Theme.Sherlock">
-        <item name="abBackground">@drawable/actionbar_background</item>
-        <item name="abDisplayOptions">showTitle|homeAsUp</item>
+	    <item name="actionBarStyle">@style/Widget.Styled.ActionBar</item>
+    	<item name="android:actionBarStyle">@style/Widget.Styled.ActionBar</item>
     </style>
     
 	<style name="readerNoBackStyle" parent="readerStyle">
-        <item name="abDisplayOptions">showTitle</item>
+        <!-- <item name="abDisplayOptions">showTitle</item> -->
     </style>
-	
+    
+	<style name="Widget.Styled.ActionBar" parent="Widget.Sherlock.ActionBar">
+	    <item name="background">@drawable/actionbar_background</item>
+    	<item name="android:background">@drawable/actionbar_background</item>
+    	
+    	<item name="displayOptions">showTitle|homeAsUp</item>
+    	<item name="android:displayOptions">showTitle|homeAsUp</item>
+	</style>
 </resources>

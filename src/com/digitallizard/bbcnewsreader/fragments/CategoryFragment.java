@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Message;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.SupportActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 
+import com.actionbarsherlock.app.SherlockFragment;
 import com.digitallizard.bbcnewsreader.ItemAdapter;
 import com.digitallizard.bbcnewsreader.NewsItem;
 import com.digitallizard.bbcnewsreader.R;
@@ -28,7 +28,7 @@ import com.digitallizard.bbcnewsreader.ServiceManager.MessageReceiver;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.digitallizard.bbcnewsreader.fragments.FrontpageFragment.FrontPageClickHandler;
 
-public class CategoryFragment extends Fragment implements MessageReceiver {
+public class CategoryFragment extends SherlockFragment implements MessageReceiver {
 	//public static final int THUMBNAIL_WIDTH_PX = 144;
 	//public static final int THUMBNAIL_HEIGHT_PX = 81;
 	public static final int THUMBNAIL_WIDTH_PX = 216;
@@ -97,7 +97,7 @@ public class CategoryFragment extends Fragment implements MessageReceiver {
 	}
 	
 	@Override
-	public void onAttach(SupportActivity activity) {
+	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		// check that the parent has implemented the correct callbacks
 		try {
@@ -106,7 +106,7 @@ public class CategoryFragment extends Fragment implements MessageReceiver {
 			throw new ClassCastException(activity.toString() + " must implement FrontPageClickHandlers");
 		}
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		super.onDestroy();

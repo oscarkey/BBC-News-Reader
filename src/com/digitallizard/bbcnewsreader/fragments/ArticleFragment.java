@@ -2,16 +2,17 @@ package com.digitallizard.bbcnewsreader.fragments;
 
 import android.os.Bundle;
 import android.os.Message;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.Menu;
-import android.support.v4.view.MenuItem;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.MenuInflater;
+
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.SherlockFragment;
 import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.ResourceService;
 import com.digitallizard.bbcnewsreader.ServiceManager;
@@ -19,7 +20,7 @@ import com.digitallizard.bbcnewsreader.ServiceManager.MessageReceiver;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.digitallizard.bbcnewsreader.resource.web.HtmlParser;
 
-public class ArticleFragment extends Fragment implements MessageReceiver {
+public class ArticleFragment extends SherlockFragment implements MessageReceiver {
 	private static final int ID_NO_ARTICLE_LOADED = -10;
 	
 	private DatabaseHandler database;

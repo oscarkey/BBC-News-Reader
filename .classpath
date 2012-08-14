@@ -8,7 +8,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
-	<classpathentry kind="lib" path="/home/oscar/Documents/Programming/libs/GoogleAdMobAdsSdk-4.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="/home/oscar/Documents/Programming/libs/GoogleAdMobAdsSdk-4.3.1.jar"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

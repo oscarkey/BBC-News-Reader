@@ -14,9 +14,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.Menu;
-import android.support.v4.view.MenuItem;
+
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -25,7 +26,7 @@ import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.ReaderActivity;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
-public class WidgetConfigActivity extends FragmentActivity {
+public class WidgetConfigActivity extends SherlockActivity {
 	ListView listView;
 	String[] enabledCategoriesNames;
 	SharedPreferences settings;
@@ -59,7 +60,7 @@ public class WidgetConfigActivity extends FragmentActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		// inflate the menu
-		getMenuInflater().inflate(R.menu.category_chooser_menu, menu);
+		getSupportMenuInflater().inflate(R.menu.category_chooser_menu, menu);
 		return true; // we have made the menu so we can return true
 	}
 	

@@ -6,17 +6,19 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.Menu;
-import android.support.v4.view.MenuItem;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
-public class CategoryChooserActivity extends FragmentActivity {
+public class CategoryChooserActivity extends SherlockFragmentActivity {
 	/* constants */
 	public static final String KEY_CATEGORY_BOOLEANS = "categorybooleans";
 	
@@ -42,7 +44,7 @@ public class CategoryChooserActivity extends FragmentActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		// inflate the menu
-		getMenuInflater().inflate(R.menu.category_chooser_menu, menu);
+		getSupportMenuInflater().inflate(R.menu.category_chooser_menu, menu);
 		return true; // we have made the menu so we can return true
 	}
 	

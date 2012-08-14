@@ -7,12 +7,12 @@
 package com.digitallizard.bbcnewsreader;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.MenuItem;
+import com.actionbarsherlock.view.MenuItem;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.digitallizard.bbcnewsreader.fragments.ArticleFragment;
 
-public class ArticleActivity extends FragmentActivity {
+public class ArticleActivity extends SherlockFragmentActivity {
 	public static final String EXTRA_KEY_ITEM_ID = "itemId";
 	
 	private int itemId;

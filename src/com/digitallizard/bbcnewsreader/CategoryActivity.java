@@ -12,15 +12,15 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Messenger;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.MenuItem;
+import com.actionbarsherlock.view.MenuItem;
 import android.widget.ListView;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.digitallizard.bbcnewsreader.fragments.CategoryFragment;
 import com.digitallizard.bbcnewsreader.fragments.FrontpageFragment.FrontPageClickHandler;
 
-public class CategoryActivity extends FragmentActivity implements FrontPageClickHandler {
+public class CategoryActivity extends SherlockFragmentActivity implements FrontPageClickHandler {
 	public static final String EXTRA_CATEGORY_TITLE = "categoryTitle";
 	
 	private static final int DISPLAY_MODE_HANDSET = 0;

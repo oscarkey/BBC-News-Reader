@@ -3,13 +3,13 @@ package com.digitallizard.bbcnewsreader.fragments;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.SupportActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +20,8 @@ import android.widget.TableRow;
 import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragment;
 import com.digitallizard.bbcnewsreader.ItemLayout;
 import com.digitallizard.bbcnewsreader.NewsItem;
 import com.digitallizard.bbcnewsreader.R;
@@ -29,7 +31,7 @@ import com.digitallizard.bbcnewsreader.ServiceManager;
 import com.digitallizard.bbcnewsreader.ServiceManager.MessageReceiver;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
-public class FrontpageFragment extends Fragment implements MessageReceiver {
+public class FrontpageFragment extends SherlockFragment implements MessageReceiver {
 	private static final int CATEGORY_ROW_LENGTH = 4;
 	private static final int ITEM_MIN_WIDTH = 100;
 	private static final int IDEAL_ITEMS_PER_ROW = 5;
@@ -82,7 +84,7 @@ public class FrontpageFragment extends Fragment implements MessageReceiver {
 	}
 	
 	@Override
-	public void onAttach(SupportActivity activity) {
+	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		// check that the parent has implemented the correct callbacks
 		try {

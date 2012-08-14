@@ -12,10 +12,12 @@ It has currently been tested on the following Android versions:
 	-1.6
 	-2.2
 	-2.3
+	-4.0
 However, it should probably work on any version.
 The app is fairly screen independent and should scale the amount of news displayed to suit any screen size or orientation.
 
 We use a lightweight Android rss library: android-rss (https://github.com/ahorn/android-rss) to read the news feeds. Feel free fix and/or improve it.
+The UI is built around ActionBarSherlock (http://actionbarsherlock.com) (currently v4.1.0).
 We also use Matthew Wiggins' SeekBarPreference class (http://android.hlidskialf.com/blog/code/android-seekbar-preference).
 Finally, we use the Eula class from the Android sample game "Divide and Conquer"
 (http://code.google.com/p/apps-for-android/source/browse/trunk/DivideAndConquer/src/com/google/android/divideandconquer/Eula.java).

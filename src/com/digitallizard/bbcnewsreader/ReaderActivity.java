@@ -15,19 +15,19 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Message;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.Menu;
-import android.support.v4.view.MenuItem;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import android.util.Log;
 import android.view.View;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.digitallizard.bbcnewsreader.ServiceManager.MessageReceiver;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.digitallizard.bbcnewsreader.fragments.ArticleFragment;
 import com.digitallizard.bbcnewsreader.fragments.FrontpageFragment;
 import com.digitallizard.bbcnewsreader.fragments.FrontpageFragment.FrontPageClickHandler;
 
-public class ReaderActivity extends FragmentActivity implements MessageReceiver, FrontPageClickHandler {
+public class ReaderActivity extends SherlockFragmentActivity implements MessageReceiver, FrontPageClickHandler {
 	
 	/* constants */
 	public static final String AD_PUB_ID = "a14f0749c716805";
@@ -454,7 +454,7 @@ public class ReaderActivity extends FragmentActivity implements MessageReceiver,
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		// inflate the menu
-		getMenuInflater().inflate(R.menu.main_menu, menu);
+		getSupportMenuInflater().inflate(R.menu.main_menu, menu);
 		
 		this.menu = menu; // store a reference for later
 		
