@@ -8,7 +8,11 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
-	<classpathentry exported="true" kind="lib" path="/home/oscar/Documents/Programming/libs/GoogleAdMobAdsSdk-4.3.1.jar"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry exported="true" kind="lib" path="/home/oscar/Documents/Programming/libs/AdMob/GoogleAdMobAdsSdkAndroid-6.1.0/GoogleAdMobAdsSdk-6.1.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/oscar/Documents/Programming/libs/AdMob/GoogleAdMobAdsSdkAndroid-6.1.0/docs/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

@@ -15,6 +15,7 @@
 	    android:layout_height="match_parent"
 	    android:layout_gravity="top" 
 	    android:layout_marginBottom="50dp"/>
+    
    	<com.google.ads.AdView android:id="@+id/adView"
 		android:layout_width="match_parent"
 		android:layout_height="50dp"
@@ -23,4 +24,5 @@
 		ads:adSize="BANNER"
 		ads:testDevices="TEST_EMULATOR, 82C63CDC1F7B73E897FA6D08BEF63589"
 		ads:loadAdOnCreate="true"/>
+   	
 </merge>
