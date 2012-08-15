@@ -7,9 +7,9 @@
 package com.digitallizard.bbcnewsreader;
 
 import android.os.Bundle;
-import com.actionbarsherlock.view.MenuItem;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.digitallizard.bbcnewsreader.fragments.ArticleFragment;
 
 public class ArticleActivity extends SherlockFragmentActivity {

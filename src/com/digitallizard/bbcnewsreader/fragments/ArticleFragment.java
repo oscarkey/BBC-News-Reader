@@ -2,10 +2,6 @@ package com.digitallizard.bbcnewsreader.fragments;
 
 import android.os.Bundle;
 import android.os.Message;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.MenuInflater;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +9,9 @@ import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.ResourceService;
 import com.digitallizard.bbcnewsreader.ServiceManager;

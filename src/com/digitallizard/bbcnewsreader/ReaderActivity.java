@@ -15,12 +15,12 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Message;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import android.util.Log;
 import android.view.View;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.digitallizard.bbcnewsreader.ServiceManager.MessageReceiver;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.digitallizard.bbcnewsreader.fragments.ArticleFragment;

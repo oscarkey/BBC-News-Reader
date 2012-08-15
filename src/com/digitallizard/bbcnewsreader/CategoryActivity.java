@@ -12,10 +12,10 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Messenger;
-import com.actionbarsherlock.view.MenuItem;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.digitallizard.bbcnewsreader.fragments.CategoryFragment;
 import com.digitallizard.bbcnewsreader.fragments.FrontpageFragment.FrontPageClickHandler;
