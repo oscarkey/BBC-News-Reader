@@ -55,6 +55,9 @@ public class FrontpageFragment extends SherlockFragment implements MessageReceiv
 	
 	public void handleMessage(Message msg) {
 		switch (msg.what) {
+		case ResourceService.MSG_FULL_LOAD_COMPLETE:
+			loadUnloadedThumbs();
+			break;
 		case ResourceService.MSG_CATEGORY_LOADED:
 			categoryLoadFinished(msg.getData().getString(ResourceService.KEY_CATEGORY));
 			break;
@@ -195,21 +198,18 @@ public class FrontpageFragment extends SherlockFragment implements MessageReceiv
 					if (Arrays.equals(thumbBytes, ReaderActivity.NO_THUMBNAIL_URL_CODE)) {
 						// set the image to the no thumbnail image
 						physicalItems[category][i].setImage(R.drawable.no_thumb);
+						physicalItems[category][i].setImageLoaded(false);
 					}
 					else if (thumbBytes != null) {
 						// try to construct an image out of the bytes given by the database
 						Bitmap imageBitmap = BitmapFactory.decodeByteArray(thumbBytes, 0, thumbBytes.length); // load the image into a bitmap
 						physicalItems[category][i].setImage(imageBitmap);
+						physicalItems[category][i].setImageLoaded(true);
 					}
 					else {
 						// set the image to the default grey image
 						physicalItems[category][i].setImage(R.drawable.no_thumb_grey);
-						
-						// load the thumbnail if in tablet mode
-						
-						Bundle bundle = new Bundle();
-						bundle.putInt(ResourceService.KEY_ITEM_ID, physicalItems[category][i].getId());
-						service.sendMessageToService(ResourceService.MSG_LOAD_THUMB, bundle);
+						physicalItems[category][i].setImageLoaded(false);
 					}
 				}
 			}
@@ -240,16 +240,31 @@ public class FrontpageFragment extends SherlockFragment implements MessageReceiv
 					if (Arrays.equals(imageBytes, ReaderActivity.NO_THUMBNAIL_URL_CODE)) {
 						// sets the image to the no thumbnail image
 						physicalItems[i][t].setImage(R.drawable.no_thumb);
+						physicalItems[i][t].setImageLoaded(false);
 					}
 					else if (imageBytes != null) {
 						// try to construct an image out of the bytes given by the database
 						Bitmap imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length); // load the image into a bitmap
 						physicalItems[i][t].setImage(imageBitmap);
+						physicalItems[i][t].setImageLoaded(true);
 					}
 					else {
 						// set the image to the no thumbnail loaded image
 						physicalItems[i][t].setImage(R.drawable.no_thumb_grey);
+						physicalItems[i][t].setImageLoaded(false);
 					}
+				}
+			}
+		}
+	}
+	
+	private void loadUnloadedThumbs() {
+		for(int i = 0; i < physicalItems.length; i++) {
+			for(int j = 0; j < physicalItems[i].length; j++) {
+				if(!physicalItems[i][j].isImageLoaded()) {
+					Bundle bundle = new Bundle();
+					bundle.putInt(ResourceService.KEY_ITEM_ID, physicalItems[i][j].getId());
+					service.sendMessageToService(ResourceService.MSG_LOAD_THUMB, bundle);
 				}
 			}
 		}

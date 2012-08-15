@@ -518,7 +518,6 @@ public class ReaderActivity extends SherlockFragmentActivity implements MessageR
 	}
 	
 	public void refreshClicked(View item) {
-		// Log.v("view", "width is: "+physicalCategories[1]].getWidth());
 		// start the load if we are not loading
 		if (!loadInProgress) {
 			loadData();

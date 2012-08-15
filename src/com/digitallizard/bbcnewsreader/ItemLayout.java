@@ -17,6 +17,7 @@ public class ItemLayout extends LinearLayout {
 	private int id;
 	private TextView title;
 	private ImageView image;
+	private boolean imageLoaded;
 	
 	public boolean isItem() {
 		// if the id is not -1 then this item has been set
@@ -71,6 +72,14 @@ public class ItemLayout extends LinearLayout {
 		if (image != null) {
 			image.setImageResource(drawable);
 		}
+	}
+	
+	public void setImageLoaded(boolean loaded) {
+		imageLoaded = loaded;
+	}
+	
+	public boolean isImageLoaded() {
+		return imageLoaded;
 	}
 	
 	public ItemLayout(Context context) {
