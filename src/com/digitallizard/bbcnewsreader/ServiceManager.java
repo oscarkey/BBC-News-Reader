@@ -1,5 +1,6 @@
 package com.digitallizard.bbcnewsreader;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
@@ -18,25 +19,29 @@ import android.util.Log;
 public class ServiceManager {
 	
 	private Context context;
-	Messenger resourceMessenger;
-	MessageReceiver receiver;
-	boolean resourceServiceBound;
-	ArrayList<Message> messageQueue;
+	private Messenger resourceMessenger;
+	private Messenger messenger;
+	private boolean resourceServiceBound;
+	private ArrayList<Message> messageQueue;
 	
 	public interface MessageReceiver {
 		public void handleMessage(Message msg);
 	}
 	
-	class IncomingHandler extends Handler {
+	static class IncomingHandler extends Handler {
+		private final WeakReference<MessageReceiver> receiver;		
+		
+		IncomingHandler(MessageReceiver receiver) {
+			this.receiver = new WeakReference<MessageReceiver>(receiver);
+		}
+		
 		@Override
 		public void handleMessage(Message msg) {
 			// pass the message on
-			receiver.handleMessage(msg);
+			receiver.get().handleMessage(msg);
 		}
 	}
-	
-	private final Messenger messenger = new Messenger(new IncomingHandler()); // this is a target for the service to send messages to
-	
+		
 	private ServiceConnection resourceServiceConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			resourceServiceBound = true; // flag the service as bound
@@ -122,8 +127,8 @@ public class ServiceManager {
 	
 	public ServiceManager(Context context, MessageReceiver receiver) {
 		this.context = context;
-		this.receiver = receiver;
 		
+		messenger = new Messenger(new IncomingHandler(receiver));
 		messageQueue = new ArrayList<Message>();
 	}
 }
