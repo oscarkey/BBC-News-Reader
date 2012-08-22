@@ -257,9 +257,11 @@ public class FrontpageFragment extends SherlockFragment implements MessageReceiv
 	}
 	
 	private void loadUnloadedThumbs() {
+		// find unloaded images
 		for(int i = 0; i < physicalItems.length; i++) {
 			for(int j = 0; j < physicalItems[i].length; j++) {
-				if(!physicalItems[i][j].isImageLoaded()) {
+				// only try and load the images if the item is set
+				if(!physicalItems[i][j].isImageLoaded() && physicalItems[i][j].isItem()) {
 					Bundle bundle = new Bundle();
 					bundle.putInt(ResourceService.KEY_ITEM_ID, physicalItems[i][j].getId());
 					service.sendMessageToService(ResourceService.MSG_LOAD_THUMB, bundle);
