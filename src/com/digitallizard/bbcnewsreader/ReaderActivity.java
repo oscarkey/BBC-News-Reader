@@ -527,4 +527,8 @@ public class ReaderActivity extends SherlockFragmentActivity implements MessageR
 		}
 	}
 	
+	
+	public int getCurrentDisplayMode() {
+		return currentDisplayMode;
+	}
 }

@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,10 +31,13 @@ import com.digitallizard.bbcnewsreader.ServiceManager.MessageReceiver;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 
 public class FrontpageFragment extends SherlockFragment implements MessageReceiver {
-	private static final int CATEGORY_ROW_LENGTH = 4;
 	private static final int ITEM_MIN_WIDTH = 100;
-	private static final int IDEAL_ITEMS_PER_ROW = 5;
-	private static final int MAX_ROWS = 2;
+	private static final int MAX_ITEMS_PER_ROW_PORTRAIT = 3;
+	private static final int MAX_ITEMS_PER_ROW_LANDSCAPE = 5;
+	private static final int MAX_ITEMS_PER_ROW_TABLET_LANDSCAPE = 5;
+	private static final int PORTRAIT_CODE = 0;
+	private static final float THUMB_HEIGHT_RATIO = 9/16f;
+	private static final float FRAGMENT_SCREEN_RATIO = 3/5f; //FIXME this is not the right way to do this
 	
 	private DatabaseHandler database;
 	private ServiceManager service;
@@ -103,23 +107,34 @@ public class FrontpageFragment extends SherlockFragment implements MessageReceiv
 	}
 	
 	public void createNewsDisplay(LayoutInflater inflater, View container) {
+		//FIXME entire layout system needs fixing
 		LinearLayout content = (LinearLayout) container.findViewById(R.id.newsScrollerContent); // a reference to the layout where we put the news
 		// clear the content area
 		content.removeAllViewsInLayout();
 		
 		// find the width and work out how many items we can add and how wide they should be
 		int rowPixelWidth = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth();
+		// take into account screen orientation and device type
+		int maxItemsPerRow = MAX_ITEMS_PER_ROW_PORTRAIT;
+		if(((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation() != PORTRAIT_CODE) {
+			maxItemsPerRow = MAX_ITEMS_PER_ROW_LANDSCAPE;
+		}
+		//FIXME dangerous
+		if(((ReaderActivity) getActivity()).getCurrentDisplayMode() == ReaderActivity.DISPLAY_MODE_TABLET_LANDSCAPE) {
+			rowPixelWidth = (int) Math.floor(rowPixelWidth * FRAGMENT_SCREEN_RATIO);
+			maxItemsPerRow = MAX_ITEMS_PER_ROW_TABLET_LANDSCAPE;
+		}
 		int rowWidth = (int) Math.floor(rowPixelWidth / this.getResources().getDisplayMetrics().density); // formula to convert from pixels to dp
 		categoryRowLength = (int) Math.floor(rowWidth / ITEM_MIN_WIDTH);
-		if (categoryRowLength > IDEAL_ITEMS_PER_ROW) {
-			categoryRowLength = IDEAL_ITEMS_PER_ROW;
+		if (categoryRowLength > maxItemsPerRow) {
+			categoryRowLength = maxItemsPerRow;
 		}
 		int thumbWidth = (int) Math.floor(rowPixelWidth / categoryRowLength);
+		int thumbHeight = (int) Math.floor(((float) thumbWidth) * THUMB_HEIGHT_RATIO);
 		
 		// create the categories
 		categoryNames = database.getEnabledCategories()[1]; // string array with category names in it
 		physicalCategories = new ArrayList<RelativeLayout>(categoryNames.length);
-		physicalItems = new ItemLayout[categoryNames.length][CATEGORY_ROW_LENGTH]; // the array to hold the news items
 		physicalItems = new ItemLayout[categoryNames.length][categoryRowLength]; // the array to hold the news items
 		
 		// loop through adding category views
@@ -146,13 +161,14 @@ public class FrontpageFragment extends SherlockFragment implements MessageReceiv
 			content.addView(categoryTitleBar);
 			
 			// create an item row and add items to it
-			TableRow itemRow = new TableRow(getActivity());
+			//TableRow itemRow = new TableRow(getActivity());
+			LinearLayout itemRow = new LinearLayout(getActivity());
 			
 			for (int j = 0; j < categoryRowLength; j++) {
 				// add a new item to the display
 				ItemLayout item = (ItemLayout) inflater.inflate(R.layout.list_news_item, null);
-				item.setLayoutParams(new LayoutParams(thumbWidth, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
 				item.setPadding(1, 0, 1, 0);
+				item.setImageSize(thumbWidth, thumbHeight);
 				
 				// set a click listener
 				item.setOnClickListener(new View.OnClickListener() {

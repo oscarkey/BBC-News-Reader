@@ -74,6 +74,15 @@ public class ItemLayout extends LinearLayout {
 		}
 	}
 	
+	public void setImageSize(int width, int height) {
+		if (image == null) {
+			initImage();
+		}
+		if (image != null) {
+			image.setLayoutParams(new LayoutParams(width, height));
+		}
+	}
+	
 	public void setImageLoaded(boolean loaded) {
 		imageLoaded = loaded;
 	}
