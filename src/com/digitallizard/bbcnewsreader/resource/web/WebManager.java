@@ -9,6 +9,7 @@ package com.digitallizard.bbcnewsreader.resource.web;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.PriorityQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import com.digitallizard.bbcnewsreader.ReaderActivity;
 import com.digitallizard.bbcnewsreader.ResourceInterface;
@@ -21,20 +22,15 @@ public class WebManager implements Runnable {
 	public static final int ERROR_FAIL_THRESHOLD = 4;
 	
 	/* variables */
-	PriorityQueue<QueueItem> downloadQueue;
+	PriorityBlockingQueue<QueueItem> downloadQueue;
 	ResourceInterface handler;
-	private boolean queueEmpty;
 	private boolean keepDownloading;
 	Thread downloadThread;
 	private volatile boolean noError;
 	private volatile int numErrors;
 	
 	public synchronized boolean isQueueEmpty() {
-		return queueEmpty;
-	}
-	
-	synchronized void setQueueEmpty(boolean queueEmpty) {
-		this.queueEmpty = queueEmpty;
+		return downloadQueue.isEmpty();
 	}
 	
 	synchronized boolean shouldKeepDownloading() {
@@ -45,13 +41,6 @@ public class WebManager implements Runnable {
 		this.keepDownloading = keepDownloading;
 	}
 	
-	synchronized void setQueue(PriorityQueue<QueueItem> queue) {
-		downloadQueue = queue;
-	}
-	
-	synchronized PriorityQueue<QueueItem> getQueue() {
-		return downloadQueue;
-	}
 	
 	private void downloadItem(QueueItem item) {
 		switch (item.getType()) {
@@ -123,7 +112,6 @@ public class WebManager implements Runnable {
 		// check if we need to start the download thread
 		if (!shouldKeepDownloading()) {
 			// start the download thread
-			setQueueEmpty(false);
 			setKeepDownloading(true);
 			noError = true;
 			downloadThread = new Thread(this);
@@ -138,7 +126,7 @@ public class WebManager implements Runnable {
 	
 	public void addToQueue(String url, int type, int itemId, int priority) {
 		QueueItem queueItem = new QueueItem(url, type, itemId, priority);
-		getQueue().add(queueItem);
+		downloadQueue.add(queueItem);
 		itemQueued();
 	}
 	
@@ -148,7 +136,7 @@ public class WebManager implements Runnable {
 			// loop through the queue to find the item we want, then boost its priority
 			boolean itemExists = false; // set to true if the item was actually in the queue
 			// FIXME looping efficient? probably doesn't matter as only on user command
-			Iterator<QueueItem> iterator = getQueue().iterator();
+			Iterator<QueueItem> iterator = downloadQueue.iterator();
 			while (iterator.hasNext()) {
 				// check the id of this item
 				QueueItem item = iterator.next();
@@ -176,7 +164,7 @@ public class WebManager implements Runnable {
 		if (shouldKeepDownloading()) {
 			stopDownload(); // first stop downloading
 		}
-		getQueue().clear(); // empty the queue
+		downloadQueue.clear(); // empty the queue
 	}
 	
 	public void stopDownload() {
@@ -195,29 +183,23 @@ public class WebManager implements Runnable {
 	
 	public void run() {
 		// check this hasn't been called in error
-		if (getQueue().size() > 0) {
+		if (!isQueueEmpty()) {
 			// keep downloading if we should
 			while (shouldKeepDownloading()) {
 				// retrieve the head of the queue and load it
-				downloadItem(getQueue().poll());
+				downloadItem(downloadQueue.poll());
 				// check if the queue is empty now
-				if (getQueue().size() == 0) {
-					setQueueEmpty(true); // flag the queue as empty
+				if (isQueueEmpty()) {
 					setKeepDownloading(false); // stop the loop
 				}
 			}
 			handler.fullLoadComplete(noError); // report that the load is complete
 		}
-		else {
-			// as the queue was empty, we should flag it
-			setQueueEmpty(true);
-		}
 	}
 	
 	public WebManager(ResourceInterface handler) {
 		this.handler = handler;
-		setQueueEmpty(true);
-		downloadQueue = new PriorityQueue<QueueItem>();
+		downloadQueue = new PriorityBlockingQueue<QueueItem>();
 		numErrors = 0; // no errors yet
 	}
 }
