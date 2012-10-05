@@ -8,7 +8,6 @@ package com.digitallizard.bbcnewsreader.resource.web;
 
 import java.net.URL;
 import java.util.Iterator;
-import java.util.PriorityQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import com.digitallizard.bbcnewsreader.ReaderActivity;
