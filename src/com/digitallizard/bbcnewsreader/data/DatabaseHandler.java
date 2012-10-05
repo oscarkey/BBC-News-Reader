@@ -288,8 +288,8 @@ public class DatabaseHandler {
 		
 		// check if no rows were returned
 		if (cursor == null) {
-			// bail here
-			return null;
+			// bail here, returning an empty 2d array
+			return new String[2][0];
 		}
 		
 		// find the column indexes
