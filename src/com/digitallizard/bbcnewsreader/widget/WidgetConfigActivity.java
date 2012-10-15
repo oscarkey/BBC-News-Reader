@@ -106,7 +106,7 @@ public class WidgetConfigActivity extends SherlockActivity {
 		DatabaseHandler database = new DatabaseHandler(this);
 		String[][] enabledCategories = database.getEnabledCategories();
 		// if no categories were enabled, do not allow the user to proceed
-		if (enabledCategories == null) {
+		if (enabledCategories == null || enabledCategories[0].length == 0) {
 			showAppNotRunDialog();
 			return; // bail here
 		}
