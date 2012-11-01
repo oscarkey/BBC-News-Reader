@@ -1,12 +1,12 @@
 package com.digitallizard.bbcnewsreader;
 
-import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
-import com.digitallizard.bbcnewsreader.fragments.CategoryFragment;
-
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+
+import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
+import com.digitallizard.bbcnewsreader.fragments.CategoryFragment;
 
 public class CategoryPagerAdapter extends FragmentStatePagerAdapter {
 	

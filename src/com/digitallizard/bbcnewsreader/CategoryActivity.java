@@ -9,20 +9,14 @@ package com.digitallizard.bbcnewsreader;
 import java.util.ArrayList;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Messenger;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.widget.ListView;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.Tab;
-import com.actionbarsherlock.app.ActionBar.TabListener;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
-import com.digitallizard.bbcnewsreader.fragments.CategoryFragment;
 import com.digitallizard.bbcnewsreader.fragments.FrontpageFragment.FrontPageClickHandler;
 import com.viewpagerindicator.TitlePageIndicator;
 
