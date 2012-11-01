@@ -6,5 +6,5 @@
   All rights reserved.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:title="Save" android:id="@+id/categoryChooserMenuItemSave" android:showAsAction="always|withText"/>
+	<item android:title="Save" android:id="@+id/categoryChooserMenuItemSave" android:showAsAction="always|withText" android:icon="@drawable/navigation_accept"/>
 </menu>
