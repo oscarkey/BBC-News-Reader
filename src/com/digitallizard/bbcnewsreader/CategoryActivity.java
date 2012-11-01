@@ -12,13 +12,19 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Messenger;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.widget.ListView;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.ActionBar.TabListener;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.digitallizard.bbcnewsreader.fragments.CategoryFragment;
 import com.digitallizard.bbcnewsreader.fragments.FrontpageFragment.FrontPageClickHandler;
+import com.viewpagerindicator.TitlePageIndicator;
 
 public class CategoryActivity extends SherlockFragmentActivity implements FrontPageClickHandler {
 	public static final String EXTRA_CATEGORY_TITLE = "categoryTitle";
@@ -48,19 +54,26 @@ public class CategoryActivity extends SherlockFragmentActivity implements FrontP
 		}
 		
 		// do specific configuration for various screen sizes
-		if (currentDisplayMode == DISPLAY_MODE_TABLET_LANDSCAPE) {
+		/*if (currentDisplayMode == DISPLAY_MODE_TABLET_LANDSCAPE) {
 			// force landscape
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 			// display the correct category
 			CategoryFragment fragment = (CategoryFragment) getSupportFragmentManager().findFragmentById(R.id.categoryFragment);
 			fragment.displayCategory(getIntent().getStringExtra(EXTRA_CATEGORY_TITLE));
-		}
+		}*/
+		
 		if (currentDisplayMode == DISPLAY_MODE_HANDSET) {
-			// set the action bar title to the category title
-			getSupportActionBar().setTitle(getIntent().getStringExtra(EXTRA_CATEGORY_TITLE));
-			// load the requested category
-			CategoryFragment fragment = (CategoryFragment) getSupportFragmentManager().findFragmentById(R.id.categoryFragment);
-			fragment.displayCategory(getIntent().getStringExtra(EXTRA_CATEGORY_TITLE));
+			// load the pager
+			CategoryPagerAdapter adapter = new CategoryPagerAdapter(this, getSupportFragmentManager());
+	        ViewPager pager = (ViewPager)findViewById(R.id.categoryPager);
+	        pager.setAdapter(adapter);
+	        
+	        // bind the pager indicator
+	        TitlePageIndicator pagerIndicator = (TitlePageIndicator) findViewById(R.id.categoryPagerIndicator);
+	        pagerIndicator.setViewPager(pager);
+	        
+	        // set the pager position to the selected category
+	        pager.setCurrentItem(adapter.getPositionOfTitle(getIntent().getStringExtra(EXTRA_CATEGORY_TITLE)), false); // no smooth scroll
 		}
 	}
 	

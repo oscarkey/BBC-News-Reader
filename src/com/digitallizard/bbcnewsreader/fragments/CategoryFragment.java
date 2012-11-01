@@ -33,6 +33,7 @@ public class CategoryFragment extends SherlockFragment implements MessageReceive
 	//public static final int THUMBNAIL_HEIGHT_PX = 81;
 	public static final int THUMBNAIL_WIDTH_PX = 216;
 	public static final int THUMBNAIL_HEIGHT_PX = 121;
+	public static final String KEY_CATEGORY = "category";
 	
 	DatabaseHandler database;
 	ServiceManager service;
@@ -40,6 +41,18 @@ public class CategoryFragment extends SherlockFragment implements MessageReceive
 	
 	GridView grid;
 	ArrayList<NewsItem> items;
+	
+	
+	public static CategoryFragment newInstance(String category) {
+		CategoryFragment fragment = new CategoryFragment();
+		
+		Bundle args = new Bundle();
+		args.putString(KEY_CATEGORY, category);
+		fragment.setArguments(args);
+		
+		return fragment;
+	}
+	
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -92,6 +105,11 @@ public class CategoryFragment extends SherlockFragment implements MessageReceive
 			public void onScroll(AbsListView list, int firstVisible, int visibleItems, int totalItems) {
 			}
 		});
+		
+		// check if we have been provided with a category to display
+		if(getArguments().getString(KEY_CATEGORY) != null) {
+			displayCategory(getArguments().getString(KEY_CATEGORY));
+		}
 		
 		return view;
 	}

@@ -5,8 +5,19 @@
   Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
   All rights reserved.
 -->
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/categoryFragment"
-    android:name="com.digitallizard.bbcnewsreader.fragments.CategoryFragment" 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    	<com.viewpagerindicator.TitlePageIndicator
+			android:id="@+id/categoryPagerIndicator"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			style="@style/TabPageIndicator" />
+	    <android.support.v4.view.ViewPager 
+	    	android:id="@+id/categoryPager"
+	    	android:layout_width="match_parent"
+	    	android:layout_height="0dp"
+	    	android:layout_weight="1" >
+		</android.support.v4.view.ViewPager>
+</LinearLayout>
