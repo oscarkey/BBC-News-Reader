@@ -6,8 +6,8 @@
   All rights reserved.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:title="Choose Categories" android:showAsAction="always" android:id="@+id/menuItemCategories" android:icon="@drawable/ic_action_choose"/>
-	<item android:title="Settings" android:showAsAction="never" android:id="@+id/menuItemSettings"/>
-	<item android:id="@+id/menuItemRefresh" android:showAsAction="always" android:title="Refresh" android:icon="@drawable/ic_action_refresh"></item>
+    <item android:id="@+id/menuItemRefresh" android:showAsAction="always" android:title="Refresh" android:icon="@drawable/ic_action_refresh"></item>
 	<item android:id="@+id/menuItemStop" android:showAsAction="always" android:title="Stop" android:icon="@drawable/ic_action_stop" android:visible="false"></item>
+	<item android:title="Choose Categories" android:showAsAction="ifRoom" android:id="@+id/menuItemCategories" android:icon="@drawable/ic_action_choose"/>
+	<item android:title="Settings" android:showAsAction="ifRoom" android:id="@+id/menuItemSettings"/>
 </menu>
