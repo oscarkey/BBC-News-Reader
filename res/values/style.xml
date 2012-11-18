@@ -5,7 +5,7 @@
     	<item name="android:actionBarStyle">@style/Widget.Styled.ActionBar</item>
     </style>
     
-	<style name="readerNoBackStyle" >
+	<style name="readerNoBackStyle" parent="Theme.Sherlock">
         <item name="actionBarStyle">@style/Widget.Styled.ActionBar.NoBack</item>
     	<item name="android:actionBarStyle">@style/Widget.Styled.ActionBar.NoBack</item>
     </style>
