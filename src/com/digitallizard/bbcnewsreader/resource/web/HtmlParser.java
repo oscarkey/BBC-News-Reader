@@ -42,17 +42,26 @@ public class HtmlParser {
 	}
 	
 	public static String parsePage(byte[] bytes) {
+		// FIXME needs a tidy up
 		if (bytes != null) {
 			// convert the bytes into a string
 			String html = new String(bytes);
-			// parse the page
-			final String[] parsed = html.split("<div class=\"story-body\">", 2);
-			if (parsed.length > 1) {
+			// trying parsing the page for news
+			final String[] parsedNews = html.split("<div class=\"story-body\">", 2);
+			if (parsedNews.length > 1) {
 				// assume there are start and stop tags
-				return parsed[1].split("<div class=\"share-this\">", 2)[0];
+				return parsedNews[1].split("<div class=\"share-this\">", 2)[0];
 			}
 			else {
-				return parsed[0];
+				// try parsing for sport
+				final String[] parsedSport = html.split("<div class=\"downlink\"> <a href=\"#navigation\">Menu</a> </div>");
+				if(parsedSport.length > 1) {
+					return parsedSport[1].split("<!-- show ShareThis -->", 2)[0];
+				}
+				else {
+					// just return the entire page as a last resort
+					return html;
+				}
 			}
 		}
 		else {

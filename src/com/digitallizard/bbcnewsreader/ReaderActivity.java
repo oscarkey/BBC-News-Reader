@@ -44,9 +44,11 @@ public class ReaderActivity extends SherlockFragmentActivity implements MessageR
 	public static final boolean DEFAULT_RTC_WAKEUP = true;
 	public static final String DEFAULT_LOAD_INTERVAL = "1_hour";
 	public static final boolean DEFAULT_DISPLAY_FULL_ERROR = false;
+	public static final boolean DEFAULT_CATEGORY_UPDATE_1_DONE = false;
 	public static final String PREFKEY_LOAD_IN_BACKGROUND = "loadInBackground";
 	public static final String PREFKEY_RTC_WAKEUP = "rtcWakeup";
 	public static final String PREFKEY_LOAD_INTERVAL = "loadInterval";
+	public static final String PREFKEY_CATEGORY_UPDATE_1_DONE = "categoryUpdate1Done";
 	
 	public static final int ERROR_TYPE_GENERAL = 0;
 	public static final int ERROR_TYPE_INTERNET = 1;
@@ -406,6 +408,15 @@ public class ReaderActivity extends SherlockFragmentActivity implements MessageR
 			database.addCategoriesFromXml();
 			firstRun = true;
 			showFirstRunDialog();
+		}
+		
+		// update the categories
+		if(!settings.getBoolean(PREFKEY_CATEGORY_UPDATE_1_DONE, DEFAULT_CATEGORY_UPDATE_1_DONE)) {
+			database.updateCategoriesFromXml();
+			// set the pref key to indicate the update
+			Editor editor = settings.edit();
+			editor.putBoolean(PREFKEY_CATEGORY_UPDATE_1_DONE, true);
+			editor.commit();
 		}
 		
 		// bind the service

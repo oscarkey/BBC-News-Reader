@@ -275,6 +275,40 @@ public class DatabaseHandler {
 		return enabledCategories;
 	}
 	
+	
+	/**
+	 * Returns the links and names of all the categories
+	 * 
+	 * @return A string[][] containing the String urls in [0] and String names in [1].
+	 */
+	public String[][] getAllCategories() {
+		// query the DatabaseProvider for the categories
+		Uri uri = DatabaseProvider.CONTENT_URI_CATEGORIES; // uri for all the categories
+		String[] projection = new String[] { DatabaseHelper.COLUMN_CATEGORY_URL, DatabaseHelper.COLUMN_CATEGORY_NAME };
+		Cursor cursor = contentResolver.query(uri, projection, null, null, DatabaseHelper.COLUMN_CATEGORY_ID);
+		
+		// check if no rows were returned
+		if (cursor == null) {
+			// bail here, returning an empty 2d array
+			return new String[2][0];
+		}
+		
+		// find the column indexes
+		int url = cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_URL);
+		int name = cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_NAME);
+		
+		// loop through and save these categories to an array
+		String[][] categories = new String[2][cursor.getCount()];
+		while (cursor.moveToNext()) {
+			categories[0][cursor.getPosition()] = cursor.getString(url);
+			categories[1][cursor.getPosition()] = cursor.getString(name);
+		}
+		cursor.close();
+		
+		return categories;
+	}
+	
+	
 	/**
 	 * Returns the links and names of all the categories that are enabled.
 	 * 
@@ -392,6 +426,51 @@ public class DatabaseHandler {
 			}
 		} catch (NullPointerException e) {
 			// Log.e("Database", "Categories XML is broken.");
+		}
+	}
+	
+	public void updateCategoriesFromXml() {
+		// FIXME this is not a reliable way to update categories because it has the potential to disrupt the order
+		// which is required to be the same as xml
+		try {
+			// get all the categories from the xml and database and check for any mismatches
+			String[] xmlCategoryNames = context.getResources().getStringArray(R.array.category_names);
+			String[] xmlCategoryUrls = context.getResources().getStringArray(R.array.catergory_rss_urls);
+			int[] xmlCategoryBooleans = context.getResources().getIntArray(R.array.category_default_booleans);
+			
+			String[][] databaseCategories = getAllCategories();
+			// check that some categories were returned
+			if(databaseCategories[0].length == 0) {
+				// bail here
+				return;
+			}
+			
+			// if both the xml and the database have the same number of categories in them, we don't need to do anything
+			if(databaseCategories[0].length == xmlCategoryNames.length) {
+				return;
+			}
+			
+			// check if each category from the xml is present in the database
+			for(int i = 0; i < xmlCategoryNames.length; i++) {
+				boolean present = false;
+				for(int j = 0; j < databaseCategories[1].length; j++) {
+					if(xmlCategoryNames[i].equals(databaseCategories[1][j])) {
+						present = true;
+					}
+				}
+				
+				if(present == false) {
+					// if the category isn't present, add it to the end of the table
+					boolean enabled = true;
+					if (xmlCategoryBooleans[i] == 0) {
+						enabled = false;
+					}
+					insertCategory(xmlCategoryNames[i], enabled, xmlCategoryUrls[i]);
+				}
+			}
+			
+		} catch (NullPointerException e) {
+			// don't log the error
 		}
 	}
 	

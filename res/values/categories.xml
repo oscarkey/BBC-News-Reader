@@ -20,6 +20,7 @@
 <item>Science &amp; Environment</item>
 <item>Technology</item>
 <item>Entertainment &amp; Arts</item>
+<item>Sport</item>
 </string-array>
 <string-array name="catergory_rss_urls">
 <item>http://feeds.bbci.co.uk/news/mobile/rss.xml</item>
@@ -35,6 +36,7 @@
 <item>http://feeds.bbci.co.uk/news/mobile/science_and_environment/rss.xml</item>
 <item>http://feeds.bbci.co.uk/news/mobile/technology/rss.xml</item>
 <item>http://feeds.bbci.co.uk/news/mobile/entertainment_and_arts/rss.xml</item>
+<item>http://feeds.bbci.co.uk/sport/0/mobile/rss.xml</item>
 </string-array>
 <integer-array name="category_default_booleans">
     <item>1</item>
@@ -49,6 +51,7 @@
     <item>0</item>
     <item>0</item>
     <item>1</item>
+    <item>0</item>
     <item>0</item>
 </integer-array>
 </resources>
