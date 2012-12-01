@@ -83,7 +83,10 @@ public class ReaderActivity extends SherlockFragmentActivity implements MessageR
 			// TODO make the load time configurable
 			long difference = System.currentTimeMillis() - (lastLoadTime * 1000); // the time since the last load
 			if (lastLoadTime == 0 || difference > (60 * 60 * 1000)) {
-				loadData(); // trigger a load
+				// don't load if this is the first run
+				if(!firstRun) {
+					loadData(); // trigger a load
+				}
 			}
 			break;
 		case ResourceService.MSG_ERROR:
