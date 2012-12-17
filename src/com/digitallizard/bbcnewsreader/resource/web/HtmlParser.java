@@ -54,9 +54,9 @@ public class HtmlParser {
 			}
 			else {
 				// try parsing for sport
-				final String[] parsedSport = html.split("<div class=\"downlink\"> <a href=\"#navigation\">Menu</a> </div>");
+				final String[] parsedSport = html.split("<article class=\"mod story\">");
 				if(parsedSport.length > 1) {
-					return parsedSport[1].split("<!-- show ShareThis -->", 2)[0];
+					return parsedSport[1].split("</article>", 2)[0];
 				}
 				else {
 					// just return the entire page as a last resort
