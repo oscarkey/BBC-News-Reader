@@ -31,8 +31,11 @@ import com.digitallizard.bbcnewsreader.fragments.FrontpageFragment.FrontPageClic
 public class CategoryFragment extends SherlockFragment implements MessageReceiver {
 	//public static final int THUMBNAIL_WIDTH_PX = 144;
 	//public static final int THUMBNAIL_HEIGHT_PX = 81;
-	public static final int THUMBNAIL_WIDTH_PX = 216;
-	public static final int THUMBNAIL_HEIGHT_PX = 121;
+	//public static final int THUMBNAIL_WIDTH_PX = 216;
+	//public static final int THUMBNAIL_HEIGHT_PX = 121;
+	public static final int THUMBNAIL_WIDTH_PX = 259;
+	public static final int THUMBNAIL_HEIGHT_PX = 145;
+	public static final int MIN_ROW_LENGTH = 2;
 	public static final String KEY_CATEGORY = "category";
 	
 	DatabaseHandler database;
@@ -134,12 +137,20 @@ public class CategoryFragment extends SherlockFragment implements MessageReceive
 	
 	public void displayCategory(String categoryTitle) {
 		// work out the ideal thumbnail size
-		int rowPixelWidth = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth();
+		int rowPixelWidth = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE))
+				.getDefaultDisplay().getWidth();
 		//int rowPixelWidth = this.getView().getLayoutParams().width;
+		
+		// check the row isn't too small
 		int rowLength = (int) Math.floor(rowPixelWidth / THUMBNAIL_WIDTH_PX);
+		if(rowLength < MIN_ROW_LENGTH) {
+			rowLength = MIN_ROW_LENGTH;
+		}
+		
 		int thumbWidth =  (int) Math.floor(rowPixelWidth / rowLength);
-		int thumbHeight = (int) Math.floor((thumbWidth / THUMBNAIL_WIDTH_PX) * THUMBNAIL_HEIGHT_PX);
+		int thumbHeight = (int) Math.floor(((float) thumbWidth / (float) THUMBNAIL_WIDTH_PX) * (float) THUMBNAIL_HEIGHT_PX);
 		grid.setNumColumns(rowLength);
+		grid.setColumnWidth(thumbWidth);
 		
 		// find the items and add them to the list
 		items = new ArrayList<NewsItem>(Arrays.asList(database.getItems(categoryTitle, 28))); // specify a high limit for the number of items

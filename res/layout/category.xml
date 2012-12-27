@@ -12,10 +12,8 @@ android:layout_height="match_parent">
 	<GridView android:id="@+id/categoryNewsItemGrid"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
-	android:numColumns="auto_fit"
 	android:background="#3D3D3D"
-    android:verticalSpacing="4dp"
-    android:horizontalSpacing="4dp"
-    android:stretchMode="columnWidth">
+    android:horizontalSpacing="2dp"
+    android:verticalSpacing="2dp">
 	</GridView>
 </LinearLayout>
