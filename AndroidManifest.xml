@@ -8,7 +8,29 @@
 <manifest package="com.digitallizard.bbcnewsreader"
 	android:versionCode="23"
 	android:versionName="1.4.5" xmlns:android="http://schemas.android.com/apk/res/android">
-		<application android:icon="@drawable/icon" android:label="@string/app_name" android:killAfterRestore="false" android:theme="@style/readerStyle" android:hardwareAccelerated="true">
+	
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
+	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+	
+	<supports-screens 
+	    android:smallScreens="true" 
+	    android:normalScreens="true" 
+	    android:largeScreens="true" 
+	    android:xlargeScreens="true"
+	    android:anyDensity="true" 
+	    android:resizeable="true" >
+	</supports-screens>
+	
+	<uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"></uses-sdk>
+    
+		<application 
+		    android:icon="@drawable/icon" 
+		    android:label="@string/app_name" 
+		    android:killAfterRestore="false" 
+		    android:theme="@style/readerStyle" 
+		    android:hardwareAccelerated="true"
+		    android:allowBackup="true">
+		    
         	<activity android:name=".ReaderActivity" android:label="@string/app_name">
             	<intent-filter>
                 	<action android:name="android.intent.action.MAIN" />
@@ -43,7 +65,9 @@
 	    		<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_provider"></meta-data>
 			</receiver>
 			
-			<activity android:name="com.digitallizard.bbcnewsreader.widget.WidgetConfigActivity" android:theme="@style/readerNoBackStyle" android:label="Choose category">
+			<activity android:name="com.digitallizard.bbcnewsreader.widget.WidgetConfigActivity"
+			    android:theme="@style/readerNoBackStyle"
+			    android:label="Choose category">
 	    		<intent-filter>
 	        		<action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"></action>
 	    		</intent-filter>
@@ -51,11 +75,7 @@
 			
 			<activity android:name="com.google.ads.AdActivity"
               android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+			
 		</application>
-
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
-	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
-	<supports-screens android:normalScreens="true" android:anyDensity="true" android:largeScreens="true" android:smallScreens="true" android:resizeable="true" android:xlargeScreens="true"></supports-screens>
-	<uses-sdk android:minSdkVersion="8" android:targetSdkVersion="14"></uses-sdk>
 
 </manifest> 
