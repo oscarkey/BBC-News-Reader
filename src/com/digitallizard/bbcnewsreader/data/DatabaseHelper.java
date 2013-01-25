@@ -17,7 +17,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 public class DatabaseHelper {
 	/** constants **/
 	private static final String DATABASE_NAME = "bbcnewsreader.db";
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 3;
 	
 	// table names
 	public static final String ITEM_TABLE = "items";
@@ -29,6 +29,7 @@ public class DatabaseHelper {
 	public static final String COLUMN_CATEGORY_NAME = "name";
 	public static final String COLUMN_CATEGORY_ENABLED = "enabled";
 	public static final String COLUMN_CATEGORY_URL = "url";
+	public static final String COLUMN_CATEGORY_PRIORITY = "priority";
 	
 	public static final String COLUMN_ITEM_ID = "item_Id";
 	public static final String COLUMN_ITEM_TITLE = "title";
@@ -136,7 +137,8 @@ public class DatabaseHelper {
 				+ "description varchar(255), " + "link varchar(255) UNIQUE, " + "pubdate int, " + "html blob, " + "image blob, " + "thumbnail blob,"
 				+ "thumbnailurl varchar(255))";
 		private static final String CREATE_CATEGORY_TABLE = "CREATE TABLE " + CATEGORY_TABLE + "(category_Id integer PRIMARY KEY,"
-				+ "name varchar(255)," + "enabled int," + "url varchar(255))";
+				+ "name varchar(255)," + "enabled int," + "url varchar(255), " + COLUMN_CATEGORY_PRIORITY
+				+ " int)";
 		private static final String CREATE_RELATIONSHIP_TABLE = "CREATE TABLE " + RELATIONSHIP_TABLE + "(categoryName varchar(255), " + "itemId INT,"
 				+ "priority int," + "PRIMARY KEY (categoryName, itemId))";
 		
@@ -160,8 +162,13 @@ public class DatabaseHelper {
 				db.execSQL(CREATE_ITEM_TABLE);
 				db.execSQL(CREATE_RELATIONSHIP_TABLE);
 			}
+			else if(oldVersion == 2 && newVersion == 3) {
+				// add the priority column to the category table
+				db.execSQL("ALTER TABLE " + CATEGORY_TABLE + " ADD COLUMN " 
+						+ COLUMN_CATEGORY_PRIORITY + " int");
+			}
 			else {
-				// reset everything to be sure
+				// unsupported upgrade, reset everything
 				db.execSQL("DROP TABLE " + ITEM_TABLE);
 				db.execSQL("DROP TABLE " + CATEGORY_TABLE);
 				db.execSQL("DROP TABLE " + RELATIONSHIP_TABLE);

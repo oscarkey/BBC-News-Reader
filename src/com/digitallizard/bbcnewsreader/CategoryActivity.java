@@ -28,7 +28,7 @@ public class CategoryActivity extends SherlockFragmentActivity implements FrontP
 	
 	ListView listView;
 	DatabaseHandler database;
-	ArrayList<NewsItem> items;
+	ArrayList<Item> items;
 	Messenger resourceMessenger;
 	boolean resourceServiceBound;
 	

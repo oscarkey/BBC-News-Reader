@@ -44,11 +44,13 @@ public class ReaderActivity extends SherlockFragmentActivity implements MessageR
 	public static final boolean DEFAULT_RTC_WAKEUP = true;
 	public static final String DEFAULT_LOAD_INTERVAL = "1_hour";
 	public static final boolean DEFAULT_DISPLAY_FULL_ERROR = false;
-	public static final boolean DEFAULT_CATEGORY_UPDATE_1_DONE = false;
+	public static final int DEFAULT_CATEGORY_UPDATE_VERSION = 0;
+	public static final int CURRENT_CATEGORY_UPDATE_VERSION = 0;
+	
 	public static final String PREFKEY_LOAD_IN_BACKGROUND = "loadInBackground";
 	public static final String PREFKEY_RTC_WAKEUP = "rtcWakeup";
 	public static final String PREFKEY_LOAD_INTERVAL = "loadInterval";
-	public static final String PREFKEY_CATEGORY_UPDATE_1_DONE = "categoryUpdate1Done";
+	public static final String PREFKEY_CATEGORY_UPDATE_VERSION = "categoryUpdateVersion";
 	
 	public static final int ERROR_TYPE_GENERAL = 0;
 	public static final int ERROR_TYPE_INTERNET = 1;
@@ -385,11 +387,8 @@ public class ReaderActivity extends SherlockFragmentActivity implements MessageR
 	}
 	
 	void showCategoryChooser() {
-		// create an intent to launch the category chooser
+		// launch the category chooser activity
 		Intent intent = new Intent(this, CategoryChooserActivity.class);
-		// load the boolean array of currently enabled categories
-		boolean[] categoryBooleans = database.getCategoryBooleans();
-		intent.putExtra("categorybooleans", categoryBooleans);
 		startActivityForResult(intent, ACTIVITY_CHOOSE_CATEGORIES);
 	}
 	
@@ -408,17 +407,26 @@ public class ReaderActivity extends SherlockFragmentActivity implements MessageR
 		database = new DatabaseHandler(this);
 		firstRun = false;
 		if (!database.isCreated()) {
+			// add the categories and set the version to prevent this happening twice
 			database.addCategoriesFromXml();
+			Editor editor = settings.edit();
+			editor.putInt(PREFKEY_CATEGORY_UPDATE_VERSION, CURRENT_CATEGORY_UPDATE_VERSION);
+			editor.commit();
+			
+			// proceed with the first run
 			firstRun = true;
 			showFirstRunDialog();
 		}
 		
-		// update the categories
-		if(!settings.getBoolean(PREFKEY_CATEGORY_UPDATE_1_DONE, DEFAULT_CATEGORY_UPDATE_1_DONE)) {
+		// check if an update is required, if the stored category version is less than the current one
+		if(settings.getInt(PREFKEY_CATEGORY_UPDATE_VERSION, DEFAULT_CATEGORY_UPDATE_VERSION) 
+				< CURRENT_CATEGORY_UPDATE_VERSION) {
+			// run an update
 			database.updateCategoriesFromXml();
-			// set the pref key to indicate the update
+			
+			// set the preference value to the current version
 			Editor editor = settings.edit();
-			editor.putBoolean(PREFKEY_CATEGORY_UPDATE_1_DONE, true);
+			editor.putInt(PREFKEY_CATEGORY_UPDATE_VERSION, CURRENT_CATEGORY_UPDATE_VERSION);
 			editor.commit();
 		}
 		
@@ -508,9 +516,9 @@ public class ReaderActivity extends SherlockFragmentActivity implements MessageR
 		case ACTIVITY_CHOOSE_CATEGORIES:
 			// check the request was a success
 			if (resultCode == RESULT_OK) {
-				database.setEnabledCategories(data.getBooleanArrayExtra(CategoryChooserActivity.KEY_CATEGORY_BOOLEANS));
-				loadData(); // make sure selected categories are loaded
 				
+				// refresh the display
+				loadData(); // make sure selected categories are loaded
 				FrontpageFragment frontpage = (FrontpageFragment) getSupportFragmentManager().findFragmentById(R.id.frontpageFragment);
 				frontpage.createNewsDisplay(getLayoutInflater(), frontpage.getView()); // reload the ui
 				

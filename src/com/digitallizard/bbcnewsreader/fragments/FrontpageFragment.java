@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.digitallizard.bbcnewsreader.ItemLayout;
-import com.digitallizard.bbcnewsreader.NewsItem;
+import com.digitallizard.bbcnewsreader.Item;
 import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.ReaderActivity;
 import com.digitallizard.bbcnewsreader.ResourceService;
@@ -194,7 +194,7 @@ public class FrontpageFragment extends SherlockFragment implements MessageReceiv
 	
 	private void displayCategoryItems(int category) {
 		// load from the database, if there's anything in it
-		NewsItem[] items = database.getItems(categoryNames[category], categoryRowLength);
+		Item[] items = database.getItems(categoryNames[category], categoryRowLength);
 		if (items != null) {
 			// change the physical items to match this
 			for (int i = 0; i < categoryRowLength; i++) {

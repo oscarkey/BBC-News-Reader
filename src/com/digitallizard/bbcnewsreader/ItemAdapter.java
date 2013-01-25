@@ -19,8 +19,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ItemAdapter extends ArrayAdapter<NewsItem> {
-	private ArrayList<NewsItem> items;
+public class ItemAdapter extends ArrayAdapter<Item> {
+	private ArrayList<Item> items;
 	private int layout;
 	private LayoutInflater inflater;
 	private int thumbWidth;
@@ -71,7 +71,7 @@ public class ItemAdapter extends ArrayAdapter<NewsItem> {
 		// do nothing
 	}
 	
-	public ItemAdapter(Context context, int layout, ArrayList<NewsItem> items, int thumbWidth, int thumbHeight) {
+	public ItemAdapter(Context context, int layout, ArrayList<Item> items, int thumbWidth, int thumbHeight) {
 		super(context, layout, items);
 		this.items = items;
 		this.layout = layout;

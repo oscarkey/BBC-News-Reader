@@ -16,6 +16,7 @@ public class CategoryPagerAdapter extends FragmentStatePagerAdapter {
 		super(fragmentManager);
 		
 		// get a list of enabled categories
+		//FIXME should be done outside of the adapter
 		DatabaseHandler database = new DatabaseHandler(context);
 		enabledCategoryTitles = database.getEnabledCategories()[1];
 	}
@@ -42,7 +43,7 @@ public class CategoryPagerAdapter extends FragmentStatePagerAdapter {
 			}
 		}
 		
-		return 0; // should never happen
+		return -98; // should never happen
 	}
 
 }

@@ -6,6 +6,7 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.AbsListView;
@@ -15,48 +16,39 @@ import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.digitallizard.bbcnewsreader.fragments.CategoryChooserFragment;
+import com.mobeta.android.dslv.DragSortListView;
 
 public class CategoryChooserActivity extends SherlockFragmentActivity {
-	/* constants */
-	public static final String KEY_CATEGORY_BOOLEANS = "categorybooleans";
 	
 	/* variables */
-	String[] allCategoryNames;
-	ListView listView;
-	Button saveButton;
+	CategoryChooserFragment fragment;
 	
-	void saveCategoriesAndReturn() {
-		// send the category state back to the main activity where it will be saved
-		Intent result = new Intent();
-		boolean[] booleans = new boolean[allCategoryNames.length]; // stores the checked booleans
-		// loop through to set booleans
-		for (int i = 0; i < allCategoryNames.length; i++) {
-			booleans[i] = listView.isItemChecked(i);
-		}
-		result.putExtra("categorybooleans", booleans);
-		setResult(RESULT_OK, result);
-		this.finish(); // end the activity
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState); // load any saved state
+		this.setContentView(R.layout.category_chooser_activity);
+		fragment = (CategoryChooserFragment) 
+				getSupportFragmentManager().findFragmentById(R.id.categoryChooserFragment);
 	}
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		// inflate the menu
 		getSupportMenuInflater().inflate(R.menu.category_chooser_menu, menu);
-		return true; // we have made the menu so we can return true
+		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		// check which item was selected and react appropriately
 		if (item.getItemId() == R.id.categoryChooserMenuItemSave) {
-			// save the categories and exit
-			saveCategoriesAndReturn();
+			saveCategoriesAndFinish();
 			return true;
 		}
 		else if (item.getItemId() == android.R.id.home) {
-			// go back without saving
-			this.finish();
+			cancelAndFinish();
 			return true;
 		}
 		else {
@@ -64,23 +56,14 @@ public class CategoryChooserActivity extends SherlockFragmentActivity {
 		}
 	}
 	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState); // load any saved state
-		this.setContentView(R.layout.category_choice);
-		
-		// create a reference to the list view
-		listView = (ListView) this.findViewById(R.id.categoryChoiceListView);
-		
-		// load the all the categories
-		allCategoryNames = getResources().getStringArray(R.array.category_names); // load the full list of categories from the XML file
-		listView.setAdapter(new ArrayAdapter<String>(this, R.layout.category_choice_item, allCategoryNames)); // load the categories into the list
-		listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE); // allow multiple choices
-		// load the enabled categories from the intent
-		boolean[] categoryBooleans = getIntent().getBooleanArrayExtra(KEY_CATEGORY_BOOLEANS);
-		// loop through enabling the categories as needed
-		for (int i = 0; i < categoryBooleans.length; i++) {
-			listView.setItemChecked(i, categoryBooleans[i]);
-		}
+	private void saveCategoriesAndFinish() {
+		fragment.saveCategories();
+		setResult(Activity.RESULT_OK);
+		finish();
+	}
+	
+	private void cancelAndFinish() {
+		setResult(Activity.RESULT_CANCELED);
+		finish();
 	}
 }

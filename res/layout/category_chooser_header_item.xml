@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  BBC News Reader
+  Released under the BSD License. See README or LICENSE.
+  Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+  All rights reserved.
+-->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/categoryChooserHeaderItem"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="@drawable/list_item_color"
+	android:textStyle="bold"
+	android:textSize="12pt"
+	android:padding="10dp" />

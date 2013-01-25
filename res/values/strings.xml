@@ -11,4 +11,5 @@
     <string name="eula_title">License</string>
 	<string name="eula_accept">Accept</string>
 	<string name="eula_refuse">Refuse</string>
+	<string name="category_chooser_instructions">Drag the categories to enable/disable and sort</string>
 </resources>

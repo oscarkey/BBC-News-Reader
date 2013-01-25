@@ -9,14 +9,18 @@ package com.digitallizard.bbcnewsreader.data;
 import java.util.ArrayList;
 import java.util.Date;
 
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
+import android.util.Log;
 
-import com.digitallizard.bbcnewsreader.NewsItem;
+import com.digitallizard.bbcnewsreader.Item;
 import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.ReaderActivity;
 
@@ -212,7 +216,7 @@ public class DatabaseHandler {
 	 *            for the number of items to return
 	 * @return NewsItem[]
 	 */
-	public NewsItem[] getItems(String category, int limit) {
+	public Item[] getItems(String category, int limit) {
 		// ask the content provider for the items
 		Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_ITEMS_BY_CATEGORY, category);
 		String[] projection = new String[] { DatabaseHelper.COLUMN_ITEM_ID, DatabaseHelper.COLUMN_ITEM_TITLE, DatabaseHelper.COLUMN_ITEM_DESCRIPTION,
@@ -224,7 +228,7 @@ public class DatabaseHandler {
 		// check the cursor isn't null
 		if (cursor == null) {
 			// bail here, returning an empty array
-			return new NewsItem[0];
+			return new Item[0];
 		}
 		
 		// load the column names
@@ -235,10 +239,10 @@ public class DatabaseHandler {
 		int thumbnail = cursor.getColumnIndex(DatabaseHelper.COLUMN_ITEM_THUMBNAIL);
 		
 		// load the items into an array
-		ArrayList<NewsItem> items = new ArrayList<NewsItem>();
+		ArrayList<Item> items = new ArrayList<Item>();
 		
 		while (cursor.moveToNext() && cursor.getPosition() < limit) {
-			NewsItem item = new NewsItem(); // initialize a new item
+			Item item = new Item(); // initialize a new item
 			item.setId(cursor.getInt(id));
 			item.setTitle(cursor.getString(title));
 			item.setDescription(cursor.getString(description));
@@ -249,7 +253,7 @@ public class DatabaseHandler {
 		
 		cursor.close();
 		
-		return items.toArray(new NewsItem[items.size()]);
+		return items.toArray(new Item[items.size()]);
 	}
 	
 	/**
@@ -318,7 +322,41 @@ public class DatabaseHandler {
 		// query the DatabaseProvider for the categories
 		Uri uri = DatabaseProvider.CONTENT_URI_ENABLED_CATEGORIES; // uri for enabled categories
 		String[] projection = new String[] { DatabaseHelper.COLUMN_CATEGORY_URL, DatabaseHelper.COLUMN_CATEGORY_NAME };
-		Cursor cursor = contentResolver.query(uri, projection, null, null, DatabaseHelper.COLUMN_CATEGORY_ID);
+		String sortOrder = DatabaseHelper.COLUMN_CATEGORY_PRIORITY + ", " + DatabaseHelper.COLUMN_CATEGORY_ID;
+		Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder);
+		
+		// check if no rows were returned
+		if (cursor == null) {
+			// bail here, returning an empty 2d array
+			return new String[2][0];
+		}
+		
+		// find the column indexes
+		int url = cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_URL);
+		int name = cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_NAME);
+		
+		// loop through and save these categories to an array
+		String[][] categories = new String[2][cursor.getCount()];
+		while (cursor.moveToNext()) {
+			categories[0][cursor.getPosition()] = cursor.getString(url);
+			categories[1][cursor.getPosition()] = cursor.getString(name);
+		}
+		cursor.close();
+		
+		return categories;
+	}
+	
+	/**
+	 * Returns the links and names of all the categories that are disabled.
+	 * 
+	 * @return A string[][] containing the String urls in [0] and String names in [1].
+	 */
+	public String[][] getDisabledCategories() {
+		// query the DatabaseProvider for the categories
+		Uri uri = DatabaseProvider.CONTENT_URI_DISABLED_CATEGORIES;
+		String[] projection = new String[] { DatabaseHelper.COLUMN_CATEGORY_URL, DatabaseHelper.COLUMN_CATEGORY_NAME };
+		String sortOrder = DatabaseHelper.COLUMN_CATEGORY_ID;
+		Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder);
 		
 		// check if no rows were returned
 		if (cursor == null) {
@@ -386,6 +424,39 @@ public class DatabaseHandler {
 		}
 	}
 	
+	public void setCategoryStates(String[] enabledCategories, String[] disabledCategories) {
+		// loop through setting the state and priority of enabled categories
+		ContentValues values = new ContentValues(2);
+		for (int i = 0; i < enabledCategories.length; i++) {
+			Uri uri = Uri.withAppendedPath(DatabaseProvider.CONTENT_URI_CATEGORY_BY_NAME, 
+					enabledCategories[i]);
+			
+			values.clear();
+			values.put(DatabaseHelper.COLUMN_CATEGORY_ENABLED, 1);
+			values.put(DatabaseHelper.COLUMN_CATEGORY_PRIORITY, i);
+			
+			contentResolver.update(uri, values, null, null);
+		}
+		
+		
+		// set the disabled categories
+		StringBuilder where = new StringBuilder();
+		String[] selectionArgs = disabledCategories;
+		for(int i = 0; i < disabledCategories.length; i++) {
+			where.append(DatabaseHelper.COLUMN_CATEGORY_NAME + "=?");
+			// don't add an or if this is the final argument
+			if(i != disabledCategories.length - 1) {
+				where.append(" OR ");
+			}
+		}
+		
+		values.clear();
+		values.put(DatabaseHelper.COLUMN_CATEGORY_ENABLED, 0);
+		
+		contentResolver.update(DatabaseProvider.CONTENT_URI_CATEGORIES, values, 
+				where.toString(), selectionArgs);
+	}
+	
 	public void clearPriorities(String category) {
 		Uri uri = DatabaseProvider.CONTENT_URI_RELATIONSHIPS;
 		ContentValues values = new ContentValues(1);
@@ -431,7 +502,7 @@ public class DatabaseHandler {
 	
 	public void updateCategoriesFromXml() {
 		// FIXME this is not a reliable way to update categories because it has the potential to disrupt the order
-		// which is required to be the same as xml
+		// which is required to be the same as xml (really? might no longer be the case)
 		try {
 			// get all the categories from the xml and database and check for any mismatches
 			String[] xmlCategoryNames = context.getResources().getStringArray(R.array.category_names);

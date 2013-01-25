@@ -21,10 +21,11 @@ We use several other projects to help us:
 * android-rss - a lightweight rss library - https://github.com/ahorn/android-rss
 * ActionBarSherlock (v4.1.0) - ui compatibility for <4.0 devices - http://actionbarsherlock.com
 * ViewPagerIndicator (v2.4.1) - page indicator in the category view - http://android.hlidskialf.com/blog/code/android-seekbar-preference
+* drag-sort-listview (v0.4.1) - allows sorting of categories when choosing - https://github.com/bauerca/drag-sort-listview/
 * Eula - displays the "eula" at first run - 
 http://code.google.com/p/apps-for-android/source/browse/trunk/DivideAndConquer/src/com/google/android/divideandconquer/Eula.java
 
-We are very gratefully for the hard work put into these projects which make things so much easier for us.
+We are very grateful for the hard work put into these projects which make things so much easier for us.
 
 ## Disclaimer
 We are in no way affiliated with the BBC, and all the news content belongs to them.

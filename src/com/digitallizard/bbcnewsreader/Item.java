@@ -6,7 +6,7 @@
  ******************************************************************************/
 package com.digitallizard.bbcnewsreader;
 
-public class NewsItem {
+public class Item {
 	private String title;
 	private String description;
 	private String url;
@@ -88,8 +88,7 @@ public class NewsItem {
 		this.thumbnailBytes = thumbnailBytes;
 	}
 	
-	public NewsItem(int id, String title, String description, String link, byte[] imageBytes) {
-		super();
+	public Item(int id, String title, String description, String link, byte[] imageBytes) {
 		this.title = title;
 		this.description = description;
 		this.url = link;
@@ -97,7 +96,6 @@ public class NewsItem {
 		this.thumbnailBytes = imageBytes;
 	}
 	
-	public NewsItem() {
-		super();
+	public Item() {
 	}
 }

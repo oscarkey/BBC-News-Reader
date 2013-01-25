@@ -24,6 +24,7 @@ public class DatabaseProvider extends ContentProvider {
 	public static final Uri CONTENT_URI = Uri.parse("content://com.digitallizard.bbcnewsreader");
 	public static final Uri CONTENT_URI_CATEGORIES = Uri.parse("content://com.digitallizard.bbcnewsreader/categories");
 	public static final Uri CONTENT_URI_ENABLED_CATEGORIES = Uri.withAppendedPath(CONTENT_URI_CATEGORIES, "enabled");
+	public static final Uri CONTENT_URI_DISABLED_CATEGORIES = Uri.withAppendedPath(CONTENT_URI_CATEGORIES, "disabled");
 	public static final Uri CONTENT_URI_CATEGORY_BY_ID = Uri.withAppendedPath(CONTENT_URI_CATEGORIES, "id");
 	public static final Uri CONTENT_URI_CATEGORY_BY_NAME = Uri.withAppendedPath(CONTENT_URI_CATEGORIES, "name");
 	public static final Uri CONTENT_URI_ITEMS = Uri.parse("content://com.digitallizard.bbcnewsreader/items");
@@ -36,6 +37,7 @@ public class DatabaseProvider extends ContentProvider {
 	private static final int CATEGORY_BY_ID = 8;
 	private static final int CATEGORY_BY_NAME = 7;
 	private static final int ENABLED_CATEGORIES = 2;
+	private static final int DISABLED_CATEGORIES = 10;
 	private static final int ITEMS = 4;
 	private static final int ITEM_BY_ID = 5;
 	private static final int ITEMS_BY_CATEGORY = 3;
@@ -47,6 +49,7 @@ public class DatabaseProvider extends ContentProvider {
 	static {
 		uriMatcher.addURI(AUTHORITY, "categories", CATEGORIES);
 		uriMatcher.addURI(AUTHORITY, "categories/enabled", ENABLED_CATEGORIES);
+		uriMatcher.addURI(AUTHORITY, "categories/disabled", DISABLED_CATEGORIES);
 		uriMatcher.addURI(AUTHORITY, "categories/id/#", CATEGORY_BY_ID);
 		uriMatcher.addURI(AUTHORITY, "categories/name/*", CATEGORY_BY_NAME);
 		uriMatcher.addURI(AUTHORITY, "items/", ITEMS);
@@ -81,6 +84,13 @@ public class DatabaseProvider extends ContentProvider {
 	private Cursor getEnabledCategories(String[] projection, String sortOrder) {
 		// define a selection to only retrieve enabled categories
 		String selection = DatabaseHelper.COLUMN_CATEGORY_ENABLED + "='1'";
+		// ask for categories by this selection
+		return getCategories(projection, selection, null, sortOrder);
+	}
+	
+	private Cursor getDisabledCategories(String[] projection, String sortOrder) {
+		// define a selection to only retrieve disabled categories
+		String selection = DatabaseHelper.COLUMN_CATEGORY_ENABLED + "='0'";
 		// ask for categories by this selection
 		return getCategories(projection, selection, null, sortOrder);
 	}
@@ -203,6 +213,10 @@ public class DatabaseProvider extends ContentProvider {
 		return database.update(DatabaseHelper.ITEM_TABLE, values, selection, selectionArgs);
 	}
 	
+	private int updateCategories(ContentValues values, String selection, String[] selectionArgs) {
+		return database.update(DatabaseHelper.CATEGORY_TABLE, values, selection, selectionArgs);
+	}
+	
 	private int updateCategory(ContentValues values, int id) {
 		String selection = DatabaseHelper.COLUMN_CATEGORY_ID + "=?";
 		String[] selectionArgs = new String[] { Integer.toString(id) };
@@ -279,6 +293,9 @@ public class DatabaseProvider extends ContentProvider {
 		case ENABLED_CATEGORIES:
 			// query the database for enabled categories
 			return getEnabledCategories(projection, sortOrder);
+		case DISABLED_CATEGORIES:
+			// query the database for disabled categories
+			return getDisabledCategories(projection, sortOrder);
 		case ITEMS:
 			// query the database for items
 			return this.getItems(projection, selection, selectionArgs, sortOrder);
@@ -305,6 +322,8 @@ public class DatabaseProvider extends ContentProvider {
 		case ITEM_BY_ID:
 			int id = Integer.parseInt(uri.getLastPathSegment());
 			return updateItem(values, id);
+		case CATEGORIES:
+			return updateCategories(values, selection, selectionArgs);
 		case CATEGORY_BY_ID:
 			id = Integer.parseInt(uri.getLastPathSegment());
 			return updateCategory(values, id);

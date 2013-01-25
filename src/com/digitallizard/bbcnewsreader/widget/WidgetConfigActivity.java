@@ -115,7 +115,7 @@ public class WidgetConfigActivity extends SherlockActivity {
 		
 		// set up the list view
 		listView = (ListView) this.findViewById(R.id.widgetCategoryChoiceListView);
-		listView.setAdapter(new ArrayAdapter<String>(this, R.layout.category_choice_item, enabledCategoriesNames));
+		listView.setAdapter(new ArrayAdapter<String>(this, R.layout.category_chooser_selectable_item, enabledCategoriesNames));
 		listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
 		
 		// find the id of the current item and enable it

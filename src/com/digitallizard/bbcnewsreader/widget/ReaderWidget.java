@@ -16,7 +16,7 @@ import android.net.Uri;
 import android.widget.RemoteViews;
 
 import com.digitallizard.bbcnewsreader.ArticleActivity;
-import com.digitallizard.bbcnewsreader.NewsItem;
+import com.digitallizard.bbcnewsreader.Item;
 import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.ReaderActivity;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
@@ -35,7 +35,7 @@ public class ReaderWidget extends AppWidgetProvider {
 		
 		for (int i = 0; i < appWidgetIds.length; i++) {
 			String category = settings.getString(PREF_KEY_CATEGORY + appWidgetIds[i], DEFAULT_CATEGORY);
-			NewsItem[] items = database.getItems(category, NUM_ITEMS);
+			Item[] items = database.getItems(category, NUM_ITEMS);
 			
 			// create references to the required view
 			RemoteViews view = new RemoteViews(context.getPackageName(), R.layout.widget);

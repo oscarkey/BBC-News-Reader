@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  BBC News Reader
+  Released under the BSD License. See README or LICENSE.
+  Copyright (c) 2011, Digital Lizard (Oscar Key, Thomas Boby)
+  All rights reserved.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res/com.digitallizard.bbcnewsreader">
+		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:id="@+id/categoryChooserInstructionItem"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="@drawable/list_item_color"
+			android:padding="8dp"
+			android:text="@string/category_chooser_instructions"
+			android:textStyle="bold"
+			/>
+		<View
+		    android:layout_width="match_parent"
+		    android:layout_height="2dp"
+		    android:background="#9a1c1c" />
+		
+		<com.mobeta.android.dslv.DragSortListView
+			android:id="@+id/categoryChooserListView"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="1"
+			
+			app:use_default_controller="true"
+			app:drag_handle_id="@+id/categoryChooserItemHandle"
+			
+			android:divider="#303030"
+	    	android:dividerHeight="2sp">
+		</com.mobeta.android.dslv.DragSortListView>
+</LinearLayout>

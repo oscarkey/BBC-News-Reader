@@ -20,7 +20,7 @@ import android.widget.GridView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.digitallizard.bbcnewsreader.ItemAdapter;
-import com.digitallizard.bbcnewsreader.NewsItem;
+import com.digitallizard.bbcnewsreader.Item;
 import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.ResourceService;
 import com.digitallizard.bbcnewsreader.ServiceManager;
@@ -43,7 +43,7 @@ public class CategoryFragment extends SherlockFragment implements MessageReceive
 	FrontPageClickHandler clickHandler;
 	
 	GridView grid;
-	ArrayList<NewsItem> items;
+	ArrayList<Item> items;
 	
 	
 	public static CategoryFragment newInstance(String category) {
@@ -78,7 +78,7 @@ public class CategoryFragment extends SherlockFragment implements MessageReceive
 		grid.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				// retrieve the NewsItem at the index of the click
-				NewsItem item = (NewsItem) grid.getAdapter().getItem(position);
+				Item item = (Item) grid.getAdapter().getItem(position);
 				// view the item
 				clickHandler.onItemClick(item.getId());
 			}
@@ -93,7 +93,7 @@ public class CategoryFragment extends SherlockFragment implements MessageReceive
 					int firstVisible = list.getFirstVisiblePosition();
 					int lastVisible = list.getLastVisiblePosition();
 					for (int i = firstVisible; i <= lastVisible; i++) {
-						NewsItem item = (NewsItem) list.getAdapter().getItem(i);
+						Item item = (Item) list.getAdapter().getItem(i);
 						// if this item doesn't have a thumbnail
 						if (item.getThumbnailBytes() == null) {
 							// load the thumbnail
@@ -153,7 +153,7 @@ public class CategoryFragment extends SherlockFragment implements MessageReceive
 		grid.setColumnWidth(thumbWidth);
 		
 		// find the items and add them to the list
-		items = new ArrayList<NewsItem>(Arrays.asList(database.getItems(categoryTitle, 28))); // specify a high limit for the number of items
+		items = new ArrayList<Item>(Arrays.asList(database.getItems(categoryTitle, 28))); // specify a high limit for the number of items
 		grid.setAdapter(new ItemAdapter(getActivity(), R.layout.list_news_item, items, thumbWidth, thumbHeight));
 	}
 	
@@ -161,9 +161,9 @@ public class CategoryFragment extends SherlockFragment implements MessageReceive
 		// load the thumbnail
 		byte[] thumbnailBytes = database.getThumbnail(id);
 		// loop through and set this thumbnail
-		Iterator<NewsItem> iterator = items.iterator();
+		Iterator<Item> iterator = items.iterator();
 		while (iterator.hasNext()) {
-			NewsItem item = iterator.next();
+			Item item = iterator.next();
 			if (item.getId() == id) {
 				// set the thumbnail bytes
 				item.setThumbnailBytes(thumbnailBytes);
