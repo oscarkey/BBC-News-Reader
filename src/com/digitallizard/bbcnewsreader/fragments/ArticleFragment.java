@@ -20,14 +20,17 @@ import com.digitallizard.bbcnewsreader.data.DatabaseHandler;
 import com.digitallizard.bbcnewsreader.resource.web.HtmlParser;
 
 public class ArticleFragment extends SherlockFragment implements MessageReceiver {
+	/* constants */
 	private static final int ID_NO_ARTICLE_LOADED = -10;
 	
+	/* variables */
 	private DatabaseHandler database;
 	private ServiceManager service;
 	
-	private int itemId;
 	private WebView webView;
 	private TextView loadingText;
+	
+	private int itemId;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -63,19 +66,22 @@ public class ArticleFragment extends SherlockFragment implements MessageReceiver
 	}
 	
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.articleMenuItemReload) {
-			// reload the current article
-			loadArticle(itemId);
-		}
-		return true; // we have received the press so we can report true
-	}
-	
-	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
 		// inflate the menu XML file
 		inflater.inflate(R.menu.article_menu, menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.articleMenuItemReload) {
+			// reload the current article
+			loadArticle(itemId);
+			return true;
+		}
+		else {
+			return super.onOptionsItemSelected(item);
+		}
 	}
 	
 	public void displayArticle(int id) {
@@ -85,7 +91,7 @@ public class ArticleFragment extends SherlockFragment implements MessageReceiver
 			return;
 		}
 		
-		// try to get the article, display or load it
+		// display the article if it is loaded, else load it
 		byte[] html = database.getHtml(id);
 		if (html != null) {
 			showArticle(html);
@@ -108,6 +114,12 @@ public class ArticleFragment extends SherlockFragment implements MessageReceiver
 		webView.scrollTo(0, 0);
 	}
 	
+	private String modifyHtml(String html) {
+		// add css to prevent images being too wide
+		String css = " <style type='text/css'> img { width:100%;} </style>";
+		return html + css;
+	}
+
 	public void loadArticle(int id) {
 		itemId = id;
 		
@@ -132,11 +144,5 @@ public class ArticleFragment extends SherlockFragment implements MessageReceiver
 			displayArticle(itemId);
 			break;
 		}
-	}
-	
-	private String modifyHtml(String html) {
-		// add css to prevent images being too wide
-		String css = " <style type='text/css'> img { width:100%;} </style>";
-		return html + css;
 	}
 }
