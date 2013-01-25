@@ -18,8 +18,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
-import com.digitallizard.bbcnewsreader.ItemLayout;
 import com.digitallizard.bbcnewsreader.Item;
+import com.digitallizard.bbcnewsreader.ItemLayout;
 import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.ReaderActivity;
 import com.digitallizard.bbcnewsreader.ResourceService;

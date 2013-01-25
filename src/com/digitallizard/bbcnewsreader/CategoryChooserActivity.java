@@ -7,19 +7,12 @@
 package com.digitallizard.bbcnewsreader;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.digitallizard.bbcnewsreader.fragments.CategoryChooserFragment;
-import com.mobeta.android.dslv.DragSortListView;
 
 public class CategoryChooserActivity extends SherlockFragmentActivity {
 	

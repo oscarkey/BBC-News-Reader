@@ -19,8 +19,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 
 import com.actionbarsherlock.app.SherlockFragment;
-import com.digitallizard.bbcnewsreader.ItemAdapter;
 import com.digitallizard.bbcnewsreader.Item;
+import com.digitallizard.bbcnewsreader.ItemAdapter;
 import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.ResourceService;
 import com.digitallizard.bbcnewsreader.ServiceManager;

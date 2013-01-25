@@ -1,16 +1,11 @@
 package com.digitallizard.bbcnewsreader.fragments;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.digitallizard.bbcnewsreader.CategoryChooserAdapter;
 import com.digitallizard.bbcnewsreader.R;
 import com.digitallizard.bbcnewsreader.data.DatabaseHandler;

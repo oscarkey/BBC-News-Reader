@@ -9,16 +9,12 @@ package com.digitallizard.bbcnewsreader.data;
 import java.util.ArrayList;
 import java.util.Date;
 
-import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.RemoteException;
-import android.util.Log;
 
 import com.digitallizard.bbcnewsreader.Item;
 import com.digitallizard.bbcnewsreader.R;
