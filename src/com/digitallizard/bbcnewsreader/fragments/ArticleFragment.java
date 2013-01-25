@@ -97,7 +97,7 @@ public class ArticleFragment extends SherlockFragment implements MessageReceiver
 	
 	private void showArticle(byte[] html) {
 		// parse the html, load it in the webview
-		String parsedHtml = HtmlParser.parsePage(html);
+		String parsedHtml = modifyHtml(HtmlParser.parsePage(html));
 		webView.loadDataWithBaseURL(null, parsedHtml, "text/html", "utf-8", null);
 		
 		// swap the loading text and webview
@@ -132,5 +132,11 @@ public class ArticleFragment extends SherlockFragment implements MessageReceiver
 			displayArticle(itemId);
 			break;
 		}
+	}
+	
+	private String modifyHtml(String html) {
+		// add css to prevent images being too wide
+		String css = " <style type='text/css'> img { width:100%;} </style>";
+		return html + css;
 	}
 }
